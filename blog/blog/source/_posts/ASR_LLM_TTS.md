@@ -1,7 +1,7 @@
 ---
 title: ASR_LLM_TTS
 date: 2024-09-22 07:28:53
-cover: images/ASR_LLM_TTS/mizuki.jpg
+cover: assets/ASR_LLM_TTS/mizuki.jpg
 tags:
   - TTS
   - LLM

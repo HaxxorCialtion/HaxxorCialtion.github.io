@@ -5,11 +5,11 @@
 # Site
 title: 创作者的创作欲望是压抑不住的
 subtitle: ''
-description: ''
+description: 'Cialtion Blog'
 keywords:
 author: Cialtion
 language: en
-timezone: ''
+timezone: Asia/Shanghai
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
@@ -96,7 +96,7 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: shoka
+theme: shokaX
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment

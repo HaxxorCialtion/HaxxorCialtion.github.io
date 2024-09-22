@@ -1,7 +1,7 @@
 ---
 title: Qwen+Deepsee构建数学agent
 date: 2024-09-22 08:24:22
-cover: images/Qwen-Deepsee构建数学agent/mizuki.jpg
+cover: assets/Qwen-Deepsee构建数学agent/mizuki.jpg
 tags:
   - agent
   - AI
@@ -12,7 +12,7 @@ Codes to use qwen2-math api for constructing qq-bot
 
 ## Process
 
-![flow img](images/Qwen-Deepsee构建数学agent/flow.jpg)
+![flow img](assets/Qwen-Deepsee构建数学agent/flow.jpg)
 
 ## PIP
 ```bash
@@ -31,4 +31,4 @@ pip install -r requirements.txt
 
 5. And you will get:
 
-![example img](images/Qwen-Deepsee构建数学agent/sch.PNG)
+![example img](assets/Qwen-Deepsee构建数学agent/sch.PNG)
