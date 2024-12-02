@@ -8,7 +8,7 @@
     <author>
       <name>John Doe</name>
     </author>
-    <updated>2024-12-02T16:57:09.648Z</updated>
+    <updated>2024-12-02T17:24:29.559Z</updated>
     <entry>
         <id>http://example.com/2024/12/03/hello-world/</id>
         <title>Hello World</title>
@@ -24,6 +24,232 @@
 &lt;h3 id=&#34;deploy-to-remote-sites&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#deploy-to-remote-sites&#34;&gt;#&lt;/a&gt; Deploy to remote sites&lt;/h3&gt;
 &lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;span&gt;h&lt;/span&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;$ hexo deploy&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;More info: &lt;a href=&#34;https://hexo.io/docs/one-command-deployment.html&#34;&gt;Deployment&lt;/a&gt;&lt;/p&gt;
 </content>
-        <updated>2024-12-02T16:57:09.648Z</updated>
+        <updated>2024-12-02T17:24:29.559Z</updated>
+    </entry>
+    <entry>
+        <id>http://example.com/2024/12/02/%E6%B5%8B%E8%AF%95/</id>
+        <title>Olama多工具调用测试</title>
+        <link rel="alternate" href="http://example.com/2024/12/02/%E6%B5%8B%E8%AF%95/"/>
+        <content type="html">&lt;h1 id=&#34;ollama工具函数调用测试文档&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#ollama工具函数调用测试文档&#34;&gt;#&lt;/a&gt; Ollama 工具函数调用测试文档&lt;/h1&gt;
+&lt;p&gt;本文档记录了使用 Ollama 框架进行本地工具函数并行调用的测试过程和结果。测试使用了 Qwen2.5 Coder Tools 模型的 7B 版本。&lt;/p&gt;
+&lt;h2 id=&#34;环境配置&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#环境配置&#34;&gt;#&lt;/a&gt; 环境配置&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;操作系统: Windows 11&lt;/li&gt;
+&lt;li&gt;CPU: Intel i7-13700K&lt;/li&gt;
+&lt;li&gt;GPU: NVIDIA RTX 2080 Ti 22GB&lt;/li&gt;
+&lt;li&gt;显存占用: 12GB&lt;/li&gt;
+&lt;li&gt;模型: hhao/qwen2.5-coder-tools:7b (4.7GB)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;测试工具函数&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#测试工具函数&#34;&gt;#&lt;/a&gt; 测试工具函数&lt;/h2&gt;
+&lt;p&gt;本测试实现了三个基础工具函数:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;calculate_fibonacci(n)&lt;/code&gt; : 计算第 n 个斐波那契数&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;calculate_factorial(n)&lt;/code&gt; : 计算 n 的阶乘&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;get_timestamp()&lt;/code&gt; : 获取当前时间戳&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;测试结果&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#测试结果&#34;&gt;#&lt;/a&gt; 测试结果&lt;/h2&gt;
+&lt;h3 id=&#34;并行调用测试结果&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#并行调用测试结果&#34;&gt;#&lt;/a&gt; 并行调用测试结果&lt;/h3&gt;
+&lt;p&gt;斐波那契数列计算:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;第 20 项: 6,765&lt;/li&gt;
+&lt;li&gt;第 50 项: 12,586,269,025&lt;/li&gt;
+&lt;li&gt;第 100 项: 354,224,848,179,261,915,075&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;阶乘计算:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;100 的阶乘: 9.33262e+157 (完整值已省略)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;时间戳:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;1733089159.7644596&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;错误处理测试结果&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#错误处理测试结果&#34;&gt;#&lt;/a&gt; 错误处理测试结果&lt;/h3&gt;
+&lt;p&gt;输入：计算 - 5 的阶乘&lt;br /&gt;
+返回:  &lt;code&gt;&amp;#123;&amp;quot;error&amp;quot;: &amp;quot;Factorial is not defined for negative numbers&amp;quot;&amp;#125;&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;性能指标&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#性能指标&#34;&gt;#&lt;/a&gt; 性能指标&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;LLM 推理总时间: 2.64 秒&lt;/li&gt;
+&lt;li&gt;显存占用: 12GB&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;结论&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#结论&#34;&gt;#&lt;/a&gt; 结论&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;模型能够成功处理多个并行工具函数调用&lt;/li&gt;
+&lt;li&gt;错误处理机制运行正常&lt;/li&gt;
+&lt;li&gt;推理速度表现良好&lt;/li&gt;
+&lt;li&gt;内存占用在合理范围内&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+        <category term="LLM" scheme="http://example.com/tags/LLM/" />
+        <category term="AI" scheme="http://example.com/tags/AI/" />
+        <category term="function_calling" scheme="http://example.com/tags/function-calling/" />
+        <category term="Local" scheme="http://example.com/tags/Local/" />
+        <updated>2024-12-01T22:00:00.000Z</updated>
+    </entry>
+    <entry>
+        <id>http://example.com/2024/09/22/Qwen-Deepsee%E6%9E%84%E5%BB%BA%E6%95%B0%E5%AD%A6agent/</id>
+        <title>Qwen+Deepsee构建数学agent</title>
+        <link rel="alternate" href="http://example.com/2024/09/22/Qwen-Deepsee%E6%9E%84%E5%BB%BA%E6%95%B0%E5%AD%A6agent/"/>
+        <content type="html">&lt;h1 id=&#34;math_prompt&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#math_prompt&#34;&gt;#&lt;/a&gt; Math_prompt&lt;/h1&gt;
+&lt;p&gt;Codes to use qwen2-math api for constructing qq-bot&lt;/p&gt;
+&lt;h2 id=&#34;process&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#process&#34;&gt;#&lt;/a&gt; Process&lt;/h2&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;assets/Qwen-Deepsee%E6%9E%84%E5%BB%BA%E6%95%B0%E5%AD%A6agent/flow.jpg&#34; alt=&#34;flow img&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;pip&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#pip&#34;&gt;#&lt;/a&gt; PIP&lt;/h2&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;pip &lt;span class=&#34;token function&#34;&gt;install&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-r&lt;/span&gt; requirements.txt&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h2 id=&#34;others&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#others&#34;&gt;#&lt;/a&gt; Others&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;You can focus solely on the prompt for this project, and you can also integrate other LLM API services or apply this project to other applications, such as qq-bot or wechat-bot.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;For different LLM APIs, you may need to change some settings in  &lt;code&gt;math_api.py&lt;/code&gt; .&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;We choose qwen2-math-72b-instruct and deepseek-coder as the default models&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;For example:Could you help me solve the energy equation for the hydrogen atom in its ground state, specifically by solving its Schrödinger equation?&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;And you will get:&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;assets/Qwen-Deepsee%E6%9E%84%E5%BB%BA%E6%95%B0%E5%AD%A6agent/sch.PNG&#34; alt=&#34;example img&#34; /&gt;&lt;/p&gt;
+</content>
+        <category term="LLM" scheme="http://example.com/tags/LLM/" />
+        <category term="AI" scheme="http://example.com/tags/AI/" />
+        <category term="agent" scheme="http://example.com/tags/agent/" />
+        <updated>2024-09-22T00:24:22.000Z</updated>
+    </entry>
+    <entry>
+        <id>http://example.com/2024/09/22/ASR_LLM_TTS/</id>
+        <title>ASR_LLM_TTS</title>
+        <link rel="alternate" href="http://example.com/2024/09/22/ASR_LLM_TTS/"/>
+        <content type="html">&lt;h1 id=&#34;智能语音助手系统&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#智能语音助手系统&#34;&gt;#&lt;/a&gt; 智能语音助手系统&lt;/h1&gt;
+&lt;h2 id=&#34;项目概述&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#项目概述&#34;&gt;#&lt;/a&gt; 项目概述&lt;/h2&gt;
+&lt;p&gt;这是一个基于关键词检测、语音识别、语音合成和对话生成的智能语音助手系统。该系统能够通过特定的唤醒词（如 &amp;quot;hey bro&amp;quot;）启动与用户的语音对话，并利用先进的自然语言处理技术提供智能回复。&lt;/p&gt;
+&lt;h2 id=&#34;主要功能&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#主要功能&#34;&gt;#&lt;/a&gt; 主要功能&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;关键词检测&lt;/strong&gt;：使用 Porcupine 实时监听唤醒词，启动对话。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;语音录制和检测&lt;/strong&gt;：采用 WebRTC VAD 进行语音活动检测，录制有效语音片段。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;语音识别（ASR）&lt;/strong&gt;：使用 SenseVoice Small 模型将录制的语音转换为文本。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;对话生成&lt;/strong&gt;：调用 Ollama API（兼容 OpenAI API），根据上下文生成助手的文本回复。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;语音合成（TTS）&lt;/strong&gt;：将助手的回复通过语音合成输出，模拟人声对话。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;对话历史保存&lt;/strong&gt;：定期将对话内容保存为 JSON 文件，便于后续分析。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;技术栈&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#技术栈&#34;&gt;#&lt;/a&gt; 技术栈&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Python&lt;/li&gt;
+&lt;li&gt;Porcupine（关键词检测）&lt;/li&gt;
+&lt;li&gt;WebRTC VAD（语音活动检测）&lt;/li&gt;
+&lt;li&gt;SenseVoice Small（语音识别）&lt;/li&gt;
+&lt;li&gt;Ollama API（对话生成）&lt;/li&gt;
+&lt;li&gt;GPT-SoVITS（语音合成）&lt;/li&gt;
+&lt;li&gt;PyAudio, NumPy, SciPy（音频处理）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;tts部分&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#tts部分&#34;&gt;#&lt;/a&gt; TTS 部分&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;本项目基于 GPT-Sovits-v2，感谢开源社区工作者的贡献！&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;gpt-sovits-tts-项目&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#gpt-sovits-tts-项目&#34;&gt;#&lt;/a&gt; GPT-SoVITS TTS 项目&lt;/h4&gt;
+&lt;p&gt;这是一个基于 GPT-SoVITS API 的文本到语音（TTS）项目。该项目允许用户根据不同的情感生成和播放语音，使用预定义的参考音频来影响输出的语音风格。&lt;/p&gt;
+&lt;h5 id=&#34;功能特点&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#功能特点&#34;&gt;#&lt;/a&gt; 功能特点&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;支持多种情感的语音生成（高兴、抑郁、激动、平静、纠结）&lt;/li&gt;
+&lt;li&gt;使用参考音频来控制语音风格&lt;/li&gt;
+&lt;li&gt;实时生成并播放 WAV 格式的音频文件&lt;/li&gt;
+&lt;li&gt;可自定义文本输入和输出文件名&lt;/li&gt;
+&lt;li&gt;提供 TTS 处理时间统计&lt;/li&gt;
+&lt;li&gt;可以添加一个情感识别模型来决定参考音频，从而控制音频合成情感 (to do)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;使用指南&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#使用指南&#34;&gt;#&lt;/a&gt; 使用指南&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;克隆仓库：&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;git clone &lt;a href=&#34;https://github.com/HaxxorCialtion/ASR_LLM_TTS_py.git&#34;&gt;https://github.com/HaxxorCialtion/ASR_LLM_TTS_py.git&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;cd intelligent-voice-assistant&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;安装依赖：&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;pip install -r requirements.txt&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;准备必要的 API 密钥和模型：&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;获取 Porcupine API 密钥&lt;/li&gt;
+&lt;li&gt;下载 SenseVoice Small 模型文件&lt;/li&gt;
+&lt;li&gt;确保 Ollama API 服务已经运行&lt;/li&gt;
+&lt;li&gt;开启 GPT-Sovits API 服务&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol start=&#34;4&#34;&gt;
+&lt;li&gt;配置系统：&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;在脚本中填入 Porcupine API 密钥&lt;/li&gt;
+&lt;li&gt;设置 ASR 模型路径&lt;/li&gt;
+&lt;li&gt;配置 Ollama API 端点（默认为本地）&lt;/li&gt;
+&lt;li&gt;配置 GPT-sovits 模型和参考音频&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;使用方法&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#使用方法&#34;&gt;#&lt;/a&gt; 使用方法&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;运行主脚本：&lt;br /&gt;
+python &lt;a href=&#34;http://main.py&#34;&gt;main.py&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;等待系统提示 &amp;quot;Listening for wake word...&amp;quot;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;说出唤醒词（默认为 &amp;quot;hey bro&amp;quot;）开始对话&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;与语音助手进行自然语言交互&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;超时则需再次触发&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;结束本轮对话即自动保存对话记录&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;主要特性&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#主要特性&#34;&gt;#&lt;/a&gt; 主要特性&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;实时语音交互&lt;/li&gt;
+&lt;li&gt;智能对话生成&lt;/li&gt;
+&lt;li&gt;自然语音合成&lt;/li&gt;
+&lt;li&gt;长时间无语音自动休眠&lt;/li&gt;
+&lt;li&gt;对话历史记录&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;自定义设置&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#自定义设置&#34;&gt;#&lt;/a&gt; 自定义设置&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;修改 &lt;code&gt;settings&lt;/code&gt;  变量来自定义助手的角色和背景&lt;/li&gt;
+&lt;li&gt;调整 &lt;code&gt;max_silence_duration&lt;/code&gt;  和 &lt;code&gt;min_speech_duration&lt;/code&gt;  等参数来优化语音检测&lt;/li&gt;
+&lt;li&gt;更换唤醒词和对应的模型文件&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;许可证&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#许可证&#34;&gt;#&lt;/a&gt; 许可证&lt;/h2&gt;
+&lt;p&gt;本项目采用 MIT 许可证 - 查看 &lt;a href=&#34;LICENSE&#34;&gt;LICENSE&lt;/a&gt; 文件了解详情&lt;/p&gt;
+&lt;h2 id=&#34;联系方式&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#联系方式&#34;&gt;#&lt;/a&gt; 联系方式&lt;/h2&gt;
+&lt;p&gt;项目维护者：HaxxorCialtion - &lt;a href=&#34;mailto:cialtion@outlook.com&#34;&gt;cialtion@outlook.com&lt;/a&gt;&lt;br /&gt;
+Bilibili 视频地址：&lt;a href=&#34;https://www.bilibili.com/video/BV1pftreQEbu&#34;&gt;https://www.bilibili.com/video/BV1pftreQEbu&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;致谢&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#致谢&#34;&gt;#&lt;/a&gt; 致谢&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/Picovoice/porcupine&#34;&gt;Porcupine&lt;/a&gt; - 用于唤醒词检测&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/FunAudioLLM/SenseVoice&#34;&gt;SenseVoice&lt;/a&gt; - 提供 ASR 模型&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/ollama/ollama&#34;&gt;Ollama&lt;/a&gt; - 本地大语言模型服务&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/QwenLM/Qwen2.5&#34;&gt;LLM&lt;/a&gt; - LLLM 服务&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/RVC-Boss/GPT-SoVITS&#34;&gt;GPT-SoVITS&lt;/a&gt; - 用于语音合成&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+        <category term="TTS" scheme="http://example.com/tags/TTS/" />
+        <category term="LLM" scheme="http://example.com/tags/LLM/" />
+        <category term="ASR" scheme="http://example.com/tags/ASR/" />
+        <category term="AI" scheme="http://example.com/tags/AI/" />
+        <updated>2024-09-21T23:28:53.000Z</updated>
     </entry>
 </feed>
