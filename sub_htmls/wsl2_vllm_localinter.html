@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   WSL2 vLLM 局域网访问配置教程
+  </title>
+  <style>
+   body {
+      font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+      line-height: 1.7;
+      margin: 40px auto;
+      max-width: 800px;
+      background: #f9f9f9;
+      color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1, h2 {
+      color: #2c3e50;
+    }
+    code {
+      background-color: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: Consolas, monospace;
+      font-size: 90%;
+    }
+    pre {
+      background-color: #272822;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 14px;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    ul {
+      margin-left: 20px;
+    }
+    .note {
+      background-color: #fffbe6;
+      border-left: 6px solid #f1c40f;
+      padding: 12px 16px;
+      margin-top: 20px;
+      border-radius: 4px;
+    }
+  
+img.cover {
+    width: 100%;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+.tag {
+    background: #007acc;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    margin-right: 0.3rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+    display: inline-block;
+    margin-bottom: 0.3rem;
+    transition: background-color 0.3s ease;
+}
+.tag:hover {
+    background: #005999;
+}
+.tag:hover {
+    background: #005999;
+}
+.tag:hover {
+    background: #005999;
+}
+.tags {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+.note-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-line {
+    color: #888;        /* 灰色 */
+    font-size: 0.9em;   /* 稍小一点的字体 */
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-line {
+    color: #888;        /* 灰色 */
+    font-size: 0.9em;   /* 稍小一点的字体 */
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-line {
+    color: #888;        /* 灰色 */
+    font-size: 0.9em;   /* 稍小一点的字体 */
+}
+  </style>
+ </head>
+ <body>
+  <img alt="封面图" class="cover" src="../images/bronya_mp.jpg"/>
+  <h1>
+   WSL2 vLLM serve 局域网访问配置
+  </h1>
+  <p>
+   <strong>
+    日期：
+   </strong>
+   2025-04-12
+  </p>
+  <div class="tags">
+   <span class="tag">
+    LLM
+   </span>
+   <span class="tag">
+    vLLM
+   </span>
+   <span class="tag">
+    WSL2
+   </span>
+   <span class="tag">
+    局域网
+   </span>
+  </div>
+  <p>
+   <strong>
+    场景说明：
+   </strong>
+   在WSL2中运行vLLM服务，需要使局域网中的其他设备能够访问该服务。
+  </p>
+  <h2>
+   1. 启动vLLM服务
+  </h2>
+  <p>
+   在WSL2中启动vLLM服务，确保监听所有网络接口：
+  </p>
+  <pre><code>vllm serve \
+  ./path/to/your/model.gguf \
+  --tokenizer ./path/to/tokenizer_files \
+  --enable-auto-tool-choice \
+  --tool-call-parser hermes \
+  --host 0.0.0.0
+</code></pre>
+  <h2>
+   2. 获取必要的IP地址
+  </h2>
+  <p>
+   Windows PowerShell中运行：
+  </p>
+  <pre><code>ipconfig</code></pre>
+  <p>
+   记录以下IP地址：
+  </p>
+  <ul>
+   <li>
+    物理网卡的IPv4地址（通常是类似
+    <code>
+     59.78.x.x
+    </code>
+    的地址）
+   </li>
+  </ul>
+  <p>
+   WSL2终端中运行：
+  </p>
+  <pre><code>ip a</code></pre>
+  <p>
+   记录WSL2的IP地址（通常是
+   <code>
+    172.x.x.x
+   </code>
+   ）
+  </p>
+  <h2>
+   3. 配置端口转发
+  </h2>
+  <p>
+   以管理员权限打开PowerShell，运行以下命令：
+  </p>
+  <pre><code>netsh interface portproxy add v4tov4 listenaddress=0.0.0.0 listenport=8000 connectaddress=&lt;WSL2的IP&gt; connectport=8000
+</code></pre>
+  <p>
+   验证端口转发配置：
+  </p>
+  <pre><code>netsh interface portproxy show all</code></pre>
+  <h2>
+   4. 配置防火墙
+  </h2>
+  <p>
+   添加防火墙入站规则：
+  </p>
+  <pre><code>New-NetFirewallRule -DisplayName "vLLM Server" -Direction Inbound -LocalPort 8000 -Protocol TCP -Action Allow
+</code></pre>
+  <h2>
+   5. 客户端配置
+  </h2>
+  <p>
+   在局域网其他设备上使用以下配置访问服务：
+  </p>
+  <pre><code class="language-python">from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://&lt;Windows主机IP&gt;:8000/v1",
+    api_key="token-abc123",
+)
+</code></pre>
+  <h2>
+   故障排除
+  </h2>
+  <ol>
+   <li>
+    测试基本连通性：
+    <pre><code>ping &lt;Windows主机IP&gt;</code></pre>
+   </li>
+   <li>
+    测试服务可访问性：
+    <pre><code>curl http://&lt;Windows主机IP&gt;:8000/v1/completions</code></pre>
+   </li>
+   <li>
+    如需删除端口转发：
+    <pre><code>netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=8000</code></pre>
+   </li>
+  </ol>
+  <div class="note">
+   <strong>
+    注意：
+   </strong>
+   如果WSL2重启或IP地址发生变化，需要重新配置端口转发规则。
+  </div>
+ </body>
+</html>

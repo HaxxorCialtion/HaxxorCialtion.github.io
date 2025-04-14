@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   ASR_LLM_TTS
+  </title>
+  <style>
+   body {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background-color: #fdfdfd;
+      color: #333;
+    }
+    h1, h2, h3, h4 {
+      color: #1a1a1a;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 1rem;
+      overflow-x: auto;
+      border-left: 4px solid #007acc;
+    }
+    code {
+      background: #f0f0f0;
+      padding: 0.2em 0.4em;
+      border-radius: 4px;
+    }
+    a {
+      color: #007acc;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    ul {
+      padding-left: 1.2em;
+    }
+    img.cover {
+    width: 100%;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+    .tag {
+    background: #007acc;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    margin-right: 0.3rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+    display: inline-block;
+    margin-bottom: 0.3rem;
+    transition: background-color 0.3s ease;
+}
+.tag:hover {
+    background: #005999;
+}
+.tag:hover {
+    background: #005999;
+}
+.tag:hover {
+    background: #005999;
+}
+.tag:hover {
+    background: #005999;
+}
+.tag:hover {
+    background: #005999;
+}
+    .tags {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+  
+
+img.cover {
+    width: 100%;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+.tag {
+    background: #007acc;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    margin-right: 0.3rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+    display: inline-block;
+    margin-bottom: 0.3rem;
+    transition: background-color 0.3s ease;
+}
+.tag:hover {
+    background: #005999;
+}
+.tag:hover {
+    background: #005999;
+}
+.tag:hover {
+    background: #005999;
+}
+.tag:hover {
+    background: #005999;
+}
+.tag:hover {
+    background: #005999;
+}
+.tags {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+  
+.note-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-line {
+    color: #888;        /* 灰色 */
+    font-size: 0.9em;   /* 稍小一点的字体 */
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-line {
+    color: #888;        /* 灰色 */
+    font-size: 0.9em;   /* 稍小一点的字体 */
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-line {
+    color: #888;        /* 灰色 */
+    font-size: 0.9em;   /* 稍小一点的字体 */
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-line {
+    color: #888;        /* 灰色 */
+    font-size: 0.9em;   /* 稍小一点的字体 */
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-label {
+    color: #999;  /* 或者你喜欢的浅灰色、淡蓝色等 */
+    margin-right: 3px;
+}
+  </style>
+ </head>
+ <body>
+  <img alt="封面图" class="cover" src="../images/bronya_mp.jpg"/>
+  <h1>
+   ASR_LLM_TTS
+  </h1>
+  <p>
+   <strong>
+    日期：
+   </strong>
+   2024-09-22
+  </p>
+  <div class="tags">
+   <span class="tag">
+    LLM角色扮演
+   </span>
+   <span class="tag">
+    LLM
+   </span>
+   <span class="tag">
+    TTS
+   </span>
+   <span class="tag">
+    ASR
+   </span>
+  </div>
+  <p>
+   这是一个基于关键词检测、语音识别、语音合成和对话生成的智能语音助手系统。该系统能够通过特定的唤醒词（如"hey bro"）启动与用户的语音对话，并利用先进的自然语言处理技术提供智能回复。
+  </p>
+  <h2>
+   主要功能
+  </h2>
+  <ol>
+   <li>
+    <strong>
+     关键词检测：
+    </strong>
+    使用 Porcupine 实时监听唤醒词，启动对话。
+   </li>
+   <li>
+    <strong>
+     语音录制和检测：
+    </strong>
+    采用 WebRTC VAD 进行语音活动检测，录制有效语音片段。
+   </li>
+   <li>
+    <strong>
+     语音识别（ASR）：
+    </strong>
+    使用 SenseVoice Small 模型将录制的语音转换为文本。
+   </li>
+   <li>
+    <strong>
+     对话生成：
+    </strong>
+    调用 Ollama API（兼容 OpenAI API），根据上下文生成助手的文本回复。
+   </li>
+   <li>
+    <strong>
+     语音合成（TTS）：
+    </strong>
+    将助手的回复通过语音合成输出，模拟人声对话。
+   </li>
+   <li>
+    <strong>
+     对话历史保存：
+    </strong>
+    定期将对话内容保存为 JSON 文件，便于后续分析。
+   </li>
+  </ol>
+  <h2>
+   技术栈
+  </h2>
+  <ul>
+   <li>
+    Python
+   </li>
+   <li>
+    Porcupine（关键词检测）
+   </li>
+   <li>
+    WebRTC VAD（语音活动检测）
+   </li>
+   <li>
+    SenseVoice Small（语音识别）
+   </li>
+   <li>
+    Ollama API（对话生成）
+   </li>
+   <li>
+    GPT-SoVITS（语音合成）
+   </li>
+   <li>
+    PyAudio, NumPy, SciPy（音频处理）
+   </li>
+  </ul>
+  <h3>
+   TTS部分
+  </h3>
+  <p>
+   本项目基于 GPT-Sovits-v2，感谢开源社区工作者的贡献！
+  </p>
+  <h4>
+   GPT-SoVITS TTS 项目
+  </h4>
+  <p>
+   这是一个基于 GPT-SoVITS API 的文本到语音（TTS）项目。该项目允许用户根据不同的情感生成和播放语音，使用预定义的参考音频来影响输出的语音风格。
+  </p>
+  <h5>
+   功能特点
+  </h5>
+  <ul>
+   <li>
+    支持多种情感的语音生成（高兴、抑郁、激动、平静、纠结）
+   </li>
+   <li>
+    使用参考音频来控制语音风格
+   </li>
+   <li>
+    实时生成并播放 WAV 格式的音频文件
+   </li>
+   <li>
+    可自定义文本输入和输出文件名
+   </li>
+   <li>
+    提供 TTS 处理时间统计
+   </li>
+   <li>
+    可以添加一个情感识别模型来决定参考音频，从而控制音频合成情感（to do）
+   </li>
+  </ul>
+  <h2>
+   使用指南
+  </h2>
+  <ol>
+   <li>
+    克隆仓库：
+    <pre><code>git clone https://github.com/HaxxorCialtion/ASR_LLM_TTS_py.git
+cd intelligent-voice-assistant</code></pre>
+   </li>
+   <li>
+    安装依赖：
+    <pre><code>pip install -r requirements.txt</code></pre>
+   </li>
+   <li>
+    准备必要的 API 密钥和模型：
+    <ul>
+     <li>
+      获取 Porcupine API 密钥
+     </li>
+     <li>
+      下载 SenseVoice Small 模型文件
+     </li>
+     <li>
+      确保 Ollama API 服务已经运行
+     </li>
+     <li>
+      开启 GPT-Sovits API 服务
+     </li>
+    </ul>
+   </li>
+   <li>
+    配置系统：
+    <ul>
+     <li>
+      在脚本中填入 Porcupine API 密钥
+     </li>
+     <li>
+      设置 ASR 模型路径
+     </li>
+     <li>
+      配置 Ollama API 端点（默认为本地）
+     </li>
+     <li>
+      配置 GPT-sovits 模型和参考音频
+     </li>
+    </ul>
+   </li>
+  </ol>
+  <h2>
+   使用方法
+  </h2>
+  <ol>
+   <li>
+    运行主脚本：
+    <pre><code>python main.py</code></pre>
+   </li>
+   <li>
+    等待系统提示："Listening for wake word..."
+   </li>
+   <li>
+    说出唤醒词（默认为"hey bro"）开始对话
+   </li>
+   <li>
+    与语音助手进行自然语言交互
+   </li>
+   <li>
+    超时则需再次触发
+   </li>
+   <li>
+    结束本轮对话即自动保存对话记录
+   </li>
+  </ol>
+  <h2>
+   主要特性
+  </h2>
+  <ul>
+   <li>
+    实时语音交互
+   </li>
+   <li>
+    智能对话生成
+   </li>
+   <li>
+    自然语音合成
+   </li>
+   <li>
+    长时间无语音自动休眠
+   </li>
+   <li>
+    对话历史记录
+   </li>
+  </ul>
+  <h2>
+   自定义设置
+  </h2>
+  <ul>
+   <li>
+    修改
+    <code>
+     settings
+    </code>
+    变量来自定义助手的角色和背景
+   </li>
+   <li>
+    调整
+    <code>
+     max_silence_duration
+    </code>
+    和
+    <code>
+     min_speech_duration
+    </code>
+    等参数来优化语音检测
+   </li>
+   <li>
+    更换唤醒词和对应的模型文件
+   </li>
+  </ul>
+  <h2>
+   许可证
+  </h2>
+  <p>
+   本项目采用 MIT 许可证 - 查看
+   <a href="LICENSE">
+    LICENSE
+   </a>
+   文件了解详情。
+  </p>
+  <h2>
+   联系方式
+  </h2>
+  <p>
+   项目维护者：HaxxorCialtion -
+   <a href="mailto:cialtion@outlook.com">
+    cialtion@outlook.com
+   </a>
+   <br/>
+   Bilibili 视频地址：
+   <a href="https://www.bilibili.com/video/BV1pftreQEbu" target="_blank">
+    BV1pftreQEbu
+   </a>
+  </p>
+  <h2>
+   致谢
+  </h2>
+  <ul>
+   <li>
+    <a href="https://github.com/Picovoice/porcupine">
+     Porcupine
+    </a>
+    - 用于唤醒词检测
+   </li>
+   <li>
+    <a href="https://github.com/FunAudioLLM/SenseVoice">
+     SenseVoice
+    </a>
+    - 提供 ASR 模型
+   </li>
+   <li>
+    <a href="https://github.com/ollama/ollama">
+     Ollama
+    </a>
+    - 本地大语言模型服务
+   </li>
+   <li>
+    <a href="https://github.com/QwenLM/Qwen2.5">
+     LLM
+    </a>
+    - LLM 服务
+   </li>
+   <li>
+    <a href="https://github.com/RVC-Boss/GPT-SoVITS">
+     GPT-SoVITS
+    </a>
+    - 用于语音合成
+   </li>
+  </ul>
+ </body>
+</html>

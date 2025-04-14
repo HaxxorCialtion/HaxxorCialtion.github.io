@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   树莓派蓝牙耳机连接指南
+  </title>
+  <style>
+   body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #000;
+            font-weight: bold;
+            margin-top: 30px;
+        }
+        code {
+            background: #eee;
+            border: 1px solid #ccc;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: Monaco, Consolas, "Courier New", monospace;
+        }
+        pre {
+            background: #f4f4f4;
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .important {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .important h3, .note h3 {
+            margin-top: 0;
+            color: #000;
+            font-weight: bold;
+        }
+    
+img.cover {
+    width: 100%;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+.tag {
+    background: #007acc;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    margin-right: 0.3rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+    display: inline-block;
+    margin-bottom: 0.3rem;
+    transition: background-color 0.3s ease;
+}
+.tag:hover {
+    background: #005999;
+}
+.tag:hover {
+    background: #005999;
+}
+.tags {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+.note-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-line {
+    color: #888;        /* 灰色 */
+    font-size: 0.9em;   /* 稍小一点的字体 */
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-line {
+    color: #888;        /* 灰色 */
+    font-size: 0.9em;   /* 稍小一点的字体 */
+}
+  </style>
+ </head>
+ <body>
+  <img alt="封面图" class="cover" src="../images/bronya_mp.jpg"/>
+  <h1>
+   树莓派连接蓝牙耳机
+  </h1>
+  <p>
+   <strong>
+    日期：
+   </strong>
+   2025-4-12
+  </p>
+  <div class="tags">
+   <span class="tag">
+    Raspberry Pi
+   </span>
+   <span class="tag">
+    Bluetooth
+   </span>
+   <span class="tag">
+    树莓派4B
+   </span>
+  </div>
+  <h2>
+   1. 首次配置（仅需执行一次）
+  </h2>
+  <pre>
+# 安装必要的包
+sudo apt install -y bluetooth bluez bluez-tools rfkill pulseaudio pulseaudio-module-bluetooth pavucontrol
+
+# 启用蓝牙服务开机自启
+sudo systemctl enable bluetooth
+
+# 确保配置文件包含正确设置
+sudo nano /etc/bluetooth/main.conf</pre>
+  <p>
+   在main.conf中确保有以下配置：
+  </p>
+  <pre>[General]
+Enable=Source,Sink,Media,Socket</pre>
+  <h2>
+   2. 快速连接方法（重启后）
+  </h2>
+  <pre># 进入蓝牙控制台
+bluetoothctl
+
+# 在bluetoothctl中执行：
+power on
+connect 08:F0:B6:C5:02:A6    # 替换为你的耳机MAC地址</pre>
+  <h2>
+   3. 完整连接流程（如果快速连接失败）
+  </h2>
+  <pre># 在bluetoothctl中执行：
+power on
+scan on
+pair 08:F0:B6:C5:02:A6
+trust 08:F0:B6:C5:02:A6
+connect 08:F0:B6:C5:02:A6</pre>
+  <h2>
+   4. 测试音频
+  </h2>
+  <pre># 播放测试音频
+aplay /usr/share/sounds/alsa/Front_Center.wav</pre>
+  <h2>
+   故障排除
+  </h2>
+  <pre># 如果听不到声音，重启音频服务
+pulseaudio -k
+pulseaudio --start
+
+# 检查蓝牙服务状态
+sudo systemctl status bluetooth
+
+# 如果蓝牙被阻止
+rfkill list
+sudo rfkill unblock bluetooth</pre>
+  <h2>
+   创建快速连接脚本（推荐）
+  </h2>
+  <pre># 创建脚本
+nano ~/connect_headphone.sh</pre>
+  <p>
+   在脚本中写入：
+  </p>
+  <pre>#!/bin/bash
+echo "power on" | bluetoothctl
+echo "connect 08:F0:B6:C5:02:A6" | bluetoothctl</pre>
+  <p>
+   设置脚本权限：
+  </p>
+  <pre>chmod +x ~/connect_headphone.sh</pre>
+  <p>
+   之后只需运行：
+  </p>
+  <pre>~/connect_headphone.sh</pre>
+  <h2>
+   将MAC地址保存到配置文件（可选）
+  </h2>
+  <pre># 创建配置文件
+nano ~/.config/bluetooth/devices.conf</pre>
+  <p>
+   添加内容：
+  </p>
+  <pre>[Devices]
+headphone=08:F0:B6:C5:02:A6</pre>
+  <div class="important">
+   <h3>
+    重要提示：
+   </h3>
+   <ul>
+    <li>
+     记得保存你的蓝牙设备MAC地址
+    </li>
+    <li>
+     首次配对成功后，后续只需执行连接命令
+    </li>
+    <li>
+     如果连接不上，检查耳机是否处于可配对状态
+    </li>
+    <li>
+     确保没有其他设备已经连接到耳机
+    </li>
+   </ul>
+  </div>
+  <div class="note">
+   <h3>
+    重启后连接步骤：
+   </h3>
+   <ol>
+    <li>
+     确保耳机开启
+    </li>
+    <li>
+     运行connect_headphone.sh脚本或使用bluetoothctl连接
+    </li>
+    <li>
+     测试音频输出
+    </li>
+   </ol>
+  </div>
+ </body>
+</html>

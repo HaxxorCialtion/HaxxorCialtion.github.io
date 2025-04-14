@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Ollama 多工具调用测试
+  </title>
+  <style>
+   body {
+      font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+      line-height: 1.8;
+      color: #333;
+      background-color: #f8f9fa;
+      padding: 40px;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1, h2, h3 {
+      color: #2c3e50;
+    }
+    h1 {
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 10px;
+    }
+    code {
+      background-color: #f1f1f1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "Courier New", monospace;
+    }
+    pre {
+      background-color: #f4f4f4;
+      padding: 12px;
+      border-left: 4px solid #3498db;
+      overflow-x: auto;
+    }
+    .section {
+      margin-bottom: 30px;
+    }
+    .cover {
+      width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+      margin-bottom: 20px;
+      border-radius: 12px;
+    }
+    ul {
+      padding-left: 20px;
+    }
+  
+img.cover {
+    width: 100%;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+.tag {
+    background: #007acc;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    margin-right: 0.3rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+    display: inline-block;
+    margin-bottom: 0.3rem;
+    transition: background-color 0.3s ease;
+}
+.tag:hover {
+    background: #005999;
+}
+.tag:hover {
+    background: #005999;
+}
+.tag:hover {
+    background: #005999;
+}
+.tag:hover {
+    background: #005999;
+}
+.tag:hover {
+    background: #005999;
+}
+.tags {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+  
+.note-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-line {
+    color: #888;        /* 灰色 */
+    font-size: 0.9em;   /* 稍小一点的字体 */
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-line {
+    color: #888;        /* 灰色 */
+    font-size: 0.9em;   /* 稍小一点的字体 */
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-line {
+    color: #888;        /* 灰色 */
+    font-size: 0.9em;   /* 稍小一点的字体 */
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-line {
+    color: #888;        /* 灰色 */
+    font-size: 0.9em;   /* 稍小一点的字体 */
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-label {
+    color: #999;  /* 或者你喜欢的浅灰色、淡蓝色等 */
+    margin-right: 3px;
+}
+  </style>
+ </head>
+ <body>
+  <img alt="封面图" class="cover" src="../images/bronya_mp.jpg"/>
+  <h1>
+   Ollama 工具函数调用测试记录
+  </h1>
+  <p>
+   <strong>
+    日期：
+   </strong>
+   2024-12-02
+  </p>
+  <div class="tags">
+   <span class="tag">
+    LLM
+   </span>
+   <span class="tag">
+    Ollama
+   </span>
+   <span class="tag">
+    functional calling
+   </span>
+  </div>
+  <p>
+   <strong>
+    标签：
+   </strong>
+   LLM, function_calling, AI, Local
+  </p>
+  <div class="section">
+   <h2>
+    环境配置
+   </h2>
+   <ul>
+    <li>
+     操作系统: Windows 11
+    </li>
+    <li>
+     CPU: Intel i7-13700K
+    </li>
+    <li>
+     GPU: NVIDIA RTX 2080 Ti 22GB
+    </li>
+    <li>
+     显存占用: 12GB
+    </li>
+    <li>
+     模型: hhao/qwen2.5-coder-tools:7b (4.7GB)
+    </li>
+   </ul>
+  </div>
+  <div class="section">
+   <h2>
+    测试工具函数
+   </h2>
+   <ol>
+    <li>
+     <code>
+      calculate_fibonacci(n)
+     </code>
+     : 计算第 n 个斐波那契数
+    </li>
+    <li>
+     <code>
+      calculate_factorial(n)
+     </code>
+     : 计算 n 的阶乘
+    </li>
+    <li>
+     <code>
+      get_timestamp()
+     </code>
+     : 获取当前时间戳
+    </li>
+   </ol>
+  </div>
+  <div class="section">
+   <h2>
+    测试结果
+   </h2>
+   <h3>
+    并行调用测试结果
+   </h3>
+   <ul>
+    <li>
+     斐波那契数列计算:
+    </li>
+    <ul>
+     <li>
+      第20项: 6,765
+     </li>
+     <li>
+      第50项: 12,586,269,025
+     </li>
+     <li>
+      第100项: 354,224,848,179,261,915,075
+     </li>
+    </ul>
+    <li>
+     阶乘计算:
+    </li>
+    <ul>
+     <li>
+      100 的阶乘: 9.33262e+157 （完整值已省略）
+     </li>
+    </ul>
+    <li>
+     时间戳:
+    </li>
+    <ul>
+     <li>
+      1733089159.7644596
+     </li>
+    </ul>
+   </ul>
+   <h3>
+    错误处理测试结果
+   </h3>
+   <pre>输入: 计算 -5 的阶乘
+返回: {"error": "Factorial is not defined for negative numbers"}</pre>
+  </div>
+  <div class="section">
+   <h2>
+    性能指标
+   </h2>
+   <ul>
+    <li>
+     LLM 推理总时间: 2.64 秒
+    </li>
+    <li>
+     显存占用: 12GB
+    </li>
+   </ul>
+  </div>
+  <div class="section">
+   <h2>
+    结论
+   </h2>
+   <ul>
+    <li>
+     模型能够成功处理多个并行工具函数调用
+    </li>
+    <li>
+     错误处理机制运行正常
+    </li>
+    <li>
+     推理速度表现良好
+    </li>
+    <li>
+     内存占用在合理范围内
+    </li>
+   </ul>
+  </div>
+ </body>
+</html>
