@@ -1,3 +1,6 @@
+# 进入目录
+cd /f/git/new
+
 # 先检查当前远程仓库
 git remote -v
 
@@ -14,7 +17,7 @@ git push -u origin gh-pages
 ### 提交更改
 git checkout gh-pages
 git add .
-git commit -m "Clean up master branch and update content"
+git commit -m "default update"
 git push origin gh-pages
 
 # 取消代理

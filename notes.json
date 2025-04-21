@@ -54,5 +54,13 @@
     "date": "2025-4-12",
     "image": "./images/bronya_mp.jpg",
     "key_words": ["Raspberry Pi", "Bluetooth", "树莓派4B"]
+  },
+      {
+    "file": "./sub_htmls/树莓派有线网配置.html",
+    "title": "树莓派有线网配置",
+    "description": "树莓派4B连上SJTU宿舍的静态IP有线网",
+    "date": "2025-4-22",
+    "image": "./images/bronya_mp.jpg",
+    "key_words": ["Raspberry Pi", "network", "树莓派4B"]
   }
 ]
