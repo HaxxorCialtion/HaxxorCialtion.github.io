@@ -62,5 +62,13 @@
     "date": "2025-4-22",
     "image": "./images/bronya_mp.jpg",
     "key_words": ["Raspberry Pi", "network", "树莓派4B"]
+  },
+      {
+    "file": "./sub_htmls/ASR_LLM_TTS_v2.html",
+    "title": "ASR_LLM_TTS_理论高效版",
+    "description": "用了vLLM来部署LLM、F5-TTS的TensorRT版实现TTS，且用了截断的方式改善首字延迟，但目前效果不是很理想。",
+    "date": "2025-4-28",
+    "image": "./images/bronya_mp.jpg",
+    "key_words": ["Raspberry Pi", "network", "树莓派4B"]
   }
 ]
