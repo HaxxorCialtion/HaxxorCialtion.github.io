@@ -10,7 +10,7 @@ git remote add origin https://github.com/HaxxorCialtion/HaxxorCialtion.github.io
 
 # 拉取
 git fetch origin
-
+git pull origin gh-pages
 # 再次尝试推送
 git push -u origin gh-pages
 
