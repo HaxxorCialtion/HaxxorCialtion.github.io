@@ -1,0 +1,26 @@
+# 进入目录
+cd /f/git/new
+
+# 先检查当前远程仓库
+git remote -v
+
+# 重新设置远程仓库地址
+git init
+git remote remove origin
+git remote add origin https://github.com/HaxxorCialtion/HaxxorCialtion.github.io.git
+
+# 拉取
+git fetch origin
+git pull origin gh-pages
+# 再次尝试推送
+git push -u origin gh-pages
+
+### 提交更改
+git checkout gh-pages
+git add .
+git commit -m "default update"
+git push origin gh-pages
+
+# 取消代理
+git config --global --unset http.proxy
+git config --global --unset https.proxy

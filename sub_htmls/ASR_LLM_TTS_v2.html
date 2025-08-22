@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   ASR-LLM-TTS 高效语音对话系统
+  </title>
+  <style>
+   :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #27ae60;
+            --bg-color: #f8f9fa;
+            --code-bg: #f5f7f9;
+            --text-color: #2c3e50;
+            --border-color: #e0e0e0;
+            --comment-color: #6c757d;
+            --keyword-color: #8e44ad;
+            --function-color: #2980b9;
+            --string-color: #27ae60;
+            --number-color: #e67e22;
+            --class-color: #e74c3c;
+            --builtin-color: #1abc9c;
+        }
+
+        body {
+            font-family: 'Source Han Sans CN', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 5px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--comment-color);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-color);
+            display: inline-block;
+        }
+
+        h3 {
+            color: var(--secondary-color);
+            margin-top: 20px;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Source Code Pro', Consolas, Monaco, 'Andale Mono', monospace;
+            position: relative;
+            margin: 15px 0;
+            line-height: 1.5;
+        }
+
+        code {
+            font-family: 'Source Code Pro', Consolas, Monaco, 'Andale Mono', monospace;
+        }
+
+        .code-block {
+            position: relative;
+        }
+
+        .language-label {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 3px 8px;
+            font-size: 12px;
+            border-radius: 0 5px 0 5px;
+        }
+
+        .comment { color: var(--comment-color); }
+        .keyword { color: var(--keyword-color); }
+        .function { color: var(--function-color); }
+        .string { color: var(--string-color); }
+        .number { color: var(--number-color); }
+        .class { color: var(--class-color); }
+        .builtin { color: var(--builtin-color); }
+
+        .architecture {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+
+        .component {
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            width: calc(33% - 20px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .component h4 {
+            color: var(--primary-color);
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .component ul {
+            padding-left: 20px;
+        }
+
+        .flowchart {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .flowchart svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        @media (max-width: 768px) {
+            .component {
+                width: 100%;
+            }
+        }
+
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .feature {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid var(--secondary-color);
+            width: calc(50% - 30px);
+        }
+
+        @media (max-width: 768px) {
+            .feature {
+                width: 100%;
+            }
+        }
+
+        .feature h4 {
+            margin-top: 0;
+            color: var(--secondary-color);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            color: var(--comment-color);
+            font-size: 0.9rem;
+        }
+
+        .class-header {
+            background-color: #f1f8e9;
+            padding: 8px 15px;
+            border-radius: 5px 5px 0 0;
+            border-left: 4px solid #8bc34a;
+            margin-bottom: -15px;
+            font-weight: bold;
+            color: #33691e;
+        }
+
+        .method-header {
+            background-color: #e8f5e9;
+            padding: 5px 15px;
+            margin-top: 15px;
+            border-left: 4px solid #4caf50;
+            font-weight: 500;
+            color: #2e7d32;
+        }
+    
+img.cover {
+    width: 100%;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+.tag {
+    background: #007acc;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    margin-right: 0.3rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+    display: inline-block;
+    margin-bottom: 0.3rem;
+    transition: background-color 0.3s ease;
+}
+.tag:hover {
+    background: #005999;
+}
+.tag:hover {
+    background: #005999;
+}
+.tag:hover {
+    background: #005999;
+}
+.tag:hover {
+    background: #005999;
+}
+.tag:hover {
+    background: #005999;
+}
+.tag:hover {
+    background: #005999;
+}
+.tags {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+.note-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-line {
+    color: #888;        /* 灰色 */
+    font-size: 0.9em;   /* 稍小一点的字体 */
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-line {
+    color: #888;        /* 灰色 */
+    font-size: 0.9em;   /* 稍小一点的字体 */
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-line {
+    color: #888;        /* 灰色 */
+    font-size: 0.9em;   /* 稍小一点的字体 */
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-line {
+    color: #888;        /* 灰色 */
+    font-size: 0.9em;   /* 稍小一点的字体 */
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-line {
+    color: #888;        /* 灰色 */
+    font-size: 0.9em;   /* 稍小一点的字体 */
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-line {
+    color: #888;        /* 灰色 */
+    font-size: 0.9em;   /* 稍小一点的字体 */
+}
+  </style>
+ </head>
+ <body>
+  <img alt="封面图" class="cover" src="../images/bronya_mp.jpg"/>
+  <h1>
+   ASR_LLM_TTS_理论高效版
+  </h1>
+  <p>
+   <strong>
+    日期：
+   </strong>
+   2025-4-28
+  </p>
+  <div class="tags">
+   <span class="tag">
+    ASR
+   </span>
+   <span class="tag">
+    LLM
+   </span>
+   <span class="tag">
+    TTS
+   </span>
+   <span class="tag">
+    LLM边缘AI应用
+   </span>
+  </div>
+  <div class="container">
+   <header>
+    <h1>
+     ASR-LLM-TTS 高效语音对话系统
+    </h1>
+    <p class="subtitle">
+     一个高性能语音交互系统，使用 Faster-Whisper-Turbo、vLLM 和 F5-TTS (TensorRT)
+    </p>
+   </header>
+   <div class="section">
+    <h2>
+     系统架构
+    </h2>
+    <div class="architecture">
+     <div class="component">
+      <h4>
+       ASR（语音识别）
+      </h4>
+      <ul>
+       <li>
+        使用 Faster-Whisper-Turbo 模型
+       </li>
+       <li>
+        CUDA 加速，FP16 精度
+       </li>
+       <li>
+        内置 VAD 过滤功能
+       </li>
+      </ul>
+     </div>
+     <div class="component">
+      <h4>
+       LLM（大型语言模型）
+      </h4>
+      <ul>
+       <li>
+        使用 vLLM 部署
+       </li>
+       <li>
+        本地 REST API 接口
+       </li>
+       <li>
+        高吞吐量推理引擎
+       </li>
+      </ul>
+     </div>
+     <div class="component">
+      <h4>
+       TTS（语音合成）
+      </h4>
+      <ul>
+       <li>
+        F5-TTS 的 TensorRT 优化版本
+       </li>
+       <li>
+        支持参考音频克隆
+       </li>
+       <li>
+        并行处理多段文本
+       </li>
+      </ul>
+     </div>
+    </div>
+    <div class="flowchart">
+     <svg height="200" viewbox="0 0 800 200" width="800">
+      <defs>
+       <marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="0" refy="3.5">
+        <polygon fill="#4a6fa5" points="0 0, 10 3.5, 0 7">
+        </polygon>
+       </marker>
+      </defs>
+      <rect fill="#e8f4f8" height="60" rx="8" stroke="#4a6fa5" stroke-width="2" width="150" x="50" y="70">
+      </rect>
+      <text fill="#2c3e50" font-weight="bold" text-anchor="middle" x="125" y="105">
+       录音/语音输入
+      </text>
+      <line marker-end="url(#arrowhead)" stroke="#4a6fa5" stroke-width="2" x1="200" x2="250" y1="100" y2="100">
+      </line>
+      <rect fill="#e3f2fd" height="60" rx="8" stroke="#1565c0" stroke-width="2" width="150" x="250" y="70">
+      </rect>
+      <text fill="#2c3e50" font-weight="bold" text-anchor="middle" x="325" y="105">
+       ASR 语音识别
+      </text>
+      <line marker-end="url(#arrowhead)" stroke="#4a6fa5" stroke-width="2" x1="400" x2="450" y1="100" y2="100">
+      </line>
+      <rect fill="#f3e5f5" height="60" rx="8" stroke="#7b1fa2" stroke-width="2" width="150" x="450" y="70">
+      </rect>
+      <text fill="#2c3e50" font-weight="bold" text-anchor="middle" x="525" y="105">
+       LLM 模型处理
+      </text>
+      <line marker-end="url(#arrowhead)" stroke="#4a6fa5" stroke-width="2" x1="600" x2="650" y1="100" y2="100">
+      </line>
+      <rect fill="#e8f5e9" height="60" rx="8" stroke="#2e7d32" stroke-width="2" width="150" x="650" y="70">
+      </rect>
+      <text fill="#2c3e50" font-weight="bold" text-anchor="middle" x="725" y="105">
+       TTS 语音合成
+      </text>
+     </svg>
+    </div>
+   </div>
+   <div class="section">
+    <h2>
+     主要特性
+    </h2>
+    <div class="features">
+     <div class="feature">
+      <h4>
+       高效语音处理
+      </h4>
+      <p>
+       使用静音检测和 VAD 技术实现高效录音，减少响应延迟。系统会缓存 300ms 的音频以捕捉完整语音起始。
+      </p>
+     </div>
+     <div class="feature">
+      <h4>
+       并行 TTS 处理
+      </h4>
+      <p>
+       文本分段处理和并行合成，首段优先播放，其余部分并行处理，显著提高响应速度。
+      </p>
+     </div>
+     <div class="feature">
+      <h4>
+       性能监控
+      </h4>
+      <p>
+       内置性能计时器，记录各个处理阶段的耗时，便于性能分析和优化。
+      </p>
+     </div>
+     <div class="feature">
+      <h4>
+       日志记录
+      </h4>
+      <p>
+       自动保存输入音频和输出合成语音，便于追踪和分析系统行为。
+      </p>
+     </div>
+    </div>
+   </div>
+   <div class="section">
+    <h2>
+     代码详解
+    </h2>
+    <h3>
+     导入依赖
+    </h3>
+    <div class="code-block">
+     <div class="language-label">
+      Python
+     </div>
+     <pre>
+<span class="keyword">import</span> os
+<span class="keyword">import</span> time
+<span class="keyword">import</span> wave
+<span class="keyword">import</span> numpy <span class="keyword">as</span> np
+<span class="keyword">import</span> requests
+<span class="keyword">import</span> soundfile <span class="keyword">as</span> sf
+<span class="keyword">import</span> pyaudio
+<span class="keyword">import</span> datetime
+<span class="keyword">import</span> threading
+<span class="keyword">import</span> queue
+<span class="keyword">import</span> concurrent.futures
+<span class="keyword">from</span> pathlib <span class="keyword">import</span> Path
+<span class="keyword">from</span> faster_whisper <span class="keyword">import</span> WhisperModel
+<span class="keyword">from</span> openai <span class="keyword">import</span> OpenAI
+<span class="keyword">import</span> sounddevice <span class="keyword">as</span> sd</pre>
+    </div>
+    <h3>
+     系统配置
+    </h3>
+    <div class="code-block">
+     <div class="language-label">
+      Python
+     </div>
+     <pre>
+<span class="comment"># 音频参数</span>
+CHUNK = <span class="number">1024</span>
+FORMAT = pyaudio.paFloat32
+CHANNELS = <span class="number">1</span>
+RATE = <span class="number">16000</span>
+SILENCE_THRESHOLD = <span class="number">0.01</span>
+SILENCE_DURATION = <span class="number">0.8</span>  <span class="comment"># 降低静音判断时间以加快响应速度</span>
+
+<span class="comment"># ASR模型路径</span>
+ASR_MODEL_PATH = <span class="string">"./whisper_turbo"</span>
+
+<span class="comment"># LLM API</span>
+LLM_BASE_URL = <span class="string">"http://localhost:6001/v1"</span>
+LLM_API_KEY = <span class="string">"token-abc123"</span>
+LLM_MODEL_PATH = <span class="string">"./Qwen/Qwen2___5-3B-Instruct-AWQ"</span>
+
+<span class="comment"># TTS服务</span>
+TTS_SERVER_URL = <span class="string">"localhost:8000"</span>
+TTS_MODEL_NAME = <span class="string">"f5_tts"</span>
+REFERENCE_AUDIO_PATH = <span class="string">"./tts/原来如此，你将见过的景物进行了这样的组合。.wav"</span>
+REFERENCE_TEXT = <span class="string">"原来如此，你将见过的景物进行了这样的组合。"</span>
+
+<span class="comment"># 日志文件夹</span>
+INPUT_LOG_FOLDER = <span class="string">"./input_logs"</span>
+OUTPUT_LOG_FOLDER = <span class="string">"./output_logs"</span>
+
+<span class="comment"># 性能优化参数</span>
+MAX_WORKERS = <span class="number">4</span>  <span class="comment"># 线程池最大工作线程数</span>
+BATCH_SIZE = <span class="number">3</span>  <span class="comment"># TTS并行合成的批次大小</span></pre>
+    </div>
+    <h3>
+     性能计时器类
+    </h3>
+    <div class="class-header">
+     PerformanceTimer 类
+    </div>
+    <div class="code-block">
+     <div class="language-label">
+      Python
+     </div>
+     <pre>
+<span class="keyword">class</span> <span class="class">PerformanceTimer</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="builtin">self</span>):
+        <span class="builtin">self</span>.timers = {}
+        <span class="builtin">self</span>.start_times = {}
+
+    <span class="keyword">def</span> <span class="function">start</span>(<span class="builtin">self</span>, name):
+        <span class="builtin">self</span>.start_times[name] = time.time()
+
+    <span class="keyword">def</span> <span class="function">stop</span>(<span class="builtin">self</span>, name):
+        <span class="keyword">if</span> name <span class="keyword">in</span> <span class="builtin">self</span>.start_times:
+            elapsed = time.time() - <span class="builtin">self</span>.start_times[name]
+            <span class="keyword">if</span> name <span class="keyword">not in</span> <span class="builtin">self</span>.timers:
+                <span class="builtin">self</span>.timers[name] = []
+            <span class="builtin">self</span>.timers[name].append(elapsed)
+            <span class="builtin">print</span>(<span class="string">f"⏱️ {name} 用时: {elapsed:.4f} 秒"</span>)
+            <span class="keyword">return</span> elapsed
+        <span class="keyword">return</span> <span class="number">0</span>
+
+    <span class="keyword">def</span> <span class="function">get_average</span>(<span class="builtin">self</span>, name):
+        <span class="keyword">if</span> name <span class="keyword">in</span> <span class="builtin">self</span>.timers <span class="keyword">and</span> <span class="builtin">self</span>.timers[name]:
+            <span class="keyword">return</span> <span class="builtin">sum</span>(<span class="builtin">self</span>.timers[name]) / <span class="builtin">len</span>(<span class="builtin">self</span>.timers[name])
+        <span class="keyword">return</span> <span class="number">0</span>
+
+    <span class="keyword">def</span> <span class="function">print_stats</span>(<span class="builtin">self</span>):
+        <span class="builtin">print</span>(<span class="string">"\n===== 性能统计 ====="</span>)
+        <span class="keyword">for</span> name, times <span class="keyword">in</span> <span class="builtin">self</span>.timers.items():
+            <span class="keyword">if</span> times:
+                avg = <span class="builtin">sum</span>(times) / <span class="builtin">len</span>(times)
+                max_time = <span class="builtin">max</span>(times)
+                min_time = <span class="builtin">min</span>(times)
+                <span class="builtin">print</span>(<span class="string">f"{name}: 平均 {avg:.4f}秒, 最小 {min_time:.4f}秒, 最大 {max_time:.4f}秒, 共 {len(times)} 次"</span>)</pre>
+    </div>
+    <h3>
+     TTS 客户端类
+    </h3>
+    <div class="class-header">
+     FastTTSClient 类
+    </div>
+    <div class="code-block">
+     <div class="language-label">
+      Python
+     </div>
+     <pre>
+<span class="keyword">class</span> <span class="class">FastTTSClient</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="builtin">self</span>, server_url=TTS_SERVER_URL, model_name=TTS_MODEL_NAME):
+        <span class="builtin">self</span>.server_url = <span class="string">f"http://{server_url}/v2/models/{model_name}/infer"</span>
+        <span class="builtin">self</span>.session = requests.Session()
+        <span class="builtin">self</span>.reference_audio_path = REFERENCE_AUDIO_PATH
+        <span class="builtin">self</span>.reference_text = REFERENCE_TEXT
+        <span class="builtin">self</span>.samples, <span class="builtin">self</span>.lengths = <span class="builtin">self</span>.load_reference_audio(<span class="builtin">self</span>.reference_audio_path)
+        <span class="builtin">self</span>.text_splitter = TextSplitter()
+        <span class="builtin">self</span>.audio_queue = queue.Queue()
+        <span class="builtin">self</span>.is_playing = <span class="boolean">False</span>
+        <span class="builtin">self</span>.executor = concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS)
+        <span class="builtin">self</span>.response_cache = {}  <span class="comment"># 缓存TTS响应</span>
+        <span class="builtin">self</span>.timer = PerformanceTimer()
+        <span class="builtin">self</span>.warmup()</pre>
+    </div>
+    <div class="method-header">
+     clean_text 方法
+    </div>
+    <div class="code-block">
+     <div class="language-label">
+      Python
+     </div>
+     <pre>
+    <span class="keyword">@staticmethod</span>
+    <span class="keyword">def</span> <span class="function">clean_text</span>(text: <span class="builtin">str</span>) -&gt; <span class="builtin">str</span>:
+        <span class="string">"""清理文本中的特殊字符和不必要的空白"""</span>
+        text = text.replace(<span class="string">'\n'</span>, <span class="string">' '</span>)
+        text = text.replace(<span class="string">'\t'</span>, <span class="string">' '</span>)
+        text = <span class="string">' '</span>.join(text.split())
+        special_chars = [<span class="string">'\r'</span>, <span class="string">'\xa0'</span>, <span class="string">'\u3000'</span>, <span class="string">'\u200b'</span>, <span class="string">'\u200c'</span>, <span class="string">'\u200d'</span>, <span class="string">'*'</span>] + [<span class="string">f"{i}."</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="builtin">range</span>(<span class="number">10</span>)]
+        <span class="keyword">for</span> char <span class="keyword">in</span> special_chars:
+            text = text.replace(char, <span class="string">''</span>)
+        <span class="keyword">return</span> text.strip()</pre>
+    </div>
+    <div class="method-header">
+     synthesize_and_play 方法
+    </div>
+    <div class="code-block">
+     <div class="language-label">
+      Python
+     </div>
+     <pre>
+    <span class="keyword">def</span> <span class="function">synthesize_and_play</span>(<span class="builtin">self</span>, text: <span class="builtin">str</span>):
+        <span class="builtin">self</span>.timer.start(<span class="string">"TTS总耗时"</span>)
+
+        <span class="comment"># 清理文本</span>
+        cleaned_text = <span class="builtin">self</span>.clean_text(text)
+
+        <span class="comment"># 分割文本为多个片段</span>
+        <span class="builtin">self</span>.timer.start(<span class="string">"文本分割"</span>)
+        segments = <span class="builtin">self</span>.text_splitter.split_text(cleaned_text)
+        <span class="builtin">self</span>.timer.stop(<span class="string">"文本分割"</span>)
+
+        <span class="keyword">if</span> <span class="keyword">not</span> segments:
+            <span class="keyword">return</span>
+
+        <span class="comment"># 创建时间戳用于音频文件命名</span>
+        timestamp = datetime.datetime.now().strftime(<span class="string">"%Y%m%d_%H%M%S"</span>)
+
+        <span class="comment"># 重置播放状态和队列</span>
+        <span class="keyword">with</span> <span class="builtin">self</span>.audio_queue.mutex:
+            <span class="builtin">self</span>.audio_queue.queue.clear()
+        <span class="builtin">self</span>.is_playing = <span class="boolean">True</span>
+
+        <span class="comment"># 启动播放线程</span>
+        player = threading.Thread(target=<span class="builtin">self</span>.player_thread)
+        player.daemon = <span class="boolean">True</span>
+        player.start()
+
+        <span class="comment"># 存储合成结果的有序字典，按索引存储，确保按顺序播放</span>
+        segment_results = {}
+        segment_done = threading.Event()
+
+        <span class="comment"># 跟踪当前应该处理的段落索引</span>
+        next_segment_index = <span class="number">0</span>
+        segments_total = <span class="builtin">len</span>(segments)
+
+        <span class="comment"># 处理并播放第一个分段，确保快速开始</span>
+        <span class="builtin">self</span>.timer.start(<span class="string">"首段合成"</span>)
+        first_audio = <span class="builtin">self</span>.synthesize_segment_sync(segments[<span class="number">0</span>], timestamp, <span class="number">0</span>, segments_total)
+        <span class="builtin">self</span>.timer.stop(<span class="string">"首段合成"</span>)
+
+        <span class="keyword">if</span> first_audio <span class="keyword">is not</span> <span class="boolean">None</span>:
+            <span class="builtin">self</span>.audio_queue.put(first_audio)
+            next_segment_index = <span class="number">1</span>
+
+        <span class="comment"># 如果还有更多分段，启动并行处理</span>
+        <span class="keyword">if</span> next_segment_index &lt; segments_total:
+            <span class="comment"># 省略部分并行处理代码...</span>
+
+        <span class="comment"># 标记播放完成</span>
+        <span class="builtin">self</span>.is_playing = <span class="boolean">False</span>
+
+        <span class="comment"># 等待播放线程结束</span>
+        player.join()
+
+        <span class="builtin">self</span>.timer.stop(<span class="string">"TTS总耗时"</span>)
+        <span class="builtin">print</span>(<span class="string">"🔊 所有语音片段播放完成"</span>)</pre>
+    </div>
+    <h3>
+     TextSplitter 类
+    </h3>
+    <div class="class-header">
+     TextSplitter 类
+    </div>
+    <div class="code-block">
+     <div class="language-label">
+      Python
+     </div>
+     <pre>
+<span class="keyword">class</span> <span class="class">TextSplitter</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="builtin">self</span>):
+        <span class="comment"># 定义分隔符及其优先级（数字越大优先级越高）</span>
+        <span class="builtin">self</span>.separators = {
+            <span class="string">'。'</span>: <span class="number">5</span>,
+            <span class="string">'！'</span>: <span class="number">5</span>,
+            <span class="string">'？'</span>: <span class="number">5</span>,
+            <span class="string">'；'</span>: <span class="number">4</span>,
+            <span class="string">'\n'</span>: <span class="number">4</span>,
+            <span class="string">'，'</span>: <span class="number">3</span>,
+            <span class="string">'：'</span>: <span class="number">3</span>,
+            <span class="string">'、'</span>: <span class="number">2</span>,
+            <span class="string">' '</span>: <span class="number">1</span>
+        }
+        <span class="comment"># 减少目标token长度以加快TTS响应</span>
+        <span class="builtin">self</span>.target_length = <span class="number">30</span>
+        <span class="comment"># 搜索窗口大小</span>
+        <span class="builtin">self</span>.window_size = <span class="number">10</span>
+
+    <span class="keyword">def</span> <span class="function">find_best_split_position</span>(<span class="builtin">self</span>, text, start_pos, target_pos):
+        <span class="string">"""在目标位置附近寻找最佳分割点"""</span>
+        best_pos = -<span class="number">1</span>
+        best_priority = -<span class="number">1</span>
+
+        <span class="comment"># 在目标位置前后的窗口内寻找最佳分割点</span>
+        search_start = <span class="builtin">max</span>(start_pos, target_pos - <span class="builtin">self</span>.window_size)
+        search_end = <span class="builtin">min</span>(<span class="builtin">len</span>(text), target_pos + <span class="builtin">self</span>.window_size)
+
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="builtin">range</span>(search_start, search_end):
+            <span class="keyword">if</span> i &gt;= <span class="builtin">len</span>(text):
+                <span class="keyword">break</span>
+
+            char = text[i]
+            <span class="keyword">if</span> char <span class="keyword">in</span> <span class="builtin">self</span>.separators:
+                priority = <span class="builtin">self</span>.separators[char]
+                <span class="keyword">if</span> priority &gt; best_priority:
+                    best_pos = i
+                    best_priority = priority
+
+        <span class="comment"># 如果没找到合适的分割点，就在目标位置处强制分割</span>
+        <span class="keyword">if</span> best_pos == -<span class="number">1</span>:
+            <span class="keyword">return</span> target_pos
+
+        <span class="keyword">return</span> best_pos + <span class="number">1</span>  <span class="comment"># 返回分隔符后的位置</span>
+
+    <span class="keyword">def</span> <span class="function">split_text</span>(<span class="builtin">self</span>, text):
+        <span class="string">"""将文本分割成较小的片段"""</span>
+        <span class="keyword">if</span> <span class="keyword">not</span> text <span class="keyword">or</span> <span class="builtin">len</span>(text.strip()) == <span class="number">0</span>:
+            <span class="keyword">return</span> []
+
+        segments = []
+        start = <span class="number">0</span>
+
+        <span class="keyword">while</span> start &lt; <span class="builtin">len</span>(text):
+            <span class="comment"># 省略部分分割逻辑...</span>
+
+        <span class="keyword">return</span> segments</pre>
+    </div>
+    <h3>
+     AudioRecorder 类
+    </h3>
+    <div class="class-header">
+     AudioRecorder 类
+    </div>
+    <div class="code-block">
+     <div class="language-label">
+      Python
+     </div>
+     <pre>
+<span class="keyword">class</span> <span class="class">AudioRecorder</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="builtin">self</span>, timer):
+        <span class="builtin">self</span>.p = pyaudio.PyAudio()
+        <span class="builtin">self</span>.stream = <span class="boolean">None</span>
+        <span class="builtin">self</span>.frames = []
+        <span class="builtin">self</span>.is_recording = <span class="boolean">False</span>
+        <span class="builtin">self</span>.silence_frames = <span class="number">0</span>
+        <span class="builtin">self</span>.is_speaking = <span class="boolean">False</span>
+        <span class="builtin">self</span>.timer = timer
+
+        <span class="comment"># 优化音量检测参数</span>
+        <span class="builtin">self</span>.volume_threshold = <span class="number">0.015</span>  <span class="comment"># 稍微降低阈值提高灵敏度</span>
+        <span class="builtin">self</span>.min_speak_frames = <span class="builtin">int</span>(<span class="number">0.15</span> * RATE / CHUNK)  <span class="comment"># 减少最少说话帧数(150ms)</span>
+        <span class="builtin">self</span>.pre_buffer = []  <span class="comment"># 预缓冲区</span>
+        <span class="builtin">self</span>.pre_buffer_size = <span class="builtin">int</span>(<span class="number">0.3</span> * RATE / CHUNK)  <span class="comment"># 减少预缓冲(300ms)以降低延迟</span>
+        <span class="builtin">self</span>.speak_frames = <span class="number">0</span>  <span class="comment"># 说话帧计数</span>
+
+        <span class="comment"># 波形能量计算的滑动窗口</span>
+        <span class="builtin">self</span>.energy_window_size = <span class="number">10</span>
+        <span class="builtin">self</span>.energy_window = []
+
+    <span class="keyword">def</span> <span class="function">process_audio</span>(<span class="builtin">self</span>):
+        <span class="keyword">if</span> <span class="keyword">not</span> <span class="builtin">self</span>.stream:
+            <span class="keyword">return</span> <span class="boolean">False</span>
+
+        data = np.frombuffer(<span class="builtin">self</span>.stream.read(CHUNK), dtype=np.float32)
+
+        <span class="comment"># 计算当前帧的能量</span>
+        energy = np.sqrt(np.mean(data ** <span class="number">2</span>))
+
+        <span class="comment"># 更新能量窗口</span>
+        <span class="builtin">self</span>.energy_window.append(energy)
+        <span class="keyword">if</span> <span class="builtin">len</span>(<span class="builtin">self</span>.energy_window) &gt; <span class="builtin">self</span>.energy_window_size:
+            <span class="builtin">self</span>.energy_window.pop(<span class="number">0</span>)
+
+        <span class="comment"># 使用滑动窗口平均能量进行更稳定的检测</span>
+        avg_energy = np.mean(<span class="builtin">self</span>.energy_window) <span class="keyword">if</span> <span class="builtin">self</span>.energy_window <span class="keyword">else</span> energy
+
+        <span class="comment"># 省略后续语音检测处理逻辑...</span>
+
+        <span class="keyword">return</span> <span class="boolean">False</span></pre>
+    </div>
+    <h3>
+     主函数
+    </h3>
+    <div class="code-block">
+     <div class="language-label">
+      Python
+     </div>
+     <pre>
+<span class="keyword">def</span> <span class="function">main</span>():
+    <span class="comment"># 创建日志文件夹</span>
+    os.makedirs(INPUT_LOG_FOLDER, exist_ok=<span class="boolean">True</span>)
+    os.makedirs(OUTPUT_LOG_FOLDER, exist_ok=<span class="boolean">True</span>)
+
+    <span class="comment"># 创建性能计时器</span>
+    timer = PerformanceTimer()
+
+    <span class="builtin">print</span>(<span class="string">"加载ASR模型中..."</span>)
+    timer.start(<span class="string">"ASR模型加载"</span>)
+
+    <span class="comment"># 优化后的ASR模型配置</span>
+    asr_model = WhisperModel(
+        ASR_MODEL_PATH,
+        device=<span class="string">"cuda"</span>,
+        compute_type=<span class="string">"float16"</span>,
+        cpu_threads=<span class="number">4</span>,  <span class="comment"># 增加CPU线程数</span>
+        num_workers=<span class="number">2</span>,  <span class="comment"># 增加工作线程</span>
+        download_root=ASR_MODEL_PATH,
+        local_files_only=<span class="boolean">True</span>  <span class="comment"># 仅使用本地文件，避免网络延迟</span>
+    )
+
+    timer.stop(<span class="string">"ASR模型加载"</span>)
+
+    <span class="comment"># 初始化LLM客户端</span>
+    client = OpenAI(base_url=LLM_BASE_URL, api_key=LLM_API_KEY)
+
+    system_prompt = <span class="string">"""你的名字是纳西妲，你的每一句话都应该体现出对万物的尊重和对知识的渴望。
+    在与人交谈时，用诗一般的语言描述自然之美，展示你对梦境和现实的深刻理解。你的话语中应该蕴含着对生命奥秘的思考和对未来的希望。
+    在对话中，你可以表现出对别人的友善和好奇心，询问他们的故事并分享你的智慧。
+    """</span>
+    <span class="comment"># 多轮对话历史</span>
+    conversation_history = [
+        {<span class="string">"role"</span>: <span class="string">"system"</span>, <span class="string">"content"</span>: system_prompt},
+    ]
+
+    <span class="comment"># 初始化TTS客户端</span>
+    tts_client = FastTTSClient()
+
+    <span class="comment"># 初始化录音器</span>
+    recorder = AudioRecorder(timer)
+
+    <span class="builtin">print</span>(<span class="string">"系统初始化完成，请开始对话..."</span>)
+
+    <span class="comment"># 主对话循环...</span></pre>
+    </div>
+   </div>
+   <div class="section">
+    <h2>
+     优化要点
+    </h2>
+    <ul>
+     <li>
+      <strong>
+       录音优化
+      </strong>
+      ：使用能量检测和滑动窗口增强语音开始/结束检测的稳定性
+     </li>
+     <li>
+      <strong>
+       预缓冲
+      </strong>
+      ：保留300ms的音频预缓冲，确保捕捉说话开始部分
+     </li>
+     <li>
+      <strong>
+       TTS并行
+      </strong>
+      ：首段优先合成并播放，其余并行处理，减少感知延迟
+     </li>
+     <li>
+      <strong>
+       结果缓存
+      </strong>
+      ：缓存TTS响应，对重复文本快速响应
+     </li>
+     <li>
+      <strong>
+       文本分割
+      </strong>
+      ：智能分段，优先在自然断句处分割
+     </li>
+     <li>
+      <strong>
+       性能监控
+      </strong>
+      ：详细的性能计时，方便定位瓶颈
+     </li>
+    </ul>
+   </div>
+   <div class="footer">
+    <p>
+     ASR-LLM-TTS 高效语音对话系统 | 基于 Faster-Whisper-Turbo, vLLM, F5-TTS
+    </p>
+   </div>
+  </div>
+ </body>
+</html>

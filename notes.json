@@ -1,0 +1,82 @@
+[
+  {
+    "file": "./sub_htmls/wsl2_vllm_localinter.html",
+    "title": "WSL2 vLLM serve 局域网访问配置",
+    "description": "局域网内设备调用vllm，适配树莓派等设备",
+    "date": "2025-04-12",
+    "image": "./images/bronya_mp.jpg",
+    "key_words": ["LLM", "vLLM", "WSL2", "局域网"]
+  },
+  {
+    "file": "./sub_htmls/ASR_LLM_TTS.html",
+    "title": "ASR_LLM_TTS",
+    "description": "ASR_LLM_TTS实现角色扮演",
+    "date": "2024-09-22",
+    "image": "./images/bronya_mp.jpg",
+    "key_words": ["LLM角色扮演","LLM", "TTS", "ASR"]
+  },
+  {
+    "file": "./sub_htmls/smart_note_system.html",
+    "title": "智能笔记网站生成系统",
+    "description": "结合 LLM + GitHub Pages + Python 实现智能化静态笔记站搭建方案。",
+    "date": "2025-04-14",
+    "image": "./images/bronya_mp.jpg",
+    "key_words": ["LLM", "自动化", "Python", "部署"]
+  },
+    {
+    "file": "./sub_htmls/Qwen_Deepseek_math_agent.html",
+    "title": "Qwen-Deepseek构建数学agent",
+    "description": "通过Qwen2-math和Deepseek v2构建强大的数学agent",
+    "date": "2024-09-22",
+    "image": "./images/bronya_mp.jpg",
+    "key_words": ["LLM", "Agent", "Math", "Markdown"]
+  },
+   {
+    "file": "./sub_htmls/PB_file_encode.html",
+    "title": "PB格式文件解码",
+    "description": "没有proto文件的时候解码pb文件",
+    "date": "2024-12-10",
+    "image": "./images/bronya_mp.jpg",
+    "key_words": ["计算化学", "文件读取", "Open Reaction Database"]
+  },
+  {
+    "file": "./sub_htmls/ollama_fc_para.html",
+    "title": "Ollama 工具函数调用测试记录",
+    "description": "只是记录",
+    "date": "2024-12-02",
+    "image": "./images/bronya_mp.jpg",
+    "key_words": ["LLM", "Ollama", "functional calling"]
+  },
+    {
+    "file": "./sub_htmls/Raspberry_Pi_bluetooth.html",
+    "title": "树莓派连接蓝牙耳机",
+    "description": "树莓派4B连接蓝牙耳机配置",
+    "date": "2025-4-12",
+    "image": "./images/bronya_mp.jpg",
+    "key_words": ["Raspberry Pi", "Bluetooth", "树莓派4B"]
+  },
+      {
+    "file": "./sub_htmls/树莓派有线网配置.html",
+    "title": "树莓派有线网配置",
+    "description": "树莓派4B连上SJTU宿舍的静态IP有线网",
+    "date": "2025-4-22",
+    "image": "./images/bronya_mp.jpg",
+    "key_words": ["Raspberry Pi", "network", "树莓派4B"]
+  },
+      {
+    "file": "./sub_htmls/ASR_LLM_TTS_v2.html",
+    "title": "ASR_LLM_TTS_理论高效版",
+    "description": "用了vLLM来部署LLM、F5-TTS的TensorRT版实现TTS，且用了截断的方式改善首字延迟，但目前效果不是很理想。",
+    "date": "2025-4-28",
+    "image": "./images/bronya_mp.jpg",
+    "key_words": ["ASR", "LLM", "TTS", "LLM边缘AI应用"]
+  },
+  {
+    "file": "./sub_htmls/Orangepi_zero3_三段式网络配置.html",
+    "title": "香橙派配置优先级的有线网、家庭WIFI和手机热点",
+    "description": "方便复杂开发环境下仍然能让香橙派zero3连接网络并与PC建立SSH连接",
+    "date": "2025-8-23",
+    "image": "./images/arknights_mizuki_0.jpg",
+    "key_words": ["嵌入式", "网络", "香橙派", "香橙派zero3"]
+  }
+]
