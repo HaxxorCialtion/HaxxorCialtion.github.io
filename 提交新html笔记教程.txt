@@ -24,3 +24,5 @@ git push origin gh-pages
 # 取消代理
 git config --global --unset http.proxy
 git config --global --unset https.proxy
+# 将代理设置得和VPN一样
+git config --global http.proxy http://127.0.0.1:7897
