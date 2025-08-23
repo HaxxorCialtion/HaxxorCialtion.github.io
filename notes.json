@@ -78,5 +78,13 @@
     "date": "2025-8-23",
     "image": "./images/arknights_mizuki_0.jpg",
     "key_words": ["嵌入式", "网络", "香橙派", "香橙派zero3"]
+  },
+    {
+    "file": "./sub_htmls/局域网内香橙派完全本地ASR-LLM-TTS_Realtime架构.html",
+    "title": "局域网内香橙派完全本地ASR-LLM-TTS_Realtime架构",
+    "description": "更加优秀的完全本地局域网通信的ASR-LLM-TTS_Realtime项目",
+    "date": "2025-8-24",
+    "image": "./images/bronya_1.jpg",
+    "key_words": ["LLM", "边缘AI", "Real-time", "ASR-LLM-TTS", "OrangePi"]
   }
 ]
