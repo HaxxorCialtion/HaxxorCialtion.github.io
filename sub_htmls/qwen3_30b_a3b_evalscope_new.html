@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Qwen3-30B-A3B-Instruct Benchmark Evaluation Report
+  </title>
+  <style>
+   body {
+            font-family: 'Times New Roman', Times, serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            color: #333;
+            background-color: #fff;
+            font-size: 16px;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #000;
+        }
+        
+        .meta-info {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 16px;
+            color: #666;
+        }
+        
+        .abstract {
+            background-color: #f9f9f9;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 4px solid #2c3e50;
+            font-style: italic;
+        }
+        
+        h2 {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 5px;
+        }
+        
+        h3 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #34495e;
+        }
+        
+        h4 {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 25px;
+            margin-bottom: 12px;
+            color: #34495e;
+        }
+        
+        /* Academic three-line table styling */
+        .academic-table {
+            width: 100%;
+            margin: 20px 0;
+            font-size: 14px;
+            border-collapse: collapse;
+        }
+        
+        .academic-table thead tr:first-child th {
+            border-top: 1.5px solid #000;
+            border-bottom: 1px solid #000;
+            padding: 8px 6px;
+            text-align: center;
+            font-weight: bold;
+            background-color: transparent;
+        }
+        
+        .academic-table tbody tr:last-child td {
+            border-bottom: 1.5px solid #000;
+        }
+        
+        .academic-table td {
+            padding: 6px 6px;
+            text-align: center;
+            border: none;
+        }
+        
+        .academic-table td:first-child {
+            text-align: left;
+            font-weight: 500;
+        }
+        
+        .academic-table .score-col {
+            font-weight: bold;
+        }
+        
+        /* Configuration table specific styling */
+        .config-table {
+            width: 100%;
+            margin: 15px 0;
+            font-size: 14px;
+            border-collapse: collapse;
+        }
+        
+        .config-table thead th {
+            border-top: 1.5px solid #000;
+            border-bottom: 1px solid #000;
+            padding: 6px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        .config-table tbody tr:last-child td {
+            border-bottom: 1.5px solid #000;
+        }
+        
+        .config-table td {
+            padding: 4px 6px;
+            text-align: left;
+            border: none;
+        }
+        
+        .code-block {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        
+        .note {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 12px;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #856404;
+        }
+        
+        .section-divider {
+            height: 2px;
+            background-color: #ecf0f1;
+            margin: 40px 0;
+            border: none;
+        }
+        
+        .appendix {
+            margin-top: 50px;
+            font-size: 14px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #bdc3c7;
+            font-size: 13px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 10px;
+                font-size: 14px;
+            }
+            .academic-table, .config-table {
+                font-size: 12px;
+            }
+        }
+    
+img.cover {
+    width: 100%;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+.tag {
+    background: #007acc;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    margin-right: 0.3rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+    display: inline-block;
+    margin-bottom: 0.3rem;
+    transition: background-color 0.3s ease;
+}
+.tag:hover {
+    background: #005999;
+}
+.tags {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+.note-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+.note-card:hover {
+    transform: translateY(-5px);
+}
+.note-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+.note-card .date {
+    color: #666;
+    font-size: 0.9em;
+}
+.note-card p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+.note-card a {
+    color: #007acc;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+.note-card a:hover {
+    color: #005999;
+}
+.tag-line {
+    color: #888;        /* 灰色 */
+    font-size: 0.9em;   /* 稍小一点的字体 */
+}
+  </style>
+ </head>
+ <body>
+  <img alt="封面图" class="cover" src="../images/arknights_mizuki_0.jpg"/>
+  <h1>
+   benchmark test via EvalScope
+  </h1>
+  <p>
+   <strong>
+    日期：
+   </strong>
+   2025-8-24
+  </p>
+  <div class="tags">
+   <span class="tag">
+    LLM
+   </span>
+   <span class="tag">
+    Benchmark
+   </span>
+   <span class="tag">
+    Qwen3
+   </span>
+   <span class="tag">
+    Beginner
+   </span>
+   <span class="tag">
+    EvalScope
+   </span>
+  </div>
+  <div class="meta-info">
+   <strong>
+    Evaluation Date:
+   </strong>
+   2025-09-25
+   <br/>
+   <strong>
+    Framework:
+   </strong>
+   OpenCompass with EvalScope
+   <br/>
+   <strong>
+    Mode:
+   </strong>
+   Offline Evaluation
+  </div>
+  <div class="abstract">
+   <strong>
+    Abstract:
+   </strong>
+   This study presents a comprehensive benchmark evaluation of Qwen3-30B-A3B-Instruct model with AWQ 4-bit quantization across 14 standard datasets, achieving an average score of 0.7816 through offline evaluation methodology.
+  </div>
+  <hr class="section-divider"/>
+  <h2>
+   1. System Configuration and Parameters
+  </h2>
+  <h3>
+   1.1 Hardware Environment
+  </h3>
+  <table class="config-table">
+   <thead>
+    <tr>
+     <th>
+      Component
+     </th>
+     <th>
+      Specification
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      GPU
+     </td>
+     <td>
+      NVIDIA H100 80GB HBM3
+     </td>
+    </tr>
+    <tr>
+     <td>
+      CUDA Driver
+     </td>
+     <td>
+      570.124.06
+     </td>
+    </tr>
+    <tr>
+     <td>
+      CUDA Runtime
+     </td>
+     <td>
+      12.9
+     </td>
+    </tr>
+    <tr>
+     <td>
+      Python
+     </td>
+     <td>
+      3.10.18
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <h3>
+   1.2 Model Configuration
+  </h3>
+  <table class="config-table">
+   <thead>
+    <tr>
+     <th>
+      Parameter
+     </th>
+     <th>
+      Value
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      Model
+     </td>
+     <td>
+      Qwen3-30B-A3B-Instruct (AWQ 4-bit quantized)
+     </td>
+    </tr>
+    <tr>
+     <td>
+      Model Path
+     </td>
+     <td>
+      &lt;MODEL_PATH&gt;/Qwen3-30B-A3B-Instruct-2507-AWQ
+     </td>
+    </tr>
+    <tr>
+     <td>
+      Served Name
+     </td>
+     <td>
+      qwen3-30b-instruct
+     </td>
+    </tr>
+    <tr>
+     <td>
+      Context Length
+     </td>
+     <td>
+      16,192 tokens
+     </td>
+    </tr>
+    <tr>
+     <td>
+      Quantization
+     </td>
+     <td>
+      AWQ (4-bit)
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <h3>
+   1.3 Deployment Parameters
+  </h3>
+  <div class="code-block">
+   CUDA_VISIBLE_DEVICES=1 python -m vllm.entrypoints.openai.api_server \
+    --model &lt;MODEL_PATH&gt;/Qwen3-30B-A3B-Instruct-2507-AWQ \
+    --host 0.0.0.0 \
+    --port 8001 \
+    --tensor-parallel-size 1 \
+    --gpu-memory-utilization 0.92 \
+    --max-model-len 16192 \
+    --max-num-seqs 64 \
+    --max-num-batched-tokens 105536 \
+    --swap-space 64 \
+    --served-model-name qwen3-30b-instruct \
+    --trust-remote-code \
+    --quantization awq \
+    --disable-log-stats \
+    --enable-auto-tool-choice \
+    --tool-call-parser qwen3_coder
+  </div>
+  <h3>
+   1.4 Evaluation Configuration
+  </h3>
+  <table class="config-table">
+   <thead>
+    <tr>
+     <th>
+      Parameter
+     </th>
+     <th>
+      Value
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      API Endpoint
+     </td>
+     <td>
+      http://127.0.0.1:8001/v1/chat/completions
+     </td>
+    </tr>
+    <tr>
+     <td>
+      Temperature
+     </td>
+     <td>
+      0.1
+     </td>
+    </tr>
+    <tr>
+     <td>
+      Max Tokens
+     </td>
+     <td>
+      4,096
+     </td>
+    </tr>
+    <tr>
+     <td>
+      Top-p
+     </td>
+     <td>
+      0.9
+     </td>
+    </tr>
+    <tr>
+     <td>
+      Batch Sizes
+     </td>
+     <td>
+      8-32 (task-dependent)
+     </td>
+    </tr>
+    <tr>
+     <td>
+      Dataset Source
+     </td>
+     <td>
+      EvalScope default configuration downloads
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <hr class="section-divider"/>
+  <h2>
+   2. Benchmark Results
+  </h2>
+  <h3>
+   2.1 Dataset Coverage
+  </h3>
+  <div class="note">
+   <strong>
+    Note:
+   </strong>
+   Dataset availability depends on EvalScope's default configuration downloads. Some datasets may be incomplete or unavailable in offline mode.
+  </div>
+  <table class="config-table">
+   <thead>
+    <tr>
+     <th>
+      Metric
+     </th>
+     <th>
+      Value
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      Total Evaluated
+     </td>
+     <td>
+      14 datasets
+     </td>
+    </tr>
+    <tr>
+     <td>
+      Evaluation Time
+     </td>
+     <td>
+      386.9 minutes
+     </td>
+    </tr>
+    <tr>
+     <td>
+      Average Score
+     </td>
+     <td>
+      0.7816
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <h3>
+   2.2 Detailed Results by Category
+  </h3>
+  <h4>
+   Reasoning and Logic
+  </h4>
+  <table class="academic-table">
+   <thead>
+    <tr>
+     <th>
+      Dataset
+     </th>
+     <th>
+      Description
+     </th>
+     <th>
+      Score
+     </th>
+     <th>
+      Subsets
+     </th>
+     <th>
+      Eval Time
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      ARC
+     </td>
+     <td>
+      AI2 Reasoning Challenge
+     </td>
+     <td class="score-col">
+      0.9369
+     </td>
+     <td>
+      Easy: 0.9407, Challenge: 0.9292
+     </td>
+     <td>
+      0.4min
+     </td>
+    </tr>
+    <tr>
+     <td>
+      HellaSwag
+     </td>
+     <td>
+      Commonsense NLI
+     </td>
+     <td class="score-col">
+      0.8633
+     </td>
+     <td>
+      -
+     </td>
+     <td>
+      1.4min
+     </td>
+    </tr>
+    <tr>
+     <td>
+      WinoGrande
+     </td>
+     <td>
+      Coreference Resolution
+     </td>
+     <td class="score-col">
+      0.7174
+     </td>
+     <td>
+      -
+     </td>
+     <td>
+      0.1min
+     </td>
+    </tr>
+    <tr>
+     <td>
+      GSM8K
+     </td>
+     <td>
+      Grade School Math
+     </td>
+     <td class="score-col">
+      0.9447
+     </td>
+     <td>
+      -
+     </td>
+     <td>
+      2.8min
+     </td>
+    </tr>
+    <tr>
+     <td>
+      DROP
+     </td>
+     <td>
+      Reading Comprehension
+     </td>
+     <td class="score-col">
+      0.8187
+     </td>
+     <td>
+      -
+     </td>
+     <td>
+      26.3min
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <h4>
+   Knowledge and Understanding
+  </h4>
+  <table class="academic-table">
+   <thead>
+    <tr>
+     <th>
+      Dataset
+     </th>
+     <th>
+      Description
+     </th>
+     <th>
+      Score
+     </th>
+     <th>
+      Subsets
+     </th>
+     <th>
+      Eval Time
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      MMLU
+     </td>
+     <td>
+      Massive Multitask Language Understanding
+     </td>
+     <td class="score-col">
+      0.8506
+     </td>
+     <td>
+      57 subjects
+     </td>
+     <td>
+      75.2min
+     </td>
+    </tr>
+    <tr>
+     <td>
+      MMLU-Pro
+     </td>
+     <td>
+      Enhanced MMLU
+     </td>
+     <td class="score-col">
+      0.7266
+     </td>
+     <td>
+      14 domains
+     </td>
+     <td>
+      167.6min
+     </td>
+    </tr>
+    <tr>
+     <td>
+      TruthfulQA
+     </td>
+     <td>
+      Truthfulness in QA
+     </td>
+     <td class="score-col">
+      0.7491
+     </td>
+     <td>
+      Multiple choice
+     </td>
+     <td>
+      0.1min
+     </td>
+    </tr>
+    <tr>
+     <td>
+      GPQA-Diamond
+     </td>
+     <td>
+      Graduate-level Science QA
+     </td>
+     <td class="score-col">
+      0.5101
+     </td>
+     <td>
+      -
+     </td>
+     <td>
+      3.0min
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <h4>
+   Code Generation
+  </h4>
+  <table class="academic-table">
+   <thead>
+    <tr>
+     <th>
+      Dataset
+     </th>
+     <th>
+      Description
+     </th>
+     <th>
+      Score
+     </th>
+     <th>
+      Subsets
+     </th>
+     <th>
+      Eval Time
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      HumanEval
+     </td>
+     <td>
+      Python Code Generation
+     </td>
+     <td class="score-col">
+      0.9024
+     </td>
+     <td>
+      -
+     </td>
+     <td>
+      0.5min
+     </td>
+    </tr>
+    <tr>
+     <td>
+      ToolBench
+     </td>
+     <td>
+      Tool Usage Evaluation
+     </td>
+     <td class="score-col">
+      0.3996
+     </td>
+     <td>
+      In-domain: 0.0563, Out-domain: 0.0591
+     </td>
+     <td>
+      7.1min
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <h4>
+   Chinese Language
+  </h4>
+  <table class="academic-table">
+   <thead>
+    <tr>
+     <th>
+      Dataset
+     </th>
+     <th>
+      Description
+     </th>
+     <th>
+      Score
+     </th>
+     <th>
+      Subsets
+     </th>
+     <th>
+      Eval Time
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      C-MMLU
+     </td>
+     <td>
+      Chinese MMLU
+     </td>
+     <td class="score-col">
+      0.8382
+     </td>
+     <td>
+      67 subjects
+     </td>
+     <td>
+      76.8min
+     </td>
+    </tr>
+    <tr>
+     <td>
+      C-Eval
+     </td>
+     <td>
+      Chinese Evaluation Suite
+     </td>
+     <td class="score-col">
+      0.8232
+     </td>
+     <td>
+      52 subjects
+     </td>
+     <td>
+      23.0min
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <h4>
+   Instruction Following
+  </h4>
+  <table class="academic-table">
+   <thead>
+    <tr>
+     <th>
+      Dataset
+     </th>
+     <th>
+      Description
+     </th>
+     <th>
+      Score
+     </th>
+     <th>
+      Subsets
+     </th>
+     <th>
+      Eval Time
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      IFEval
+     </td>
+     <td>
+      Instruction Following
+     </td>
+     <td class="score-col">
+      0.8616
+     </td>
+     <td>
+      -
+     </td>
+     <td>
+      2.5min
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <h3>
+   2.3 Summary Statistics
+  </h3>
+  <table class="academic-table">
+   <thead>
+    <tr>
+     <th>
+      Category
+     </th>
+     <th>
+      Datasets
+     </th>
+     <th>
+      Mean Score
+     </th>
+     <th>
+      Std Dev
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>
+      Reasoning
+     </td>
+     <td>
+      5
+     </td>
+     <td class="score-col">
+      0.8562
+     </td>
+     <td>
+      0.0861
+     </td>
+    </tr>
+    <tr>
+     <td>
+      Knowledge
+     </td>
+     <td>
+      4
+     </td>
+     <td class="score-col">
+      0.7091
+     </td>
+     <td>
+      0.1396
+     </td>
+    </tr>
+    <tr>
+     <td>
+      Code
+     </td>
+     <td>
+      2
+     </td>
+     <td class="score-col">
+      0.6510
+     </td>
+     <td>
+      0.3514
+     </td>
+    </tr>
+    <tr>
+     <td>
+      Chinese
+     </td>
+     <td>
+      2
+     </td>
+     <td class="score-col">
+      0.8307
+     </td>
+     <td>
+      0.0106
+     </td>
+    </tr>
+    <tr>
+     <td>
+      Instruction
+     </td>
+     <td>
+      1
+     </td>
+     <td class="score-col">
+      0.8616
+     </td>
+     <td>
+      -
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <hr class="section-divider"/>
+  <h2>
+   3. Evaluation Framework Commands
+  </h2>
+  <h3>
+   3.1 Dataset Preparation
+  </h3>
+  <p>
+   Datasets are automatically downloaded via EvalScope's default configuration:
+  </p>
+  <div class="code-block">
+   # Dataset availability determined by EvalScope cache
+OFFLINE_DATASETS = {
+    'arc': 'Multi-choice reasoning with standard answers',
+    'hellaswag': 'Commonsense reasoning with standard answers', 
+    'mmlu': 'Multi-choice questions with standard answers',
+    'gsm8k': 'Math problems with computable answers',
+    'humaneval': 'Code generation with executable tests',
+    # ... additional datasets as available
+}
+  </div>
+  <h3>
+   3.2 Evaluation Execution
+  </h3>
+  <div class="code-block">
+   # Basic evaluation configuration
+config = {
+    'model': 'qwen3-30b-instruct',
+    'api_url': 'http://127.0.0.1:8001/v1/chat/completions',
+    'eval_type': 'openai_api',
+    'datasets': [dataset_name],
+    'generation_config': {
+        'temperature': 0.1,
+        'max_tokens': 4096,
+        'top_p': 0.9,
+    },
+    'work_dir': f'outputs/qwen3-30b-instruct/{dataset_name}'
+}
+
+# Execute evaluation
+run_task(task_cfg=config)
+  </div>
+  <h3>
+   3.3 Result Aggregation
+  </h3>
+  <p>
+   Results are collected from the standard OpenCompass output structure:
+  </p>
+  <div class="code-block">
+   outputs/
+└── qwen3-30b-instruct/
+    └── {dataset}/
+        └── {timestamp}/
+            └── reports/
+                └── qwen3-30b-instruct/
+                    └── {dataset}.json
+  </div>
+  <p>
+   Each JSON contains:
+  </p>
+  <ul>
+   <li>
+    <code>
+     score
+    </code>
+    : Overall performance metric
+   </li>
+   <li>
+    <code>
+     metrics
+    </code>
+    : Detailed breakdown including subsets
+   </li>
+   <li>
+    <code>
+     dataset_description
+    </code>
+    : Task description
+   </li>
+   <li>
+    <code>
+     num_samples
+    </code>
+    : Number of evaluated samples
+   </li>
+  </ul>
+  <h3>
+   3.4 Offline Mode Enforcement
+  </h3>
+  <div class="code-block">
+   # Environment variables for strict offline mode
+offline_env = {
+    'HF_DATASETS_OFFLINE': '1',
+    'HF_HUB_OFFLINE': '1', 
+    'TRANSFORMERS_OFFLINE': '1',
+    'MODELSCOPE_OFFLINE': '1',
+}
+  </div>
+  <div class="note">
+   <strong>
+    Note:
+   </strong>
+   Some datasets requiring online judge models (e.g., subjective evaluation tasks) are automatically skipped in offline mode. The evaluation framework prioritizes datasets with deterministic scoring mechanisms.
+  </div>
+  <hr class="section-divider"/>
+  <div class="appendix">
+   <h2>
+    Appendix
+   </h2>
+   <h3>
+    A.1 Reproduction Information
+   </h3>
+   <div class="code-block">
+    # Environment setup
+Python 3.10.18
+CUDA 12.9, Driver 570.124.06
+GPU: NVIDIA H100 80GB HBM3
+
+# Model serving
+vLLM with AWQ quantization
+API: OpenAI-compatible endpoint
+Concurrent sequences: 64
+Batch tokens: 105,536
+   </div>
+   <h3>
+    A.2 Data Availability
+   </h3>
+   <p>
+    Dataset completeness subject to:
+   </p>
+   <ul>
+    <li>
+     EvalScope default download configuration
+    </li>
+    <li>
+     Network connectivity during setup
+    </li>
+    <li>
+     Dataset licensing and availability
+    </li>
+    <li>
+     Offline evaluation compatibility
+    </li>
+   </ul>
+  </div>
+  <div class="footer">
+   Report generated automatically from OpenCompass evaluation outputs.
+  </div>
+ </body>
+</html>

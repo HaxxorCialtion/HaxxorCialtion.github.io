@@ -86,5 +86,13 @@
     "date": "2025-8-24",
     "image": "./images/bronya_1.jpg",
     "key_words": ["LLM", "边缘AI", "Real-time", "ASR-LLM-TTS", "OrangePi"]
+  },
+  {
+    "file": "./sub_htmls/qwen3_30b_a3b_evalscope_new.html",
+    "title": "benchmark test via EvalScope",
+    "description": "Beginner with EvalScope, test Qwen3.0-30B-A3B",
+    "date": "2025-8-24",
+    "image": "./images/arknights_mizuki_0.jpg",
+    "key_words": ["LLM", "Benchmark", "Qwen3", "Beginner", "EvalScope"]
   }
 ]
