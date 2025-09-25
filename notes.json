@@ -88,7 +88,7 @@
     "key_words": ["LLM", "边缘AI", "Real-time", "ASR-LLM-TTS", "OrangePi"]
   },
   {
-    "file": "./sub_htmls/qwen3_30b_a3b_evalscope_new.html",
+    "file": "./sub_htmls/benchmark_test_via_EvalScope_v0.html",
     "title": "benchmark test via EvalScope",
     "description": "Beginner with EvalScope, test Qwen3.0-30B-A3B",
     "date": "2025-8-24",
