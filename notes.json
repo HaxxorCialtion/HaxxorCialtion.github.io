@@ -91,7 +91,7 @@
     "file": "./sub_htmls/benchmark_test_via_EvalScope_v0.html",
     "title": "benchmark test via EvalScope",
     "description": "Beginner with EvalScope, test Qwen3.0-30B-A3B",
-    "date": "2025-8-24",
+    "date": "2025-9-26",
     "image": "./images/arknights_mizuki_0.jpg",
     "key_words": ["LLM", "Benchmark", "Qwen3", "Beginner", "EvalScope"]
   }
