@@ -94,5 +94,13 @@
     "date": "2025-9-26",
     "image": "./images/arknights_mizuki_0.jpg",
     "key_words": ["LLM", "Benchmark", "Qwen3", "Beginner", "EvalScope"]
+  },
+    {
+    "file": "./sub_htmls/paper_notes_base.html",
+    "title": "Research Notes",
+    "description": "AI & Machine Learning | Memory Systems & Continual Learning",
+    "date": "2025-9-26",
+    "image": "./images/arknights_mizuki_0.jpg",
+    "key_words": ["LLM", "Memory Systems", "Continual Learning"]
   }
 ]
