@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MemLLM: Finetuning LLMs to Use Explicit Read-Write Memory - Cialtion's Tech Blog</title>
+    <meta name="description" content="构造RAG数据库结构，微调LLM适配以提高benchmark score">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-color: #2c3e50; --secondary-color: #3498db; --accent-color: #e74c3c;
+            --background-color: #f8fafc; --card-background: #ffffff; --text-primary: #2d3748;
+            --text-secondary: #718096; --border-color: #e2e8f0; --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1); --border-radius: 12px; --transition: all 0.3s ease;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: var(--background-color); color: var(--text-primary); line-height: 1.7; }
+        .navbar { background: var(--card-background); box-shadow: var(--shadow-light); padding: 1rem 0; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border-color); }
+        .nav-container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .nav-brand { display: flex; align-items: center; text-decoration: none; color: var(--primary-color); font-weight: 600; font-size: 1.2rem; }
+        .nav-brand i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-link { color: var(--text-secondary); text-decoration: none; transition: var(--transition); padding: 0.5rem 1rem; border-radius: 8px; }
+        .nav-link:hover { color: var(--secondary-color); background-color: rgba(52, 152, 219, 0.1); }
+        .main-container { display: flex; max-width: 1400px; margin: 0 auto; gap: 2rem; padding: 2rem; }
+        .toc-sidebar { width: 250px; flex-shrink: 0; position: sticky; top: 6rem; height: fit-content; max-height: calc(100vh - 8rem); overflow-y: auto; }
+        .toc-container { background: var(--card-background); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1.5rem; }
+        .toc-title { font-size: 1.1rem; font-weight: 600; color: var(--primary-color); margin-bottom: 1rem; display: flex; align-items: center; }
+        .toc-title i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .toc ul { list-style: none; padding-left: 0; }
+        .toc ul ul { padding-left: 1rem; margin-top: 0.3rem; }
+        .toc li { margin: 0.3rem 0; }
+        .toc a { color: var(--text-secondary); text-decoration: none; transition: var(--transition); display: block; padding: 0.3rem 0.5rem; border-radius: 4px; font-size: 0.9rem; line-height: 1.4; }
+        .toc a:hover, .toc a.active { color: var(--secondary-color); background-color: rgba(52, 152, 219, 0.1); }
+        .article-main { flex: 1; min-width: 0; }
+        .article-header { background: var(--card-background); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; box-shadow: var(--shadow-light); border: 1px solid var(--border-color); position: relative; overflow: hidden; }
+        .article-cover { width: 100%; height: 350px; object-fit: cover; border-radius: var(--border-radius); margin-bottom: 1.5rem; box-shadow: var(--shadow-medium); transition: var(--transition); }
+        .article-cover:hover { transform: scale(1.02); }
+        .article-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, var(--secondary-color), var(--accent-color)); }
+        .article-title { font-size: 2.5rem; font-weight: 700; color: var(--primary-color); margin-bottom: 1rem; line-height: 1.3; }
+        .article-meta { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.95rem; }
+        .meta-item { display: flex; align-items: center; background: var(--background-color); padding: 0.5rem 1rem; border-radius: 20px; }
+        .meta-item i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .article-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+        .tag { background: linear-gradient(135deg, var(--secondary-color), #2980b9); color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 500; box-shadow: var(--shadow-light); }
+        .article-description { color: var(--text-secondary); font-size: 1.1rem; line-height: 1.6; font-style: italic; background: var(--background-color); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--secondary-color); }
+        .article-content { background: var(--card-background); border-radius: var(--border-radius); padding: 2.5rem; box-shadow: var(--shadow-light); border: 1px solid var(--border-color); }
+        .article-content h1, .article-content h2, .article-content h3, .article-content h4, .article-content h5, .article-content h6 { color: var(--primary-color); margin: 2rem 0 1rem 0; font-weight: 600; line-height: 1.4; }
+        .article-content h1 { font-size: 2.2rem; border-bottom: 3px solid var(--secondary-color); padding-bottom: 0.5rem; }
+        .article-content h2 { font-size: 1.8rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.3rem; }
+        .article-content p { margin: 1rem 0; line-height: 1.8; }
+        .article-content img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: var(--shadow-light); margin: 1.5rem 0; }
+        .article-content blockquote { border-left: 4px solid var(--secondary-color); margin: 1.5rem 0; padding: 1rem 1.5rem; background: var(--background-color); border-radius: 0 8px 8px 0; font-style: italic; }
+        .article-content pre { background: #f6f8fa; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; overflow-x: auto; margin: 1.5rem 0; }
+        .article-content code { background: #f6f8fa; border: 1px solid var(--border-color); border-radius: 4px; padding: 0.2rem 0.4rem; font-family: 'Monaco', 'Consolas', monospace; font-size: 0.9em; }
+        .article-content pre code { background: none; border: none; padding: 0; }
+        .article-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-light); }
+        .article-content th, .article-content td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .article-content th { background: var(--background-color); font-weight: 600; color: var(--primary-color); }
+        .contact-card { background: linear-gradient(135deg, var(--primary-color), #34495e); color: white; border-radius: var(--border-radius); padding: 2rem; margin: 2rem 0; text-align: center; }
+        .contact-card h3 { margin-bottom: 1rem; color: white; }
+        .contact-links { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+        .contact-link { display: inline-flex; align-items: center; padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.1); border-radius: 25px; color: white; text-decoration: none; transition: var(--transition); }
+        .contact-link:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-1px); }
+        .contact-link i { margin-right: 0.5rem; }
+        .back-button { position: fixed; bottom: 2rem; right: 2rem; background: var(--secondary-color); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-medium); transition: var(--transition); text-decoration: none; }
+        .back-button:hover { background: #2980b9; transform: translateY(-2px); }
+        @media (max-width: 1024px) { .main-container { flex-direction: column; padding: 1rem; } .toc-sidebar { width: 100%; position: static; order: 2; margin-top: 2rem; } .article-main { order: 1; } }
+        @media (max-width: 768px) { .nav-container { padding: 0 1rem; flex-direction: column; gap: 1rem; } .article-header, .article-content { padding: 1.5rem; } .article-title { font-size: 2rem; } .back-button { bottom: 1rem; right: 1rem; width: 50px; height: 50px; } .article-cover { height: 250px; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-brand">
+                <i class="fas fa-home"></i>Cialtion's Tech Blog
+            </a>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link"><i class="fas fa-arrow-left"></i>Back to Home</a>
+                <a href="mailto:cialtion737410@sjtu.edu.cn" class="nav-link"><i class="fas fa-envelope"></i>Contact Me</a>
+            </div>
+        </div>
+    </nav>
+    <div class="main-container">
+        <aside class="toc-sidebar"><div class="toc-container">
+            <div class="toc-title">
+                <i class="fas fa-list"></i>
+                Table of Contents
+            </div>
+            <div class="toc"><div class="toc"><span class="toctitle">Table of Contents</span><ul>
+<li><a href="#memllm-finetuning-llms-to-use-explicit-read-write-memory">MemLLM: Finetuning LLMs to Use Explicit Read-Write Memory</a><ul>
+<li><a href="#_1">核心观点</a></li>
+<li><a href="#_2">技术架构</a><ul>
+<li><a href="#_3">并非直接存储</a></li>
+<li><a href="#_4">知识库构建</a></li>
+</ul>
+</li>
+<li><a href="#_5">微调的核心作用</a></li>
+<li><a href="#_6">技术特点</a></li>
+<li><a href="#_7">应用场景</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+        </div></aside>
+        <main class="article-main">
+            <header class="article-header">
+                <img src="../images/bronya_mp.jpg" alt="MemLLM: Finetuning LLMs to Use Explicit Read-Write Memory" class="article-cover" onerror="this.style.display='none'">
+                <h1 class="article-title">MemLLM: Finetuning LLMs to Use Explicit Read-Write Memory</h1>
+                <div class="article-meta">
+                    <div class="meta-item"><i class="fas fa-calendar-alt"></i>Published: 2025-09-26</div>
+                    <div class="meta-item"><i class="fas fa-user"></i>Author: Cialtion</div>
+                </div>
+                <div class="article-tags"><span class="tag">LLM</span><span class="tag">Memory Systems</span><span class="tag">RAG增强</span><span class="tag">知识图谱</span><span class="tag">微调</span><span class="tag">三元组</span></div>
+                <div class="article-description">构造RAG数据库结构，微调LLM适配以提高benchmark score</div>
+            </header>
+            <article class="article-content"><h1 id="memllm-finetuning-llms-to-use-explicit-read-write-memory">MemLLM: Finetuning LLMs to Use Explicit Read-Write Memory</h1>
+<p><strong>日期：</strong> 2025-9-26<br />
+<strong>链接：</strong> <a href="https://openreview.net/forum?id=dghM7sOudh">OpenReview</a><br />
+<strong>标签：</strong> <code>LLM</code> <code>Memory Systems</code> <code>RAG增强</code> <code>知识图谱</code> <code>微调</code></p>
+<h2 id="_1">核心观点</h2>
+<p>构造RAG数据库结构，微调LLM适配以提高benchmark score</p>
+<h2 id="_2">技术架构</h2>
+<h3 id="_3">并非直接存储</h3>
+<p>不是参数化记忆，而是通过LLM微调提升与一个<strong>外部的、结构化的动态知识库</strong>交互的benchmark scores</p>
+<h3 id="_4">知识库构建</h3>
+<p>知识库通过<strong>三元组 (subject, relation, object)</strong> 的形式存储事实，并使用特殊标记符号（如 <code>MEM_WRITE</code> 和 <code>MEM_READ</code>）进行操作</p>
+<h2 id="_5">微调的核心作用</h2>
+<ul>
+<li>通过微调 <strong>Mistral-7B</strong>，让模型能够<strong>自发判断</strong>在生成某些关键信息之前，主动发起 <code>MEM_READ</code> 查询请求</li>
+<li>训练模型<strong>在关键节点生成有效查询的决策能力</strong>，以及从文本中提取关系并写入知识库的能力 (<code>MEM_WRITE</code>)</li>
+</ul>
+<h2 id="_6">技术特点</h2>
+<p>✅ <strong>优势：</strong>
+- 将外部知识库与LLM有机结合
+- 通过微调提升交互效率
+- 结构化知识存储</p>
+<p>⚠️ <strong>局限：</strong>
+- 需要微调特定模型
+- 知识库构建成本较高
+- 依赖特定的标记符号系统</p>
+<h2 id="_7">应用场景</h2>
+<ul>
+<li>需要频繁更新知识的问答系统</li>
+<li>企业知识库管理</li>
+<li>学术研究辅助工具</li>
+</ul></article>
+            <div class="contact-card">
+                <h3><i class="fas fa-heart"></i> Thanks for Reading</h3>
+                <p>If this article was helpful to you, feel free to connect with me!</p>
+                <div class="contact-links">
+                    <a href="https://github.com/HaxxorCialtion" class="contact-link" target="_blank"><i class="fab fa-github"></i>GitHub</a>
+                    <a href="mailto:cialtion737410@sjtu.edu.cn" class="contact-link"><i class="fas fa-envelope"></i>Email</a>
+                </div>
+            </div>
+        </main>
+    </div>
+    <a href="#" class="back-button" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script>
+        hljs.highlightAll();
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+            });
+        });
+        function highlightCurrentSection() {
+            const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+            const tocLinks = document.querySelectorAll('.toc a');
+            let current = '';
+            headings.forEach(heading => {
+                const rect = heading.getBoundingClientRect();
+                if (rect.top <= 100) { current = heading.id; }
+            });
+            tocLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) { link.classList.add('active'); }
+            });
+        }
+        window.addEventListener('scroll', highlightCurrentSection);
+        document.addEventListener('DOMContentLoaded', highlightCurrentSection);
+    </script>
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MemoryLLM: Towards Self-Updatable Large Language Models - Cialtion's Tech Blog</title>
+    <meta name="description" content="论文链接： https://github.com/wangyu-ustc/MemoryLLM 发表会议： ICML 2024 作者： Yu Wang et al. 总结 在transformer层之前，额外引入memory pool，维度R^(N×M×L) 其中N为base LLM的transfor...">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-color: #2c3e50; --secondary-color: #3498db; --accent-color: #e74c3c;
+            --background-color: #f8fafc; --card-background: #ffffff; --text-primary: #2d3748;
+            --text-secondary: #718096; --border-color: #e2e8f0; --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1); --border-radius: 12px; --transition: all 0.3s ease;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: var(--background-color); color: var(--text-primary); line-height: 1.7; }
+        .navbar { background: var(--card-background); box-shadow: var(--shadow-light); padding: 1rem 0; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border-color); }
+        .nav-container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .nav-brand { display: flex; align-items: center; text-decoration: none; color: var(--primary-color); font-weight: 600; font-size: 1.2rem; }
+        .nav-brand i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-link { color: var(--text-secondary); text-decoration: none; transition: var(--transition); padding: 0.5rem 1rem; border-radius: 8px; }
+        .nav-link:hover { color: var(--secondary-color); background-color: rgba(52, 152, 219, 0.1); }
+        .main-container { display: flex; max-width: 1400px; margin: 0 auto; gap: 2rem; padding: 2rem; }
+        .toc-sidebar { width: 250px; flex-shrink: 0; position: sticky; top: 6rem; height: fit-content; max-height: calc(100vh - 8rem); overflow-y: auto; }
+        .toc-container { background: var(--card-background); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1.5rem; }
+        .toc-title { font-size: 1.1rem; font-weight: 600; color: var(--primary-color); margin-bottom: 1rem; display: flex; align-items: center; }
+        .toc-title i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .toc ul { list-style: none; padding-left: 0; }
+        .toc ul ul { padding-left: 1rem; margin-top: 0.3rem; }
+        .toc li { margin: 0.3rem 0; }
+        .toc a { color: var(--text-secondary); text-decoration: none; transition: var(--transition); display: block; padding: 0.3rem 0.5rem; border-radius: 4px; font-size: 0.9rem; line-height: 1.4; }
+        .toc a:hover, .toc a.active { color: var(--secondary-color); background-color: rgba(52, 152, 219, 0.1); }
+        .article-main { flex: 1; min-width: 0; }
+        .article-header { background: var(--card-background); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; box-shadow: var(--shadow-light); border: 1px solid var(--border-color); position: relative; overflow: hidden; }
+        .article-cover { width: 100%; height: 350px; object-fit: cover; border-radius: var(--border-radius); margin-bottom: 1.5rem; box-shadow: var(--shadow-medium); transition: var(--transition); }
+        .article-cover:hover { transform: scale(1.02); }
+        .article-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, var(--secondary-color), var(--accent-color)); }
+        .article-title { font-size: 2.5rem; font-weight: 700; color: var(--primary-color); margin-bottom: 1rem; line-height: 1.3; }
+        .article-meta { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.95rem; }
+        .meta-item { display: flex; align-items: center; background: var(--background-color); padding: 0.5rem 1rem; border-radius: 20px; }
+        .meta-item i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .article-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+        .tag { background: linear-gradient(135deg, var(--secondary-color), #2980b9); color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 500; box-shadow: var(--shadow-light); }
+        .article-description { color: var(--text-secondary); font-size: 1.1rem; line-height: 1.6; font-style: italic; background: var(--background-color); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--secondary-color); }
+        .article-content { background: var(--card-background); border-radius: var(--border-radius); padding: 2.5rem; box-shadow: var(--shadow-light); border: 1px solid var(--border-color); }
+        .article-content h1, .article-content h2, .article-content h3, .article-content h4, .article-content h5, .article-content h6 { color: var(--primary-color); margin: 2rem 0 1rem 0; font-weight: 600; line-height: 1.4; }
+        .article-content h1 { font-size: 2.2rem; border-bottom: 3px solid var(--secondary-color); padding-bottom: 0.5rem; }
+        .article-content h2 { font-size: 1.8rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.3rem; }
+        .article-content p { margin: 1rem 0; line-height: 1.8; }
+        .article-content img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: var(--shadow-light); margin: 1.5rem 0; }
+        .article-content blockquote { border-left: 4px solid var(--secondary-color); margin: 1.5rem 0; padding: 1rem 1.5rem; background: var(--background-color); border-radius: 0 8px 8px 0; font-style: italic; }
+        .article-content pre { background: #f6f8fa; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; overflow-x: auto; margin: 1.5rem 0; }
+        .article-content code { background: #f6f8fa; border: 1px solid var(--border-color); border-radius: 4px; padding: 0.2rem 0.4rem; font-family: 'Monaco', 'Consolas', monospace; font-size: 0.9em; }
+        .article-content pre code { background: none; border: none; padding: 0; }
+        .article-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-light); }
+        .article-content th, .article-content td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .article-content th { background: var(--background-color); font-weight: 600; color: var(--primary-color); }
+        .contact-card { background: linear-gradient(135deg, var(--primary-color), #34495e); color: white; border-radius: var(--border-radius); padding: 2rem; margin: 2rem 0; text-align: center; }
+        .contact-card h3 { margin-bottom: 1rem; color: white; }
+        .contact-links { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+        .contact-link { display: inline-flex; align-items: center; padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.1); border-radius: 25px; color: white; text-decoration: none; transition: var(--transition); }
+        .contact-link:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-1px); }
+        .contact-link i { margin-right: 0.5rem; }
+        .back-button { position: fixed; bottom: 2rem; right: 2rem; background: var(--secondary-color); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-medium); transition: var(--transition); text-decoration: none; }
+        .back-button:hover { background: #2980b9; transform: translateY(-2px); }
+        @media (max-width: 1024px) { .main-container { flex-direction: column; padding: 1rem; } .toc-sidebar { width: 100%; position: static; order: 2; margin-top: 2rem; } .article-main { order: 1; } }
+        @media (max-width: 768px) { .nav-container { padding: 0 1rem; flex-direction: column; gap: 1rem; } .article-header, .article-content { padding: 1.5rem; } .article-title { font-size: 2rem; } .back-button { bottom: 1rem; right: 1rem; width: 50px; height: 50px; } .article-cover { height: 250px; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-brand">
+                <i class="fas fa-home"></i>Cialtion's Tech Blog
+            </a>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link"><i class="fas fa-arrow-left"></i>Back to Home</a>
+                <a href="mailto:cialtion737410@sjtu.edu.cn" class="nav-link"><i class="fas fa-envelope"></i>Contact Me</a>
+            </div>
+        </div>
+    </nav>
+    <div class="main-container">
+        <aside class="toc-sidebar"><div class="toc-container">
+            <div class="toc-title">
+                <i class="fas fa-list"></i>
+                Table of Contents
+            </div>
+            <div class="toc"><div class="toc"><span class="toctitle">Table of Contents</span><ul>
+<li><a href="#memoryllm-towards-self-updatable-large-language-models">MemoryLLM: Towards Self-Updatable Large Language Models</a><ul>
+<li><a href="#_1">核心问题与动机</a></li>
+<li><a href="#_2">技术栈架构</a><ul>
+<li><a href="#1">1. 双参数系统设计</a></li>
+<li><a href="#2-memory-pool">2. Memory Pool结构</a></li>
+<li><a href="#3-self-update">3. Self-Update机制</a></li>
+</ul>
+</li>
+<li><a href="#_3">核心创新点</a><ul>
+<li><a href="#1_1">1. 指数遗忘机制</a></li>
+<li><a href="#2">2. 三阶段训练策略</a></li>
+</ul>
+</li>
+<li><a href="#_4">实验结果</a><ul>
+<li><a href="#baselinebenchmark">Baseline与Benchmark</a></li>
+</ul>
+</li>
+<li><a href="#_5">技术问题与批判性分析</a><ul>
+<li><a href="#1-vs-fifo">1. 随机删除vs FIFO删除的设计缺陷</a></li>
+<li><a href="#2_1">2. 无监督更新的信息污染风险</a></li>
+<li><a href="#3">3. 计算成本被严重低估</a></li>
+<li><a href="#4">4. 能力退化的高风险</a></li>
+<li><a href="#5">5. "新知识完全保留"的误导性表述</a></li>
+</ul>
+</li>
+<li><a href="#_6">设计哲学评价</a><ul>
+<li><a href="#_7">优点</a></li>
+<li><a href="#_8">根本缺陷</a></li>
+</ul>
+</li>
+<li><a href="#_9">后续研究方向</a><ul>
+<li><a href="#_10">改进建议</a></li>
+<li><a href="#_11">技术启发</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+        </div></aside>
+        <main class="article-main">
+            <header class="article-header">
+                <img src="../images/bronya_1.jpg" alt="MemoryLLM: Towards Self-Updatable Large Language Models" class="article-cover" onerror="this.style.display='none'">
+                <h1 class="article-title">MemoryLLM: Towards Self-Updatable Large Language Models</h1>
+                <div class="article-meta">
+                    <div class="meta-item"><i class="fas fa-calendar-alt"></i>Published: 2025-09-28</div>
+                    <div class="meta-item"><i class="fas fa-user"></i>Author: Cialtion</div>
+                </div>
+                
+                <div class="article-description">论文链接： https://github.com/wangyu-ustc/MemoryLLM 发表会议： ICML 2024 作者： Yu Wang et al. 总结 在transformer层之前，额外引入memory pool，维度R^(N×M×L) 其中N为base LLM的transfor...</div>
+            </header>
+            <article class="article-content"><h1 id="memoryllm-towards-self-updatable-large-language-models">MemoryLLM: Towards Self-Updatable Large Language Models</h1>
+<p><strong>论文链接：</strong> https://github.com/wangyu-ustc/MemoryLLM<br />
+<strong>发表会议：</strong> ICML 2024<br />
+<strong>作者：</strong> Yu Wang et al.</p>
+<p><strong>总结</strong> 在transformer层之前，额外引入memory pool，维度R^(N×M×L)<br />
+其中N为base LLM的transformer层数，例如32；M为每层memory pool每层向量维度，L为原模型hidden size</p>
+<hr />
+<h2 id="_1">核心问题与动机</h2>
+<p><strong>目标问题：</strong> 现有LLM部署后参数静态，难以注入新知识
+- 传统方案局限：检索方法存储冗余、模型编辑仅限单句、长上下文方法存在容量瓶颈
+- 核心需求：实现LLM的持续学习能力，同时避免灾难性遗忘</p>
+<h2 id="_2">技术栈架构</h2>
+<h3 id="1">1. 双参数系统设计</h3>
+<div class="highlight"><pre><span></span><code>Model = ϕ (static) + θ (dynamic)
+- ϕ: Llama2-7B基础参数 (冻结)
+- θ: Memory Pool参数 (1.066B，可更新)
+</code></pre></div>
+
+<h3 id="2-memory-pool">2. Memory Pool结构</h3>
+<ul>
+<li><strong>层级分布：</strong> 每层包含7680个memory tokens，维度R^(32×7680×4096)</li>
+<li><strong>存储机制：</strong> Hidden space中的连续向量，非BPE token级别操作</li>
+<li><strong>注意力集成：</strong> 生成时attention map: nx × (nx + 7680)</li>
+</ul>
+<h3 id="3-self-update">3. Self-Update机制</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 核心更新流程</span>
+<span class="n">e</span><span class="o">^</span><span class="n">l_θ</span> <span class="o">=</span> <span class="n">θl</span><span class="p">[</span><span class="o">-</span><span class="n">K</span><span class="p">:]</span>                    <span class="c1"># 提取最后K个tokens</span>
+<span class="n">input_combined</span> <span class="o">=</span> <span class="n">concat</span><span class="p">([</span><span class="n">e</span><span class="o">^</span><span class="n">l_θ</span><span class="p">,</span> <span class="n">hl</span><span class="p">])</span> <span class="c1"># 与新输入融合</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">transformer_layer</span><span class="p">(</span><span class="n">input_combined</span><span class="p">)</span>
+<span class="n">e</span><span class="o">^</span><span class="n">l_θ</span><span class="s1">&#39; = output[-K:]               # 新记忆</span>
+<span class="n">θl_dropped</span> <span class="o">=</span> <span class="n">random_drop</span><span class="p">(</span><span class="n">θl</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span>    <span class="c1"># 随机删除K个</span>
+<span class="n">θ</span><span class="s1">&#39;l = concat([θl_dropped, e^l_θ&#39;</span><span class="p">])</span> <span class="c1"># 更新memory pool</span>
+</code></pre></div>
+
+<h2 id="_3">核心创新点</h2>
+<h3 id="1_1">1. 指数遗忘机制</h3>
+<div class="highlight"><pre><span></span><code>遗忘率 = K/N
+N/K步后保留率 = (1-K/N)^(N/K) ≈ 1/e
+</code></pre></div>
+
+<h3 id="2">2. 三阶段训练策略</h3>
+<ul>
+<li><strong>新知识整合：</strong> 文档分割训练，50%梯度/50%无梯度</li>
+<li><strong>连续上下文：</strong> 长文档分段注入能力</li>
+<li><strong>遗忘缓解：</strong> 跨文档知识保持训练</li>
+</ul>
+<h2 id="_4">实验结果</h2>
+<h3 id="baselinebenchmark">Baseline与Benchmark</h3>
+<ul>
+<li><strong>模型编辑：</strong> ZsRE (79.2 vs ROME 69.3), CounterFactual (75.3 vs 69.2)</li>
+<li><strong>长上下文：</strong> LongBench评测4/6数据集优于baseline</li>
+<li><strong>记忆保持：</strong> 20步更新后仍保持记忆，650K更新无性能退化</li>
+</ul>
+<hr />
+<h2 id="_5">技术问题与批判性分析</h2>
+<h3 id="1-vs-fifo">1. 随机删除vs FIFO删除的设计缺陷</h3>
+<p><strong>论文选择：</strong> 随机删除K个memory tokens<br />
+<strong>更合理方案：</strong> FIFO删除最前面的tokens</p>
+<p><strong>问题分析：</strong>
+- 随机删除破坏了时间序列的语义连续性
+- 可能删除重要的中期记忆
+- 无法真正模拟人类遗忘的时间特性</p>
+<p><strong>论文辩护：</strong> 声称随机删除保持hidden states完整性，但缺乏充分理论支撑</p>
+<h3 id="2_1">2. 无监督更新的信息污染风险</h3>
+<p><strong>风险场景：</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 推理阶段每次都更新参数</span>
+<span class="k">for</span> <span class="n">user_input</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">user_input</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">self_update</span><span class="p">(</span><span class="n">user_input</span><span class="p">)</span>  <span class="c1"># 无质量控制</span>
+</code></pre></div>
+
+<p><strong>潜在问题：</strong>
+- <strong>低质量数据注入：</strong> 用户输入、错误信息直接进入记忆
+- <strong>对抗攻击脆弱性：</strong> 恶意用户可故意污染memory pool
+- <strong>累积偏差：</strong> 无监督更新可能导致模型偏离原始能力分布
+- <strong>质量控制缺失：</strong> 没有机制筛选有价值的知识</p>
+<h3 id="3">3. 计算成本被严重低估</h3>
+<p><strong>初始化阶段：</strong>
+- 需要3天×8×A100训练memory pool与原模型对齐
+- 对现代大模型(70B+)，成本将指数级增长
+- 多能力对齐(推理、代码、多语言)训练复杂度极高</p>
+<p><strong>部署阶段：</strong>
+- 每次推理都需要处理7680额外tokens
+- 内存占用增加1B参数
+- 注意力复杂度从O(n²)变为O(n×(n+7680))</p>
+<h3 id="4">4. 能力退化的高风险</h3>
+<p><strong>理论风险：</strong>
+- 现代LLM能力高度耦合，memory pool干扰可能破坏精细平衡
+- 无监督更新缺乏能力保护机制
+- 长期drift可能导致不可逆的能力损失</p>
+<p><strong>实证不足：</strong>
+- 论文仅测试650K更新，对生产环境不充分
+- 缺乏多样化任务的长期稳定性验证</p>
+<h3 id="5">5. "新知识完全保留"的误导性表述</h3>
+<p><strong>实际机制：</strong>
+- 仅在当前更新步骤不被删除
+- 后续更新仍受随机删除影响
+- 无法提供长期保护保证</p>
+<h2 id="_6">设计哲学评价</h2>
+<h3 id="_7">优点</h3>
+<ul>
+<li><strong>创新思路：</strong> 将记忆机制嵌入transformer内部</li>
+<li><strong>实时更新：</strong> 避免重训练的部署友好性</li>
+<li><strong>理论基础：</strong> 模拟人类记忆的指数遗忘</li>
+</ul>
+<h3 id="_8">根本缺陷</h3>
+<ul>
+<li><strong>质量控制缺失：</strong> 无机制区分有价值vs无价值信息</li>
+<li><strong>安全性不足：</strong> 易受信息污染和对抗攻击</li>
+<li><strong>成本被低估：</strong> 初始化和部署成本都被严重低估</li>
+<li><strong>稳定性风险：</strong> 长期无监督更新的不可预测性</li>
+</ul>
+<h2 id="_9">后续研究方向</h2>
+<h3 id="_10">改进建议</h3>
+<ol>
+<li><strong>增加质量门控：</strong> 引入知识质量评估机制</li>
+<li><strong>FIFO遗忘策略：</strong> 改进删除策略保持时间连续性</li>
+<li><strong>能力保护机制：</strong> 添加关键能力的保护约束</li>
+<li><strong>分级记忆管理：</strong> 区分短期和长期记忆池</li>
+</ol>
+<h3 id="_11">技术启发</h3>
+<ul>
+<li>Memory-augmented架构的探索价值</li>
+<li>持续学习在LLM中的应用潜力</li>
+<li>参数分离策略的设计思路</li>
+</ul>
+<hr />
+<p><strong>总体评价：</strong> MemoryLLM提出了有趣的设计哲学，但在实用性、安全性和成本控制方面存在显著缺陷。其核心思想值得借鉴，但需要大幅改进才能用于生产环境。</p></article>
+            <div class="contact-card">
+                <h3><i class="fas fa-heart"></i> Thanks for Reading</h3>
+                <p>If this article was helpful to you, feel free to connect with me!</p>
+                <div class="contact-links">
+                    <a href="https://github.com/HaxxorCialtion" class="contact-link" target="_blank"><i class="fab fa-github"></i>GitHub</a>
+                    <a href="mailto:cialtion737410@sjtu.edu.cn" class="contact-link"><i class="fas fa-envelope"></i>Email</a>
+                </div>
+            </div>
+        </main>
+    </div>
+    <a href="#" class="back-button" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script>
+        hljs.highlightAll();
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+            });
+        });
+        function highlightCurrentSection() {
+            const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+            const tocLinks = document.querySelectorAll('.toc a');
+            let current = '';
+            headings.forEach(heading => {
+                const rect = heading.getBoundingClientRect();
+                if (rect.top <= 100) { current = heading.id; }
+            });
+            tocLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) { link.classList.add('active'); }
+            });
+        }
+        window.addEventListener('scroll', highlightCurrentSection);
+        document.addEventListener('DOMContentLoaded', highlightCurrentSection);
+    </script>
+</body>
+</html>

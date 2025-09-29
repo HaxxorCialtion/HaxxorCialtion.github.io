@@ -1,0 +1,2003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Former Notes - Cialtion's Tech Blog</title>
+    <meta name="description" content="日期: 2024-09-22 标签: LLM角色扮演, LLM, TTS, ASR 这是一个基于关键词检测、语音识别、语音合成和对话生成的智能语音助手系统。该系统能够通过特定的唤醒词（如"hey bro"）启动与用户的语音对话，并利用先进的自然语言处理技术提供智能回复。 1. 关键词检测： 使用 P...">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-color: #2c3e50; --secondary-color: #3498db; --accent-color: #e74c3c;
+            --background-color: #f8fafc; --card-background: #ffffff; --text-primary: #2d3748;
+            --text-secondary: #718096; --border-color: #e2e8f0; --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1); --border-radius: 12px; --transition: all 0.3s ease;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: var(--background-color); color: var(--text-primary); line-height: 1.7; }
+        .navbar { background: var(--card-background); box-shadow: var(--shadow-light); padding: 1rem 0; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border-color); }
+        .nav-container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .nav-brand { display: flex; align-items: center; text-decoration: none; color: var(--primary-color); font-weight: 600; font-size: 1.2rem; }
+        .nav-brand i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-link { color: var(--text-secondary); text-decoration: none; transition: var(--transition); padding: 0.5rem 1rem; border-radius: 8px; }
+        .nav-link:hover { color: var(--secondary-color); background-color: rgba(52, 152, 219, 0.1); }
+        .main-container { display: flex; max-width: 1400px; margin: 0 auto; gap: 2rem; padding: 2rem; }
+        .toc-sidebar { width: 250px; flex-shrink: 0; position: sticky; top: 6rem; height: fit-content; max-height: calc(100vh - 8rem); overflow-y: auto; }
+        .toc-container { background: var(--card-background); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1.5rem; }
+        .toc-title { font-size: 1.1rem; font-weight: 600; color: var(--primary-color); margin-bottom: 1rem; display: flex; align-items: center; }
+        .toc-title i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .toc ul { list-style: none; padding-left: 0; }
+        .toc ul ul { padding-left: 1rem; margin-top: 0.3rem; }
+        .toc li { margin: 0.3rem 0; }
+        .toc a { color: var(--text-secondary); text-decoration: none; transition: var(--transition); display: block; padding: 0.3rem 0.5rem; border-radius: 4px; font-size: 0.9rem; line-height: 1.4; }
+        .toc a:hover, .toc a.active { color: var(--secondary-color); background-color: rgba(52, 152, 219, 0.1); }
+        .article-main { flex: 1; min-width: 0; }
+        .article-header { background: var(--card-background); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; box-shadow: var(--shadow-light); border: 1px solid var(--border-color); position: relative; overflow: hidden; }
+        .article-cover { width: 100%; height: 350px; object-fit: cover; border-radius: var(--border-radius); margin-bottom: 1.5rem; box-shadow: var(--shadow-medium); transition: var(--transition); }
+        .article-cover:hover { transform: scale(1.02); }
+        .article-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, var(--secondary-color), var(--accent-color)); }
+        .article-title { font-size: 2.5rem; font-weight: 700; color: var(--primary-color); margin-bottom: 1rem; line-height: 1.3; }
+        .article-meta { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.95rem; }
+        .meta-item { display: flex; align-items: center; background: var(--background-color); padding: 0.5rem 1rem; border-radius: 20px; }
+        .meta-item i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .article-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+        .tag { background: linear-gradient(135deg, var(--secondary-color), #2980b9); color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 500; box-shadow: var(--shadow-light); }
+        .article-description { color: var(--text-secondary); font-size: 1.1rem; line-height: 1.6; font-style: italic; background: var(--background-color); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--secondary-color); }
+        .article-content { background: var(--card-background); border-radius: var(--border-radius); padding: 2.5rem; box-shadow: var(--shadow-light); border: 1px solid var(--border-color); }
+        .article-content h1, .article-content h2, .article-content h3, .article-content h4, .article-content h5, .article-content h6 { color: var(--primary-color); margin: 2rem 0 1rem 0; font-weight: 600; line-height: 1.4; }
+        .article-content h1 { font-size: 2.2rem; border-bottom: 3px solid var(--secondary-color); padding-bottom: 0.5rem; }
+        .article-content h2 { font-size: 1.8rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.3rem; }
+        .article-content p { margin: 1rem 0; line-height: 1.8; }
+        .article-content img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: var(--shadow-light); margin: 1.5rem 0; }
+        .article-content blockquote { border-left: 4px solid var(--secondary-color); margin: 1.5rem 0; padding: 1rem 1.5rem; background: var(--background-color); border-radius: 0 8px 8px 0; font-style: italic; }
+        .article-content pre { background: #f6f8fa; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; overflow-x: auto; margin: 1.5rem 0; }
+        .article-content code { background: #f6f8fa; border: 1px solid var(--border-color); border-radius: 4px; padding: 0.2rem 0.4rem; font-family: 'Monaco', 'Consolas', monospace; font-size: 0.9em; }
+        .article-content pre code { background: none; border: none; padding: 0; }
+        .article-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-light); }
+        .article-content th, .article-content td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .article-content th { background: var(--background-color); font-weight: 600; color: var(--primary-color); }
+        .contact-card { background: linear-gradient(135deg, var(--primary-color), #34495e); color: white; border-radius: var(--border-radius); padding: 2rem; margin: 2rem 0; text-align: center; }
+        .contact-card h3 { margin-bottom: 1rem; color: white; }
+        .contact-links { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+        .contact-link { display: inline-flex; align-items: center; padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.1); border-radius: 25px; color: white; text-decoration: none; transition: var(--transition); }
+        .contact-link:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-1px); }
+        .contact-link i { margin-right: 0.5rem; }
+        .back-button { position: fixed; bottom: 2rem; right: 2rem; background: var(--secondary-color); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-medium); transition: var(--transition); text-decoration: none; }
+        .back-button:hover { background: #2980b9; transform: translateY(-2px); }
+        @media (max-width: 1024px) { .main-container { flex-direction: column; padding: 1rem; } .toc-sidebar { width: 100%; position: static; order: 2; margin-top: 2rem; } .article-main { order: 1; } }
+        @media (max-width: 768px) { .nav-container { padding: 0 1rem; flex-direction: column; gap: 1rem; } .article-header, .article-content { padding: 1.5rem; } .article-title { font-size: 2rem; } .back-button { bottom: 1rem; right: 1rem; width: 50px; height: 50px; } .article-cover { height: 250px; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-brand">
+                <i class="fas fa-home"></i>Cialtion's Tech Blog
+            </a>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link"><i class="fas fa-arrow-left"></i>Back to Home</a>
+                <a href="mailto:cialtion737410@sjtu.edu.cn" class="nav-link"><i class="fas fa-envelope"></i>Contact Me</a>
+            </div>
+        </div>
+    </nav>
+    <div class="main-container">
+        <aside class="toc-sidebar"><div class="toc-container">
+            <div class="toc-title">
+                <i class="fas fa-list"></i>
+                Table of Contents
+            </div>
+            <div class="toc"><div class="toc"><span class="toctitle">Table of Contents</span><ul>
+<li><a href="#former-notes">Former Notes</a><ul>
+<li><a href="#1-asr_llm_ttsmd">1. ASR_LLM_TTS.md</a><ul>
+<li><a href="#_1">主要功能</a></li>
+<li><a href="#_2">技术栈</a><ul>
+<li><a href="#tts">TTS部分</a><ul>
+<li><a href="#gpt-sovits-tts">GPT-SoVITS TTS 项目</a><ul>
+<li><a href="#_3">功能特点</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_4">使用指南</a></li>
+<li><a href="#_5">使用方法</a></li>
+<li><a href="#_6">主要特性</a></li>
+<li><a href="#_7">自定义设置</a></li>
+<li><a href="#_8">许可证</a></li>
+<li><a href="#_9">联系方式</a></li>
+<li><a href="#_10">致谢</a></li>
+</ul>
+</li>
+<li><a href="#2-asr_llm_tts_md">2. ASR_LLM_TTS_理论高效版.md</a></li>
+</ul>
+</li>
+<li><a href="#asr-llm-tts">ASR-LLM-TTS 高效语音对话系统</a><ul>
+<li><a href="#_11">系统架构</a><ul>
+<li><a href="#asr">ASR（语音识别）</a></li>
+<li><a href="#llm">LLM（大型语言模型）</a></li>
+<li><a href="#tts_1">TTS（语音合成）</a></li>
+</ul>
+</li>
+<li><a href="#_12">主要特性</a><ul>
+<li><a href="#_13">高效语音处理</a></li>
+<li><a href="#tts_2">并行 TTS 处理</a></li>
+<li><a href="#_14">性能监控</a></li>
+<li><a href="#_15">日志记录</a></li>
+</ul>
+</li>
+<li><a href="#_16">代码详解</a><ul>
+<li><a href="#_17">导入依赖</a></li>
+<li><a href="#_18">系统配置</a></li>
+<li><a href="#_19">性能计时器类</a></li>
+<li><a href="#tts_3">TTS 客户端类</a></li>
+<li><a href="#textsplitter">TextSplitter 类</a></li>
+<li><a href="#audiorecorder">AudioRecorder 类</a></li>
+<li><a href="#_20">主函数</a></li>
+</ul>
+</li>
+<li><a href="#_21">优化要点</a></li>
+<li><a href="#3-benchmark_test_via_evalscopemd">3. benchmark_test_via_EvalScope.md</a></li>
+</ul>
+</li>
+<li><a href="#qwen3-30b-a3b-instruct-benchmark-evaluation-report">Qwen3-30B-A3B-Instruct Benchmark Evaluation Report</a><ul>
+<li><a href="#abstract">Abstract</a></li>
+<li><a href="#1-system-configuration-and-parameters">1. System Configuration and Parameters</a><ul>
+<li><a href="#11-hardware-environment">1.1 Hardware Environment</a></li>
+<li><a href="#12-model-configuration">1.2 Model Configuration</a></li>
+<li><a href="#13-deployment-parameters">1.3 Deployment Parameters</a></li>
+<li><a href="#14-evaluation-configuration">1.4 Evaluation Configuration</a></li>
+</ul>
+</li>
+<li><a href="#2-benchmark-results">2. Benchmark Results</a><ul>
+<li><a href="#21-dataset-coverage">2.1 Dataset Coverage</a></li>
+<li><a href="#22-detailed-results-by-category">2.2 Detailed Results by Category</a><ul>
+<li><a href="#reasoning-and-logic">Reasoning and Logic</a></li>
+<li><a href="#knowledge-and-understanding">Knowledge and Understanding</a></li>
+<li><a href="#code-generation">Code Generation</a></li>
+<li><a href="#chinese-language">Chinese Language</a></li>
+<li><a href="#instruction-following">Instruction Following</a></li>
+</ul>
+</li>
+<li><a href="#23-summary-statistics">2.3 Summary Statistics</a></li>
+</ul>
+</li>
+<li><a href="#3-evaluation-framework-commands">3. Evaluation Framework Commands</a><ul>
+<li><a href="#31-dataset-preparation">3.1 Dataset Preparation</a></li>
+<li><a href="#32-evaluation-execution">3.2 Evaluation Execution</a></li>
+<li><a href="#33-result-aggregation">3.3 Result Aggregation</a></li>
+<li><a href="#34-offline-mode-enforcement">3.4 Offline Mode Enforcement</a></li>
+</ul>
+</li>
+<li><a href="#appendix">Appendix</a><ul>
+<li><a href="#a1-reproduction-information">A.1 Reproduction Information</a></li>
+<li><a href="#a2-data-availability">A.2 Data Availability</a></li>
+</ul>
+</li>
+<li><a href="#4-ollamamd">4. Ollama工具函数调用测试记录.md</a></li>
+</ul>
+</li>
+<li><a href="#ollama">Ollama 工具函数调用测试记录</a><ul>
+<li><a href="#_22">环境配置</a></li>
+<li><a href="#_23">测试工具函数</a></li>
+<li><a href="#_24">测试结果</a><ul>
+<li><a href="#_25">并行调用测试结果</a></li>
+<li><a href="#_26">错误处理测试结果</a></li>
+</ul>
+</li>
+<li><a href="#_27">性能指标</a></li>
+<li><a href="#_28">结论</a></li>
+<li><a href="#5-zero3md">5. 香橙派Zero3三段式网络配置完全指南.md</a></li>
+</ul>
+</li>
+<li><a href="#zero3">香橙派Zero3三段式网络配置完全指南</a><ul>
+<li><a href="#_29">目录导航</a></li>
+<li><a href="#_30">环境信息</a><ul>
+<li><a href="#_31">硬件平台：</a></li>
+<li><a href="#_32">软件环境：</a></li>
+</ul>
+</li>
+<li><a href="#_33">配置目标</a></li>
+<li><a href="#_34">完整配置步骤</a><ul>
+<li><a href="#1-ssh">1. 基础SSH服务配置</a></li>
+<li><a href="#2">2. 安装网络管理器</a></li>
+<li><a href="#3-netplan">3. 创建netplan网络配置</a></li>
+<li><a href="#4">4. 设置配置文件权限</a></li>
+<li><a href="#5">5. 应用网络配置</a></li>
+<li><a href="#6">6. 验证网络配置</a></li>
+<li><a href="#7">7. 测试故障转移功能</a><ul>
+<li><a href="#wifi">测试有线到WiFi切换：</a></li>
+<li><a href="#wifi_1">测试WiFi间自动切换：</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_35">常见问题及解决方案</a><ul>
+<li><a href="#1">问题1：权限警告</a></li>
+<li><a href="#2route-metric">问题2：route-metric配置错误</a></li>
+<li><a href="#3wifi">问题3：中文WiFi名称显示异常</a></li>
+<li><a href="#4wifi">问题4：WiFi故障转移不工作</a></li>
+<li><a href="#5_1">问题5：手机热点设备隔离</a></li>
+</ul>
+</li>
+<li><a href="#_36">使用场景验证</a><ul>
+<li><a href="#1wifi">场景1：在家使用（有线+家庭WiFi）</a></li>
+<li><a href="#2_1">场景2：外出使用（手机热点）</a></li>
+<li><a href="#3">场景3：网络优先级测试</a></li>
+</ul>
+</li>
+<li><a href="#_37">常用管理命令</a><ul>
+<li><a href="#_38">查看网络状态</a></li>
+<li><a href="#_39">手动网络管理</a></li>
+<li><a href="#ssh">SSH连接</a></li>
+<li><a href="#_40">配置文件备份</a></li>
+</ul>
+</li>
+<li><a href="#_41">总结</a></li>
+<li><a href="#6-qwen-deepseekagentmd">6. Qwen-Deepseek构建数学agent.md</a></li>
+</ul>
+</li>
+<li><a href="#qwen-deepseekagent">Qwen-Deepseek构建数学agent</a><ul>
+<li><a href="#_42">流程图</a></li>
+<li><a href="#pip">PIP 安装依赖</a></li>
+<li><a href="#_43">其他说明</a></li>
+<li><a href="#7-md">7. 树莓派连接蓝牙耳机.md</a></li>
+</ul>
+</li>
+<li><a href="#_44">树莓派连接蓝牙耳机</a><ul>
+<li><a href="#1_1">1. 首次配置（仅需执行一次）</a></li>
+<li><a href="#2_2">2. 快速连接方法（重启后）</a></li>
+<li><a href="#3_1">3. 完整连接流程（如果快速连接失败）</a></li>
+<li><a href="#4_1">4. 测试音频</a></li>
+<li><a href="#_45">故障排除</a></li>
+<li><a href="#_46">创建快速连接脚本（推荐）</a></li>
+<li><a href="#mac">将MAC地址保存到配置文件（可选）</a><ul>
+<li><a href="#_47">重要提示：</a></li>
+<li><a href="#_48">重启后连接步骤：</a></li>
+</ul>
+</li>
+<li><a href="#8-md">8. 智能笔记网站生成系统.md</a></li>
+</ul>
+</li>
+<li><a href="#_49">智能笔记网站生成系统</a><ul>
+<li><a href="#_50">使用流程</a><ul>
+<li><a href="#_51">智能笔记生成流程图</a></li>
+</ul>
+</li>
+<li><a href="#json">示例 JSON 配置</a></li>
+<li><a href="#_52">优点总结</a><ul>
+<li><a href="#_53">格式自由转换</a></li>
+<li><a href="#_54">高度自定义</a></li>
+<li><a href="#_55">集中管理</a></li>
+<li><a href="#_56">自动生成</a></li>
+<li><a href="#_57">简易部署</a></li>
+</ul>
+</li>
+<li><a href="#llm_1">借助 LLM 的能力</a></li>
+<li><a href="#_58">总结</a></li>
+<li><a href="#9-wsl2-vllm-serve-md">9. WSL2 vLLM serve 局域网访问配置.md</a></li>
+</ul>
+</li>
+<li><a href="#wsl2-vllm-serve">WSL2 vLLM serve 局域网访问配置</a><ul>
+<li><a href="#1-vllm">1. 启动vLLM服务</a></li>
+<li><a href="#2-ip">2. 获取必要的IP地址</a></li>
+<li><a href="#3_2">3. 配置端口转发</a></li>
+<li><a href="#4_2">4. 配置防火墙</a></li>
+<li><a href="#5_2">5. 客户端配置</a></li>
+<li><a href="#_59">故障排除</a></li>
+<li><a href="#10-asr-llm-tts_realtimemd">10. 局域网内香橙派完全本地ASR-LLM-TTS_Realtime架构.md</a></li>
+</ul>
+</li>
+<li><a href="#3ttfa">实时语音助手技术笔记：从3秒TTFA到踩坑实录</a><ul>
+<li><a href="#_60">系统设计</a></li>
+<li><a href="#_61">性能实录</a></li>
+<li><a href="#_62">关键踩坑与解决方案</a><ul>
+<li><a href="#1-vad">1. VAD灵敏度问题</a></li>
+<li><a href="#2-orange-pi">2. Orange Pi音频播放静默失败</a></li>
+<li><a href="#3_3">3. 命令行参数传递失效</a></li>
+<li><a href="#4-ollama">4. Ollama局域网连接问题</a></li>
+<li><a href="#5-asr">5. 首次ASR模型加载耗时</a></li>
+</ul>
+</li>
+<li><a href="#_63">性能监控体系</a></li>
+<li><a href="#_64">关键启动参数</a></li>
+<li><a href="#_65">后续优化方向</a></li>
+<li><a href="#_66">技术感悟</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+        </div></aside>
+        <main class="article-main">
+            <header class="article-header">
+                <img src="../images/bronya_mp.jpg" alt="Former Notes" class="article-cover" onerror="this.style.display='none'">
+                <h1 class="article-title">Former Notes</h1>
+                <div class="article-meta">
+                    <div class="meta-item"><i class="fas fa-calendar-alt"></i>Published: 2025-09-28</div>
+                    <div class="meta-item"><i class="fas fa-user"></i>Author: Cialtion</div>
+                </div>
+                
+                <div class="article-description">日期: 2024-09-22 标签: LLM角色扮演, LLM, TTS, ASR 这是一个基于关键词检测、语音识别、语音合成和对话生成的智能语音助手系统。该系统能够通过特定的唤醒词（如"hey bro"）启动与用户的语音对话，并利用先进的自然语言处理技术提供智能回复。 1. 关键词检测： 使用 P...</div>
+            </header>
+            <article class="article-content"><h1 id="former-notes">Former Notes</h1>
+<h2 id="1-asr_llm_ttsmd">1. ASR_LLM_TTS.md</h2>
+<p><strong>日期:</strong> 2024-09-22<br />
+<strong>标签:</strong> LLM角色扮演, LLM, TTS, ASR</p>
+<p>这是一个基于关键词检测、语音识别、语音合成和对话生成的智能语音助手系统。该系统能够通过特定的唤醒词（如"hey bro"）启动与用户的语音对话，并利用先进的自然语言处理技术提供智能回复。</p>
+<h3 id="_1">主要功能</h3>
+<ol>
+<li><strong>关键词检测：</strong> 使用 Porcupine 实时监听唤醒词，启动对话。</li>
+<li><strong>语音录制和检测：</strong> 采用 WebRTC VAD 进行语音活动检测，录制有效语音片段。</li>
+<li><strong>语音识别（ASR）：</strong> 使用 SenseVoice Small 模型将录制的语音转换为文本。</li>
+<li><strong>对话生成：</strong> 调用 Ollama API（兼容 OpenAI API），根据上下文生成助手的文本回复。</li>
+<li><strong>语音合成（TTS）：</strong> 将助手的回复通过语音合成输出，模拟人声对话。</li>
+<li><strong>对话历史保存：</strong> 定期将对话内容保存为 JSON 文件，便于后续分析。</li>
+</ol>
+<h3 id="_2">技术栈</h3>
+<ul>
+<li>Python</li>
+<li>Porcupine（关键词检测）</li>
+<li>WebRTC VAD（语音活动检测）</li>
+<li>SenseVoice Small（语音识别）</li>
+<li>Ollama API（对话生成）</li>
+<li>GPT-SoVITS（语音合成）</li>
+<li>PyAudio, NumPy, SciPy（音频处理）</li>
+</ul>
+<h4 id="tts">TTS部分</h4>
+<p>本项目基于 GPT-Sovits-v2，感谢开源社区工作者的贡献！</p>
+<h5 id="gpt-sovits-tts">GPT-SoVITS TTS 项目</h5>
+<p>这是一个基于 GPT-SoVITS API 的文本到语音（TTS）项目。该项目允许用户根据不同的情感生成和播放语音，使用预定义的参考音频来影响输出的语音风格。</p>
+<h6 id="_3">功能特点</h6>
+<ul>
+<li>支持多种情感的语音生成（高兴、抑郁、激动、平静、纠结）</li>
+<li>使用参考音频来控制语音风格</li>
+<li>实时生成并播放 WAV 格式的音频文件</li>
+<li>可自定义文本输入和输出文件名</li>
+<li>提供 TTS 处理时间统计</li>
+<li>可以添加一个情感识别模型来决定参考音频，从而控制音频合成情感（to do）</li>
+</ul>
+<h3 id="_4">使用指南</h3>
+<ol>
+<li>克隆仓库：</li>
+</ol>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/HaxxorCialtion/ASR_LLM_TTS_py.git
+<span class="nb">cd</span><span class="w"> </span>intelligent-voice-assistant
+</code></pre></div>
+
+<ol>
+<li>安装依赖：</li>
+</ol>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</code></pre></div>
+
+<ol>
+<li>准备必要的 API 密钥和模型：</li>
+<li>获取 Porcupine API 密钥</li>
+<li>下载 SenseVoice Small 模型文件</li>
+<li>确保 Ollama API 服务已经运行</li>
+<li>
+<p>开启 GPT-Sovits API 服务</p>
+</li>
+<li>
+<p>配置系统：</p>
+</li>
+<li>在脚本中填入 Porcupine API 密钥</li>
+<li>设置 ASR 模型路径</li>
+<li>配置 Ollama API 端点（默认为本地）</li>
+<li>配置 GPT-sovits 模型和参考音频</li>
+</ol>
+<h3 id="_5">使用方法</h3>
+<ol>
+<li>运行主脚本：</li>
+</ol>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>main.py
+</code></pre></div>
+
+<ol>
+<li>等待系统提示："Listening for wake word..."</li>
+<li>说出唤醒词（默认为"hey bro"）开始对话</li>
+<li>与语音助手进行自然语言交互</li>
+<li>超时则需再次触发</li>
+<li>结束本轮对话即自动保存对话记录</li>
+</ol>
+<h3 id="_6">主要特性</h3>
+<ul>
+<li>实时语音交互</li>
+<li>智能对话生成</li>
+<li>自然语音合成</li>
+<li>长时间无语音自动休眠</li>
+<li>对话历史记录</li>
+</ul>
+<h3 id="_7">自定义设置</h3>
+<ul>
+<li>修改 <code>settings</code> 变量来自定义助手的角色和背景</li>
+<li>调整 <code>max_silence_duration</code> 和 <code>min_speech_duration</code> 等参数来优化语音检测</li>
+<li>更换唤醒词和对应的模型文件</li>
+</ul>
+<h3 id="_8">许可证</h3>
+<p>本项目采用 MIT 许可证 - 查看 LICENSE 文件了解详情。</p>
+<h3 id="_9">联系方式</h3>
+<p>项目维护者：HaxxorCialtion - cialtion@outlook.com<br />
+Bilibili 视频地址：<a href="https://www.bilibili.com/video/BV1pftreQEbu">BV1pftreQEbu</a></p>
+<h3 id="_10">致谢</h3>
+<ul>
+<li><a href="https://github.com/Picovoice/porcupine">Porcupine</a> - 用于唤醒词检测</li>
+<li><a href="https://github.com/FunAudioLLM/SenseVoice">SenseVoice</a> - 提供 ASR 模型</li>
+<li><a href="https://github.com/ollama/ollama">Ollama</a> - 本地大语言模型服务</li>
+<li><a href="https://github.com/QwenLM/Qwen2.5">LLM</a> - LLM 服务</li>
+<li><a href="https://github.com/RVC-Boss/GPT-SoVITS">GPT-SoVITS</a> - 用于语音合成</li>
+</ul>
+<hr />
+<h2 id="2-asr_llm_tts_md">2. ASR_LLM_TTS_理论高效版.md</h2>
+<p><strong>日期:</strong> 2025-4-28<br />
+<strong>标签:</strong> ASR, LLM, TTS, LLM边缘AI应用</p>
+<h1 id="asr-llm-tts">ASR-LLM-TTS 高效语音对话系统</h1>
+<p>一个高性能语音交互系统，使用 Faster-Whisper-Turbo、vLLM 和 F5-TTS (TensorRT)</p>
+<h2 id="_11">系统架构</h2>
+<h3 id="asr">ASR（语音识别）</h3>
+<ul>
+<li>使用 Faster-Whisper-Turbo 模型</li>
+<li>CUDA 加速，FP16 精度</li>
+<li>内置 VAD 过滤功能</li>
+</ul>
+<h3 id="llm">LLM（大型语言模型）</h3>
+<ul>
+<li>使用 vLLM 部署</li>
+<li>本地 REST API 接口</li>
+<li>高吞吐量推理引擎</li>
+</ul>
+<h3 id="tts_1">TTS（语音合成）</h3>
+<ul>
+<li>F5-TTS 的 TensorRT 优化版本</li>
+<li>支持参考音频克隆</li>
+<li>并行处理多段文本</li>
+</ul>
+<h2 id="_12">主要特性</h2>
+<h3 id="_13">高效语音处理</h3>
+<p>使用静音检测和 VAD 技术实现高效录音，减少响应延迟。系统会缓存 300ms 的音频以捕捉完整语音起始。</p>
+<h3 id="tts_2">并行 TTS 处理</h3>
+<p>文本分段处理和并行合成，首段优先播放，其余部分并行处理，显著提高响应速度。</p>
+<h3 id="_14">性能监控</h3>
+<p>内置性能计时器，记录各个处理阶段的耗时，便于性能分析和优化。</p>
+<h3 id="_15">日志记录</h3>
+<p>自动保存输入音频和输出合成语音，便于追踪和分析系统行为。</p>
+<h2 id="_16">代码详解</h2>
+<h3 id="_17">导入依赖</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">wave</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">soundfile</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sf</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyaudio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">queue</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">concurrent.futures</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">faster_whisper</span><span class="w"> </span><span class="kn">import</span> <span class="n">WhisperModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAI</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sounddevice</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sd</span>
+</code></pre></div>
+
+<h3 id="_18">系统配置</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 音频参数</span>
+<span class="n">CHUNK</span> <span class="o">=</span> <span class="mi">1024</span>
+<span class="n">FORMAT</span> <span class="o">=</span> <span class="n">pyaudio</span><span class="o">.</span><span class="n">paFloat32</span>
+<span class="n">CHANNELS</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">RATE</span> <span class="o">=</span> <span class="mi">16000</span>
+<span class="n">SILENCE_THRESHOLD</span> <span class="o">=</span> <span class="mf">0.01</span>
+<span class="n">SILENCE_DURATION</span> <span class="o">=</span> <span class="mf">0.8</span>  <span class="c1"># 降低静音判断时间以加快响应速度</span>
+
+<span class="c1"># ASR模型路径</span>
+<span class="n">ASR_MODEL_PATH</span> <span class="o">=</span> <span class="s2">&quot;./whisper_turbo&quot;</span>
+
+<span class="c1"># LLM API</span>
+<span class="n">LLM_BASE_URL</span> <span class="o">=</span> <span class="s2">&quot;http://localhost:6001/v1&quot;</span>
+<span class="n">LLM_API_KEY</span> <span class="o">=</span> <span class="s2">&quot;token-abc123&quot;</span>
+<span class="n">LLM_MODEL_PATH</span> <span class="o">=</span> <span class="s2">&quot;./Qwen/Qwen2___5-3B-Instruct-AWQ&quot;</span>
+
+<span class="c1"># TTS服务</span>
+<span class="n">TTS_SERVER_URL</span> <span class="o">=</span> <span class="s2">&quot;localhost:8000&quot;</span>
+<span class="n">TTS_MODEL_NAME</span> <span class="o">=</span> <span class="s2">&quot;f5_tts&quot;</span>
+<span class="n">REFERENCE_AUDIO_PATH</span> <span class="o">=</span> <span class="s2">&quot;./tts/原来如此，你将见过的景物进行了这样的组合。.wav&quot;</span>
+<span class="n">REFERENCE_TEXT</span> <span class="o">=</span> <span class="s2">&quot;原来如此，你将见过的景物进行了这样的组合。&quot;</span>
+
+<span class="c1"># 日志文件夹</span>
+<span class="n">INPUT_LOG_FOLDER</span> <span class="o">=</span> <span class="s2">&quot;./input_logs&quot;</span>
+<span class="n">OUTPUT_LOG_FOLDER</span> <span class="o">=</span> <span class="s2">&quot;./output_logs&quot;</span>
+
+<span class="c1"># 性能优化参数</span>
+<span class="n">MAX_WORKERS</span> <span class="o">=</span> <span class="mi">4</span>  <span class="c1"># 线程池最大工作线程数</span>
+<span class="n">BATCH_SIZE</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># TTS并行合成的批次大小</span>
+</code></pre></div>
+
+<h3 id="_19">性能计时器类</h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PerformanceTimer</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_times</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_times</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_times</span><span class="p">:</span>
+            <span class="n">elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_times</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">timers</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elapsed</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⏱️ </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> 用时: </span><span class="si">{</span><span class="n">elapsed</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> 秒&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">elapsed</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_average</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">timers</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="n">name</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">===== 性能统计 =====&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">times</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">timers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">times</span><span class="p">:</span>
+                <span class="n">avg</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">times</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+                <span class="n">max_time</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+                <span class="n">min_time</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: 平均 </span><span class="si">{</span><span class="n">avg</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">秒, 最小 </span><span class="si">{</span><span class="n">min_time</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">秒, 最大 </span><span class="si">{</span><span class="n">max_time</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">秒, 共 </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">)</span><span class="si">}</span><span class="s2"> 次&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<h3 id="tts_3">TTS 客户端类</h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FastTTSClient</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_url</span><span class="o">=</span><span class="n">TTS_SERVER_URL</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="n">TTS_MODEL_NAME</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;http://</span><span class="si">{</span><span class="n">server_url</span><span class="si">}</span><span class="s2">/v2/models/</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">/infer&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reference_audio_path</span> <span class="o">=</span> <span class="n">REFERENCE_AUDIO_PATH</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reference_text</span> <span class="o">=</span> <span class="n">REFERENCE_TEXT</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lengths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_reference_audio</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_audio_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text_splitter</span> <span class="o">=</span> <span class="n">TextSplitter</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">audio_queue</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_playing</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">executor</span> <span class="o">=</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">MAX_WORKERS</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">response_cache</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># 缓存TTS响应</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">=</span> <span class="n">PerformanceTimer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">warmup</span><span class="p">()</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clean_text</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;清理文本中的特殊字符和不必要的空白&quot;&quot;&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+        <span class="n">special_chars</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\xa0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\u3000</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\u200b</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\u200c</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\u200d</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">special_chars</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">char</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">synthesize_and_play</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s2">&quot;TTS总耗时&quot;</span><span class="p">)</span>
+
+        <span class="c1"># 清理文本</span>
+        <span class="n">cleaned_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+        <span class="c1"># 分割文本为多个片段</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s2">&quot;文本分割&quot;</span><span class="p">)</span>
+        <span class="n">segments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text_splitter</span><span class="o">.</span><span class="n">split_text</span><span class="p">(</span><span class="n">cleaned_text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s2">&quot;文本分割&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">segments</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># 创建时间戳用于音频文件命名</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S&quot;</span><span class="p">)</span>
+
+        <span class="c1"># 重置播放状态和队列</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">audio_queue</span><span class="o">.</span><span class="n">mutex</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">audio_queue</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_playing</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># 启动播放线程</span>
+        <span class="n">player</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">player_thread</span><span class="p">)</span>
+        <span class="n">player</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">player</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="c1"># 存储合成结果的有序字典，按索引存储，确保按顺序播放</span>
+        <span class="n">segment_results</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">segment_done</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+
+        <span class="c1"># 跟踪当前应该处理的段落索引</span>
+        <span class="n">next_segment_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">segments_total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">segments</span><span class="p">)</span>
+
+        <span class="c1"># 处理并播放第一个分段，确保快速开始</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s2">&quot;首段合成&quot;</span><span class="p">)</span>
+        <span class="n">first_audio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">synthesize_segment_sync</span><span class="p">(</span><span class="n">segments</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">timestamp</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">segments_total</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s2">&quot;首段合成&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">first_audio</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">audio_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">first_audio</span><span class="p">)</span>
+            <span class="n">next_segment_index</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="c1"># 如果还有更多分段，启动并行处理</span>
+        <span class="k">if</span> <span class="n">next_segment_index</span> <span class="o">&lt;</span> <span class="n">segments_total</span><span class="p">:</span>
+            <span class="c1"># 省略部分并行处理代码...</span>
+
+        <span class="c1"># 标记播放完成</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_playing</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># 等待播放线程结束</span>
+        <span class="n">player</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s2">&quot;TTS总耗时&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🔊 所有语音片段播放完成&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<h3 id="textsplitter">TextSplitter 类</h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">TextSplitter</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># 定义分隔符及其优先级（数字越大优先级越高）</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">separators</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;。&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="s1">&#39;！&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="s1">&#39;？&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="s1">&#39;；&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="s1">&#39;，&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+            <span class="s1">&#39;：&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+            <span class="s1">&#39;』&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s1">&#39; &#39;</span><span class="p">:</span> <span class="mi">1</span>
+        <span class="p">}</span>
+        <span class="c1"># 减少目标token长度以加快TTS响应</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_length</span> <span class="o">=</span> <span class="mi">30</span>
+        <span class="c1"># 搜索窗口大小</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window_size</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_best_split_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">start_pos</span><span class="p">,</span> <span class="n">target_pos</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;在目标位置附近寻找最佳分割点&quot;&quot;&quot;</span>
+        <span class="n">best_pos</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">best_priority</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="c1"># 在目标位置前后的窗口内寻找最佳分割点</span>
+        <span class="n">search_start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">start_pos</span><span class="p">,</span> <span class="n">target_pos</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_size</span><span class="p">)</span>
+        <span class="n">search_end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">),</span> <span class="n">target_pos</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_size</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">search_start</span><span class="p">,</span> <span class="n">search_end</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+                <span class="k">break</span>
+
+            <span class="n">char</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">char</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">separators</span><span class="p">:</span>
+                <span class="n">priority</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">separators</span><span class="p">[</span><span class="n">char</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">priority</span> <span class="o">&gt;</span> <span class="n">best_priority</span><span class="p">:</span>
+                    <span class="n">best_pos</span> <span class="o">=</span> <span class="n">i</span>
+                    <span class="n">best_priority</span> <span class="o">=</span> <span class="n">priority</span>
+
+        <span class="c1"># 如果没找到合适的分割点，就在目标位置处强制分割</span>
+        <span class="k">if</span> <span class="n">best_pos</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">target_pos</span>
+
+        <span class="k">return</span> <span class="n">best_pos</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># 返回分隔符后的位置</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">split_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;将文本分割成较小的片段&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="n">segments</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">while</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+            <span class="c1"># 省略部分分割逻辑...</span>
+
+        <span class="k">return</span> <span class="n">segments</span>
+</code></pre></div>
+
+<h3 id="audiorecorder">AudioRecorder 类</h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AudioRecorder</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timer</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">pyaudio</span><span class="o">.</span><span class="n">PyAudio</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frames</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_recording</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">silence_frames</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_speaking</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">=</span> <span class="n">timer</span>
+
+        <span class="c1"># 优化音量检测参数</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">volume_threshold</span> <span class="o">=</span> <span class="mf">0.015</span>  <span class="c1"># 稍微降低阈值提高灵敏度</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_speak_frames</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.15</span> <span class="o">*</span> <span class="n">RATE</span> <span class="o">/</span> <span class="n">CHUNK</span><span class="p">)</span>  <span class="c1"># 减少最少说话帧数(150ms)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pre_buffer</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># 预缓冲区</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pre_buffer_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.3</span> <span class="o">*</span> <span class="n">RATE</span> <span class="o">/</span> <span class="n">CHUNK</span><span class="p">)</span>  <span class="c1"># 减少预缓冲(300ms)以降低延迟</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">speak_frames</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># 说话帧计数</span>
+
+        <span class="c1"># 波形能量计算的滑动窗口</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_window_size</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_window</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_audio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">CHUNK</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="c1"># 计算当前帧的能量</span>
+        <span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+
+        <span class="c1"># 更新能量窗口</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_window</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energy_window</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_window_size</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">energy_window</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># 使用滑动窗口平均能量进行更稳定的检测</span>
+        <span class="n">avg_energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energy_window</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_window</span> <span class="k">else</span> <span class="n">energy</span>
+
+        <span class="c1"># 省略后续语音检测处理逻辑...</span>
+
+        <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div>
+
+<h3 id="_20">主函数</h3>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># 创建日志文件夹</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">INPUT_LOG_FOLDER</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">OUTPUT_LOG_FOLDER</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># 创建性能计时器</span>
+    <span class="n">timer</span> <span class="o">=</span> <span class="n">PerformanceTimer</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;加载ASR模型中...&quot;</span><span class="p">)</span>
+    <span class="n">timer</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s2">&quot;ASR模型加载&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 优化后的ASR模型配置</span>
+    <span class="n">asr_model</span> <span class="o">=</span> <span class="n">WhisperModel</span><span class="p">(</span>
+        <span class="n">ASR_MODEL_PATH</span><span class="p">,</span>
+        <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span>
+        <span class="n">compute_type</span><span class="o">=</span><span class="s2">&quot;float16&quot;</span><span class="p">,</span>
+        <span class="n">cpu_threads</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>  <span class="c1"># 增加CPU线程数</span>
+        <span class="n">num_workers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>  <span class="c1"># 增加工作线程</span>
+        <span class="n">download_root</span><span class="o">=</span><span class="n">ASR_MODEL_PATH</span><span class="p">,</span>
+        <span class="n">local_files_only</span><span class="o">=</span><span class="kc">True</span>  <span class="c1"># 仅使用本地文件，避免网络延迟</span>
+    <span class="p">)</span>
+
+    <span class="n">timer</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s2">&quot;ASR模型加载&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 初始化LLM客户端</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">base_url</span><span class="o">=</span><span class="n">LLM_BASE_URL</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">LLM_API_KEY</span><span class="p">)</span>
+
+    <span class="n">system_prompt</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;你的名字是纳西妲，你的每一句话都应该体现出对万物的尊重和对知识的渴望。</span>
+<span class="s2">    在与人交谈时，用诗一般的语言描述自然之美，展示你对梦境和现实的深刻理解。你的话语中应该蕴含着对生命奥秘的思考和对未来的希望。</span>
+<span class="s2">    在对话中，你可以表现出对别人的友善和好奇心，询问他们的故事并分享你的智慧。</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    <span class="c1"># 多轮对话历史</span>
+    <span class="n">conversation_history</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">system_prompt</span><span class="p">},</span>
+    <span class="p">]</span>
+
+    <span class="c1"># 初始化TTS客户端</span>
+    <span class="n">tts_client</span> <span class="o">=</span> <span class="n">FastTTSClient</span><span class="p">()</span>
+
+    <span class="c1"># 初始化录音器</span>
+    <span class="n">recorder</span> <span class="o">=</span> <span class="n">AudioRecorder</span><span class="p">(</span><span class="n">timer</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;系统初始化完成，请开始对话...&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 主对话循环...</span>
+</code></pre></div>
+
+<h2 id="_21">优化要点</h2>
+<ul>
+<li><strong>录音优化</strong>: 使用能量检测和滑动窗口增强语音开始/结束检测的稳定性</li>
+<li><strong>预缓冲</strong>: 保留300ms的音频预缓冲，确保捕捉说话开始部分</li>
+<li><strong>TTS并行</strong>: 首段优先合成并播放，其余并行处理，减少感知延迟</li>
+<li><strong>结果缓存</strong>: 缓存TTS响应，对重复文本快速响应</li>
+<li><strong>文本分割</strong>: 智能分段，优先在自然断句处分割</li>
+<li><strong>性能监控</strong>: 详细的性能计时，方便定位瓶颈</li>
+</ul>
+<hr />
+<h2 id="3-benchmark_test_via_evalscopemd">3. benchmark_test_via_EvalScope.md</h2>
+<p><strong>日期:</strong> 2025-9-26<br />
+<strong>标签:</strong> LLM, Benchmark, Qwen3, Beginner, EvalScope</p>
+<h1 id="qwen3-30b-a3b-instruct-benchmark-evaluation-report">Qwen3-30B-A3B-Instruct Benchmark Evaluation Report</h1>
+<p><strong>Evaluation Date:</strong> 2025-09-25<br />
+<strong>Framework:</strong> OpenCompass with EvalScope<br />
+<strong>Author:</strong> Cialtion (cialtion@outlook.com)</p>
+<h2 id="abstract">Abstract</h2>
+<p>This study presents a comprehensive benchmark evaluation of Qwen3-30B-A3B-Instruct model with AWQ 4-bit quantization across 14 standard datasets, achieving an average score of 0.7816 through offline evaluation methodology.</p>
+<h2 id="1-system-configuration-and-parameters">1. System Configuration and Parameters</h2>
+<h3 id="11-hardware-environment">1.1 Hardware Environment</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Specification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GPU</td>
+<td>NVIDIA H100 80GB HBM3</td>
+</tr>
+<tr>
+<td>CUDA Driver</td>
+<td>570.124.06</td>
+</tr>
+<tr>
+<td>CUDA Runtime</td>
+<td>12.9</td>
+</tr>
+<tr>
+<td>Python</td>
+<td>3.10.18</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12-model-configuration">1.2 Model Configuration</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Model</td>
+<td>Qwen3-30B-A3B-Instruct (AWQ 4-bit quantized)</td>
+</tr>
+<tr>
+<td>Model Path</td>
+<td><MODEL_PATH>/Qwen3-30B-A3B-Instruct-2507-AWQ</td>
+</tr>
+<tr>
+<td>Served Name</td>
+<td>qwen3-30b-instruct</td>
+</tr>
+<tr>
+<td>Context Length</td>
+<td>16,192 tokens</td>
+</tr>
+<tr>
+<td>Quantization</td>
+<td>AWQ (4-bit)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="13-deployment-parameters">1.3 Deployment Parameters</h3>
+<div class="highlight"><pre><span></span><code><span class="nv">CUDA_VISIBLE_DEVICES</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>vllm.entrypoints.openai.api_server<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--model<span class="w"> </span>&lt;MODEL_PATH&gt;/Qwen3-30B-A3B-Instruct-2507-AWQ<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--port<span class="w"> </span><span class="m">8001</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--tensor-parallel-size<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--gpu-memory-utilization<span class="w"> </span><span class="m">0</span>.92<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--max-model-len<span class="w"> </span><span class="m">16192</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--max-num-seqs<span class="w"> </span><span class="m">64</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--max-num-batched-tokens<span class="w"> </span><span class="m">105536</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--swap-space<span class="w"> </span><span class="m">64</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--served-model-name<span class="w"> </span>qwen3-30b-instruct<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--trust-remote-code<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--quantization<span class="w"> </span>awq<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--disable-log-stats<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--enable-auto-tool-choice<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--tool-call-parser<span class="w"> </span>qwen3_coder
+</code></pre></div>
+
+<h3 id="14-evaluation-configuration">1.4 Evaluation Configuration</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td>http://127.0.0.1:8001/v1/chat/completions</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>Max Tokens</td>
+<td>4,096</td>
+</tr>
+<tr>
+<td>Top-p</td>
+<td>0.9</td>
+</tr>
+<tr>
+<td>Batch Sizes</td>
+<td>8-32 (task-dependent)</td>
+</tr>
+<tr>
+<td>Dataset Source</td>
+<td>EvalScope default configuration downloads</td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-benchmark-results">2. Benchmark Results</h2>
+<h3 id="21-dataset-coverage">2.1 Dataset Coverage</h3>
+<p><strong>Note:</strong> Dataset availability depends on EvalScope's default configuration downloads. Some datasets may be incomplete or unavailable in offline mode.</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total Evaluated</td>
+<td>14 datasets</td>
+</tr>
+<tr>
+<td>Evaluation Time</td>
+<td>386.9 minutes</td>
+</tr>
+<tr>
+<td>Average Score</td>
+<td>0.7816</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22-detailed-results-by-category">2.2 Detailed Results by Category</h3>
+<h4 id="reasoning-and-logic">Reasoning and Logic</h4>
+<table>
+<thead>
+<tr>
+<th>Dataset</th>
+<th>Description</th>
+<th>Score</th>
+<th>Subsets</th>
+<th>Eval Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ARC</td>
+<td>AI2 Reasoning Challenge</td>
+<td>0.9369</td>
+<td>Easy: 0.9407, Challenge: 0.9292</td>
+<td>0.4min</td>
+</tr>
+<tr>
+<td>HellaSwag</td>
+<td>Commonsense NLI</td>
+<td>0.8633</td>
+<td>-</td>
+<td>1.4min</td>
+</tr>
+<tr>
+<td>WinoGrande</td>
+<td>Coreference Resolution</td>
+<td>0.7174</td>
+<td>-</td>
+<td>0.1min</td>
+</tr>
+<tr>
+<td>GSM8K</td>
+<td>Grade School Math</td>
+<td>0.9447</td>
+<td>-</td>
+<td>2.8min</td>
+</tr>
+<tr>
+<td>DROP</td>
+<td>Reading Comprehension</td>
+<td>0.8187</td>
+<td>-</td>
+<td>26.3min</td>
+</tr>
+</tbody>
+</table>
+<h4 id="knowledge-and-understanding">Knowledge and Understanding</h4>
+<table>
+<thead>
+<tr>
+<th>Dataset</th>
+<th>Description</th>
+<th>Score</th>
+<th>Subsets</th>
+<th>Eval Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MMLU</td>
+<td>Massive Multitask Language Understanding</td>
+<td>0.8506</td>
+<td>57 subjects</td>
+<td>75.2min</td>
+</tr>
+<tr>
+<td>MMLU-Pro</td>
+<td>Enhanced MMLU</td>
+<td>0.7266</td>
+<td>14 domains</td>
+<td>167.6min</td>
+</tr>
+<tr>
+<td>TruthfulQA</td>
+<td>Truthfulness in QA</td>
+<td>0.7491</td>
+<td>Multiple choice</td>
+<td>0.1min</td>
+</tr>
+<tr>
+<td>GPQA-Diamond</td>
+<td>Graduate-level Science QA</td>
+<td>0.5101</td>
+<td>-</td>
+<td>3.0min</td>
+</tr>
+</tbody>
+</table>
+<h4 id="code-generation">Code Generation</h4>
+<table>
+<thead>
+<tr>
+<th>Dataset</th>
+<th>Description</th>
+<th>Score</th>
+<th>Subsets</th>
+<th>Eval Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HumanEval</td>
+<td>Python Code Generation</td>
+<td>0.9024</td>
+<td>-</td>
+<td>0.5min</td>
+</tr>
+<tr>
+<td>ToolBench</td>
+<td>Tool Usage Evaluation</td>
+<td>0.3996</td>
+<td>In-domain: 0.0563, Out-domain: 0.0591</td>
+<td>7.1min</td>
+</tr>
+</tbody>
+</table>
+<h4 id="chinese-language">Chinese Language</h4>
+<table>
+<thead>
+<tr>
+<th>Dataset</th>
+<th>Description</th>
+<th>Score</th>
+<th>Subsets</th>
+<th>Eval Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C-MMLU</td>
+<td>Chinese MMLU</td>
+<td>0.8382</td>
+<td>67 subjects</td>
+<td>76.8min</td>
+</tr>
+<tr>
+<td>C-Eval</td>
+<td>Chinese Evaluation Suite</td>
+<td>0.8232</td>
+<td>52 subjects</td>
+<td>23.0min</td>
+</tr>
+</tbody>
+</table>
+<h4 id="instruction-following">Instruction Following</h4>
+<table>
+<thead>
+<tr>
+<th>Dataset</th>
+<th>Description</th>
+<th>Score</th>
+<th>Subsets</th>
+<th>Eval Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IFEval</td>
+<td>Instruction Following</td>
+<td>0.8616</td>
+<td>-</td>
+<td>2.5min</td>
+</tr>
+</tbody>
+</table>
+<h3 id="23-summary-statistics">2.3 Summary Statistics</h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Datasets</th>
+<th>Mean Score</th>
+<th>Std Dev</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reasoning</td>
+<td>5</td>
+<td>0.8562</td>
+<td>0.0861</td>
+</tr>
+<tr>
+<td>Knowledge</td>
+<td>4</td>
+<td>0.7091</td>
+<td>0.1396</td>
+</tr>
+<tr>
+<td>Code</td>
+<td>2</td>
+<td>0.6510</td>
+<td>0.3514</td>
+</tr>
+<tr>
+<td>Chinese</td>
+<td>2</td>
+<td>0.8307</td>
+<td>0.0106</td>
+</tr>
+<tr>
+<td>Instruction</td>
+<td>1</td>
+<td>0.8616</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-evaluation-framework-commands">3. Evaluation Framework Commands</h2>
+<h3 id="31-dataset-preparation">3.1 Dataset Preparation</h3>
+<p>Datasets are automatically downloaded via EvalScope's default configuration:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Dataset availability determined by EvalScope cache</span>
+<span class="n">OFFLINE_DATASETS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;arc&#39;</span><span class="p">:</span> <span class="s1">&#39;Multi-choice reasoning with standard answers&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;hellaswag&#39;</span><span class="p">:</span> <span class="s1">&#39;Commonsense reasoning with standard answers&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;mmlu&#39;</span><span class="p">:</span> <span class="s1">&#39;Multi-choice questions with standard answers&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;gsm8k&#39;</span><span class="p">:</span> <span class="s1">&#39;Math problems with computable answers&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;humaneval&#39;</span><span class="p">:</span> <span class="s1">&#39;Code generation with executable tests&#39;</span><span class="p">,</span>
+    <span class="c1"># ... additional datasets as available</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="32-evaluation-execution">3.2 Evaluation Execution</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Basic evaluation configuration</span>
+<span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="s1">&#39;qwen3-30b-instruct&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;api_url&#39;</span><span class="p">:</span> <span class="s1">&#39;http://127.0.0.1:8001/v1/chat/completions&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;eval_type&#39;</span><span class="p">:</span> <span class="s1">&#39;openai_api&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;datasets&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">dataset_name</span><span class="p">],</span>
+    <span class="s1">&#39;generation_config&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;temperature&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+        <span class="s1">&#39;max_tokens&#39;</span><span class="p">:</span> <span class="mi">4096</span><span class="p">,</span>
+        <span class="s1">&#39;top_p&#39;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;work_dir&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;outputs/qwen3-30b-instruct/</span><span class="si">{</span><span class="n">dataset_name</span><span class="si">}</span><span class="s1">&#39;</span>
+<span class="p">}</span>
+
+<span class="c1"># Execute evaluation</span>
+<span class="n">run_task</span><span class="p">(</span><span class="n">task_cfg</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+</code></pre></div>
+
+<h3 id="33-result-aggregation">3.3 Result Aggregation</h3>
+<p>Results are collected from the standard OpenCompass output structure:</p>
+<div class="highlight"><pre><span></span><code>outputs/
+└── qwen3-30b-instruct/
+    └── {dataset}/
+        └── {timestamp}/
+            └── reports/
+                └── qwen3-30b-instruct/
+                    └── {dataset}.json
+</code></pre></div>
+
+<p>Each JSON contains:
+- <code>score</code>: Overall performance metric
+- <code>metrics</code>: Detailed breakdown including subsets
+- <code>dataset_description</code>: Task description
+- <code>num_samples</code>: Number of evaluated samples</p>
+<h3 id="34-offline-mode-enforcement">3.4 Offline Mode Enforcement</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Environment variables for strict offline mode</span>
+<span class="n">offline_env</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;HF_DATASETS_OFFLINE&#39;</span><span class="p">:</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;HF_HUB_OFFLINE&#39;</span><span class="p">:</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;TRANSFORMERS_OFFLINE&#39;</span><span class="p">:</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;MODELSCOPE_OFFLINE&#39;</span><span class="p">:</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Note:</strong> Some datasets requiring online judge models (e.g., subjective evaluation tasks) are automatically skipped in offline mode. The evaluation framework prioritizes datasets with deterministic scoring mechanisms.</p>
+<h2 id="appendix">Appendix</h2>
+<h3 id="a1-reproduction-information">A.1 Reproduction Information</h3>
+<div class="highlight"><pre><span></span><code># Environment setup
+Python 3.10.18
+CUDA 12.9, Driver 570.124.06
+GPU: NVIDIA H100 80GB HBM3
+
+# Model serving
+vLLM with AWQ quantization
+API: OpenAI-compatible endpoint
+Concurrent sequences: 64
+Batch tokens: 105,536
+</code></pre></div>
+
+<h3 id="a2-data-availability">A.2 Data Availability</h3>
+<p>Dataset completeness subject to:
+- EvalScope default download configuration
+- Network connectivity during setup
+- Dataset licensing and availability
+- Offline evaluation compatibility</p>
+<p><strong>Contact Information:</strong>
+- GitHub: HaxxorCialtion
+- Email: cialtion@outlook.com</p>
+<hr />
+<h2 id="4-ollamamd">4. Ollama工具函数调用测试记录.md</h2>
+<p><strong>日期:</strong> 2024-12-02<br />
+<strong>标签:</strong> LLM, Ollama, functional calling</p>
+<h1 id="ollama">Ollama 工具函数调用测试记录</h1>
+<h2 id="_22">环境配置</h2>
+<ul>
+<li>操作系统: Windows 11</li>
+<li>CPU: Intel i7-13700K</li>
+<li>GPU: NVIDIA RTX 2080 Ti 22GB</li>
+<li>显存占用: 12GB</li>
+<li>模型: hhao/qwen2.5-coder-tools:7b (4.7GB)</li>
+</ul>
+<h2 id="_23">测试工具函数</h2>
+<ol>
+<li><code>calculate_fibonacci(n)</code>: 计算第 n 个斐波那契数</li>
+<li><code>calculate_factorial(n)</code>: 计算 n 的阶乘</li>
+<li><code>get_timestamp()</code>: 获取当前时间戳</li>
+</ol>
+<h2 id="_24">测试结果</h2>
+<h3 id="_25">并行调用测试结果</h3>
+<ul>
+<li>斐波那契数列计算:</li>
+<li>第20项: 6,765</li>
+<li>第50项: 12,586,269,025</li>
+<li>
+<p>第100项: 354,224,848,179,261,915,075</p>
+</li>
+<li>
+<p>阶乘计算:</p>
+</li>
+<li>
+<p>100 的阶乘: 9.33262e+157 （完整值已省略）</p>
+</li>
+<li>
+<p>时间戳:</p>
+</li>
+<li>1733089159.7644596</li>
+</ul>
+<h3 id="_26">错误处理测试结果</h3>
+<div class="highlight"><pre><span></span><code><span class="err">输入</span><span class="o">:</span><span class="w"> </span><span class="err">计算</span><span class="w"> </span><span class="o">-</span><span class="mi">5</span><span class="w"> </span><span class="err">的阶乘</span>
+<span class="err">返回</span><span class="o">:</span><span class="w"> </span><span class="o">{</span><span class="s2">&quot;error&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Factorial is not defined for negative numbers&quot;</span><span class="o">}</span>
+</code></pre></div>
+
+<h2 id="_27">性能指标</h2>
+<ul>
+<li>LLM 推理总时间: 2.64 秒</li>
+<li>显存占用: 12GB</li>
+</ul>
+<h2 id="_28">结论</h2>
+<ul>
+<li>模型能够成功处理多个并行工具函数调用</li>
+<li>错误处理机制运行正常</li>
+<li>推理速度表现良好</li>
+<li>内存占用在合理范围内</li>
+</ul>
+<hr />
+<h2 id="5-zero3md">5. 香橙派Zero3三段式网络配置完全指南.md</h2>
+<p><strong>日期:</strong> 2025-8-23<br />
+<strong>标签:</strong> 嵌入式, 网络, 香橙派, 香橙派zero3</p>
+<h1 id="zero3">香橙派Zero3三段式网络配置完全指南</h1>
+<p>Ubuntu 22.04.4 LTS • 完整配置方案 • 故障排除指南</p>
+<h2 id="_29">目录导航</h2>
+<ul>
+<li>环境信息</li>
+<li>配置目标</li>
+<li>完整配置步骤</li>
+<li>常见问题及解决方案</li>
+<li>使用场景验证</li>
+<li>常用管理命令</li>
+<li>总结</li>
+</ul>
+<h2 id="_30">环境信息</h2>
+<h3 id="_31">硬件平台：</h3>
+<ul>
+<li>香橙派Zero3</li>
+<li>支持有线网络和WiFi</li>
+</ul>
+<h3 id="_32">软件环境：</h3>
+<div class="highlight"><pre><span></span><code>Linux orangepizero3 6.1.31-sun50iw9 #1.0.4 SMP Thu Jul 11 16:37:41 CST 2024 aarch64 aarch64 aarch64 GNU/Linux
+Ubuntu 22.04.4 LTS (jammy)
+</code></pre></div>
+
+<h2 id="_33">配置目标</h2>
+<p>实现三段式网络配置，按优先级自动连接：</p>
+<ol>
+<li><strong>有线网络</strong> - 最高优先级</li>
+<li><strong>家庭WiFi</strong> - 中等优先级</li>
+<li><strong>手机热点</strong> - 备用网络</li>
+</ol>
+<p>同时确保SSH服务在任何网络环境下都可用。</p>
+<h2 id="_34">完整配置步骤</h2>
+<h3 id="1-ssh">1. 基础SSH服务配置</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 更新系统包</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>update
+
+<span class="c1"># 安装SSH服务</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>openssh-server<span class="w"> </span>-y
+
+<span class="c1"># 启用SSH服务开机自启</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>ssh
+sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>ssh
+
+<span class="c1"># 检查SSH状态</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>ssh
+</code></pre></div>
+
+<h3 id="2">2. 安装网络管理器</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 安装NetworkManager（处理中文WiFi名称更好）</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>network-manager<span class="w"> </span>-y
+
+<span class="c1"># 启用NetworkManager</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>NetworkManager
+sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>NetworkManager
+</code></pre></div>
+
+<h3 id="3-netplan">3. 创建netplan网络配置</h3>
+<p>创建主配置文件：</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>nano<span class="w"> </span>/etc/netplan/01-network-manager-all.yaml
+</code></pre></div>
+
+<p>写入以下配置内容：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">network</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">  </span><span class="nt">renderer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NetworkManager</span>
+<span class="w">  </span><span class="nt">ethernets</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">eth0</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">dhcp4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">nameservers</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">addresses</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">114.114.114.114</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">8.8.8.8</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">routes</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">          </span><span class="nt">via</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.2.1</span>
+<span class="w">          </span><span class="nt">metric</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">          </span><span class="nt">on-link</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">wifis</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">wlan0</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">dhcp4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">nameservers</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">addresses</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">114.114.114.114</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">8.8.8.8</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">routes</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">          </span><span class="nt">via</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.2.1</span>
+<span class="w">          </span><span class="nt">metric</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">600</span>
+<span class="w">          </span><span class="nt">on-link</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">access-points</span><span class="p">:</span>
+<span class="w">        </span><span class="s">&quot;Your-Family-WIFI&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">          </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;xxxxxxxx&quot;</span>
+<span class="w">        </span><span class="s">&quot;Your-Mobile-Hotspot&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">          </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;xxxxxxxx&quot;</span>
+</code></pre></div>
+
+<p><strong>重要说明：</strong>
+- <code>metric</code> 值越小优先级越高
+- 有线网 metric: 100（最高优先级）
+- WiFi metric: 600（较低优先级）
+- 可根据实际网络环境调整网关地址和WiFi信息</p>
+<h3 id="4">4. 设置配置文件权限</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 设置正确的文件权限</span>
+sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>/etc/netplan/01-network-manager-all.yaml
+
+<span class="c1"># 如果存在其他netplan文件也需要设置权限</span>
+sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>/etc/netplan/orangepi-default.yaml
+</code></pre></div>
+
+<h3 id="5">5. 应用网络配置</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 检查配置语法</span>
+sudo<span class="w"> </span>netplan<span class="w"> </span>--debug<span class="w"> </span>try
+
+<span class="c1"># 应用配置</span>
+sudo<span class="w"> </span>netplan<span class="w"> </span>apply
+
+<span class="c1"># 重启网络服务确保生效</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>NetworkManager
+</code></pre></div>
+
+<h3 id="6">6. 验证网络配置</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 查看网络连接状态</span>
+nmcli<span class="w"> </span>dev<span class="w"> </span>status
+
+<span class="c1"># 查看已配置的连接</span>
+nmcli<span class="w"> </span>con<span class="w"> </span>show
+
+<span class="c1"># 查看路由表（确认优先级）</span>
+ip<span class="w"> </span>route<span class="w"> </span>show
+
+<span class="c1"># 测试网络连通性</span>
+ping<span class="w"> </span>-c<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="m">8</span>.8.8.8
+</code></pre></div>
+
+<h3 id="7">7. 测试故障转移功能</h3>
+<h4 id="wifi">测试有线到WiFi切换：</h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># 临时禁用有线网络</span>
+sudo<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span><span class="nb">set</span><span class="w"> </span>eth0<span class="w"> </span>down
+
+<span class="c1"># 等待WiFi自动连接</span>
+sleep<span class="w"> </span><span class="m">10</span>
+
+<span class="c1"># 测试网络连通性</span>
+ping<span class="w"> </span>-c<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="m">8</span>.8.8.8
+
+<span class="c1"># 恢复有线网络</span>
+sudo<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span><span class="nb">set</span><span class="w"> </span>eth0<span class="w"> </span>up
+</code></pre></div>
+
+<h4 id="wifi_1">测试WiFi间自动切换：</h4>
+<ol>
+<li>关闭主WiFi网络</li>
+<li>开启备用WiFi网络</li>
+<li>观察自动切换情况</li>
+</ol>
+<h2 id="_35">常见问题及解决方案</h2>
+<h3 id="1">问题1：权限警告</h3>
+<p><strong>错误信息：</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nv">Permissions</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="o">/</span><span class="nv">etc</span><span class="o">/</span><span class="nv">netplan</span><span class="o">/</span><span class="nv">xxx</span>.<span class="nv">yaml</span><span class="w"> </span><span class="nv">are</span><span class="w"> </span><span class="nv">too</span><span class="w"> </span><span class="nv">open</span>
+</code></pre></div>
+
+<p><strong>解决方案：</strong></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>/etc/netplan/*.yaml
+</code></pre></div>
+
+<h3 id="2route-metric">问题2：route-metric配置错误</h3>
+<p><strong>错误信息：</strong></p>
+<div class="highlight"><pre><span></span><code>Error in network definition: link and host routes must specify a &#39;to&#39; IP
+</code></pre></div>
+
+<p><strong>解决方案：</strong>
+- 不要使用 <code>route-metric</code> 直接配置
+- 改用 <code>routes</code> 部分配置，包含完整的路由信息
+- 或使用 <code>dhcp4-overrides</code> 中的 <code>route-metric</code></p>
+<h3 id="3wifi">问题3：中文WiFi名称显示异常</h3>
+<p><strong>现象：</strong> WiFi扫描显示为UTF-8编码字符串</p>
+<p><strong>解决方案：</strong>
+- 使用NetworkManager作为renderer
+- NetworkManager对中文SSID支持更好
+- 在配置文件中正确使用双引号包围SSID名称</p>
+<h3 id="4wifi">问题4：WiFi故障转移不工作</h3>
+<p><strong>现象：</strong> 有线网断开后，WiFi无法自动提供网络连接</p>
+<p><strong>解决方案：</strong>
+- 确保使用完整的路由配置，包含 <code>to: default</code>
+- 设置不同的metric值确保优先级
+- 使用 <code>on-link: true</code> 参数</p>
+<h3 id="5_1">问题5：手机热点设备隔离</h3>
+<p><strong>现象：</strong> 连接手机热点后，设备间无法通信</p>
+<p><strong>解决方案：</strong>
+- 检查手机热点设置，关闭"设备隔离"或"AP隔离"
+- 确保热点允许设备间通信
+- 某些手机需要在热点高级设置中开启</p>
+<h2 id="_36">使用场景验证</h2>
+<h3 id="1wifi">场景1：在家使用（有线+家庭WiFi）</h3>
+<ol>
+<li>插入网线：自动使用有线网络</li>
+<li>拔掉网线：自动切换到家庭WiFi</li>
+<li>PC通过同一网络SSH连接香橙派</li>
+</ol>
+<h3 id="2_1">场景2：外出使用（手机热点）</h3>
+<ol>
+<li>关闭家庭WiFi或离开家庭网络覆盖</li>
+<li>开启手机热点</li>
+<li>香橙派自动连接到预设的手机热点</li>
+<li>PC连接同一热点后可SSH访问香橙派</li>
+</ol>
+<h3 id="3">场景3：网络优先级测试</h3>
+<p>当多个网络同时可用时：
+- 有线网络优先级最高
+- 家庭WiFi次之
+- 手机热点作为备用</p>
+<h2 id="_37">常用管理命令</h2>
+<h3 id="_38">查看网络状态</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 查看所有网络设备状态</span>
+nmcli<span class="w"> </span>dev<span class="w"> </span>status
+
+<span class="c1"># 查看WiFi网络列表</span>
+sudo<span class="w"> </span>nmcli<span class="w"> </span>dev<span class="w"> </span>wifi<span class="w"> </span>list
+
+<span class="c1"># 查看当前IP地址</span>
+ip<span class="w"> </span>addr<span class="w"> </span>show
+
+<span class="c1"># 查看路由表</span>
+ip<span class="w"> </span>route<span class="w"> </span>show
+</code></pre></div>
+
+<h3 id="_39">手动网络管理</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 手动连接WiFi</span>
+sudo<span class="w"> </span>nmcli<span class="w"> </span>dev<span class="w"> </span>wifi<span class="w"> </span>connect<span class="w"> </span><span class="s2">&quot;WiFi名称&quot;</span><span class="w"> </span>password<span class="w"> </span><span class="s2">&quot;密码&quot;</span>
+
+<span class="c1"># 断开网络连接</span>
+sudo<span class="w"> </span>nmcli<span class="w"> </span>con<span class="w"> </span>down<span class="w"> </span><span class="s2">&quot;连接名称&quot;</span>
+
+<span class="c1"># 启用网络连接</span>
+sudo<span class="w"> </span>nmcli<span class="w"> </span>con<span class="w"> </span>up<span class="w"> </span><span class="s2">&quot;连接名称&quot;</span>
+</code></pre></div>
+
+<h3 id="ssh">SSH连接</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 通过IP地址连接</span>
+ssh<span class="w"> </span>username@IP地址
+
+<span class="c1"># 查看香橙派当前IP</span>
+hostname<span class="w"> </span>-I
+</code></pre></div>
+
+<h3 id="_40">配置文件备份</h3>
+<p>建议备份重要配置文件：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 备份netplan配置</span>
+sudo<span class="w"> </span>cp<span class="w"> </span>/etc/netplan/01-network-manager-all.yaml<span class="w"> </span>~/network-backup.yaml
+
+<span class="c1"># 备份SSH配置</span>
+sudo<span class="w"> </span>cp<span class="w"> </span>/etc/ssh/sshd_config<span class="w"> </span>~/ssh-backup.conf
+</code></pre></div>
+
+<h2 id="_41">总结</h2>
+<p>这套配置方案适用于香橙派Zero3 + Ubuntu 22.04.4 LTS环境，实现了：</p>
+<ul>
+<li>有线网络优先级管理</li>
+<li>多WiFi网络自动切换</li>
+<li>中文SSID支持</li>
+<li>SSH服务持久化</li>
+<li>网络故障自动恢复</li>
+<li>重启后配置自动生效</li>
+</ul>
+<p>通过这种三段式网络配置，可以确保香橙派在不同网络环境下都能保持稳定的连接，并支持远程SSH管理。</p>
+<hr />
+<h2 id="6-qwen-deepseekagentmd">6. Qwen-Deepseek构建数学agent.md</h2>
+<p><strong>日期:</strong> 2024-09-22<br />
+<strong>标签:</strong> LLM, Agent, Math, Markdown</p>
+<h1 id="qwen-deepseekagent">Qwen-Deepseek构建数学agent</h1>
+<p>使用 <code>qwen2-math</code> API 构建 QQ 机器人。</p>
+<h2 id="_42">流程图</h2>
+<p><img alt="流程图" src="../images/assets/flow.png" /></p>
+<h2 id="pip">PIP 安装依赖</h2>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</code></pre></div>
+
+<h2 id="_43">其他说明</h2>
+<ul>
+<li>你可以仅关注 prompt 的构建，也可以将此项目与其他 LLM API 服务结合，或用于 QQ/微信机器人等场景。</li>
+<li>使用不同的 LLM API 时，需要修改 <code>math_api.py</code> 中的一些设置。</li>
+<li>默认模型为 <strong>qwen2-math-72b-instruct</strong> 与 <strong>deepseek-coder</strong>。</li>
+<li>例如，提问：<blockquote>
+<p>你能帮我解氢原子基态的能量方程吗？特别是通过求解它的薛定谔方程。</p>
+</blockquote>
+</li>
+<li>你将会得到如下结果：</li>
+</ul>
+<p><img alt="数学求解示例" src="../images/assets/sch.png" /></p>
+<hr />
+<h2 id="7-md">7. 树莓派连接蓝牙耳机.md</h2>
+<p><strong>日期:</strong> 2025-4-12<br />
+<strong>标签:</strong> Raspberry Pi, Bluetooth, 树莓派4B</p>
+<h1 id="_44">树莓派连接蓝牙耳机</h1>
+<h2 id="1_1">1. 首次配置（仅需执行一次）</h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># 安装必要的包</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bluetooth<span class="w"> </span>bluez<span class="w"> </span>bluez-tools<span class="w"> </span>rfkill<span class="w"> </span>pulseaudio<span class="w"> </span>pulseaudio-module-bluetooth<span class="w"> </span>pavucontrol
+
+<span class="c1"># 启用蓝牙服务开机自启</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>bluetooth
+
+<span class="c1"># 确保配置文件包含正确设置</span>
+sudo<span class="w"> </span>nano<span class="w"> </span>/etc/bluetooth/main.conf
+</code></pre></div>
+
+<p>在main.conf中确保有以下配置：</p>
+<div class="highlight"><pre><span></span><code><span class="k">[General]</span>
+<span class="na">Enable</span><span class="o">=</span><span class="s">Source,Sink,Media,Socket</span>
+</code></pre></div>
+
+<h2 id="2_2">2. 快速连接方法（重启后）</h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># 进入蓝牙控制台</span>
+bluetoothctl
+
+<span class="c1"># 在bluetoothctl中执行：</span>
+power<span class="w"> </span>on
+connect<span class="w"> </span><span class="m">08</span>:F0:B6:C5:02:A6<span class="w">    </span><span class="c1"># 替换为你的耳机MAC地址</span>
+</code></pre></div>
+
+<h2 id="3_1">3. 完整连接流程（如果快速连接失败）</h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># 在bluetoothctl中执行：</span>
+power<span class="w"> </span>on
+scan<span class="w"> </span>on
+pair<span class="w"> </span><span class="m">08</span>:F0:B6:C5:02:A6
+trust<span class="w"> </span><span class="m">08</span>:F0:B6:C5:02:A6
+connect<span class="w"> </span><span class="m">08</span>:F0:B6:C5:02:A6
+</code></pre></div>
+
+<h2 id="4_1">4. 测试音频</h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># 播放测试音频</span>
+aplay<span class="w"> </span>/usr/share/sounds/alsa/Front_Center.wav
+</code></pre></div>
+
+<h2 id="_45">故障排除</h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># 如果听不到声音，重启音频服务</span>
+pulseaudio<span class="w"> </span>-k
+pulseaudio<span class="w"> </span>--start
+
+<span class="c1"># 检查蓝牙服务状态</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>bluetooth
+
+<span class="c1"># 如果蓝牙被阻止</span>
+rfkill<span class="w"> </span>list
+sudo<span class="w"> </span>rfkill<span class="w"> </span>unblock<span class="w"> </span>bluetooth
+</code></pre></div>
+
+<h2 id="_46">创建快速连接脚本（推荐）</h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># 创建脚本</span>
+nano<span class="w"> </span>~/connect_headphone.sh
+</code></pre></div>
+
+<p>在脚本中写入：</p>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;power on&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>bluetoothctl
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;connect 08:F0:B6:C5:02:A6&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>bluetoothctl
+</code></pre></div>
+
+<p>设置脚本权限：</p>
+<div class="highlight"><pre><span></span><code>chmod<span class="w"> </span>+x<span class="w"> </span>~/connect_headphone.sh
+</code></pre></div>
+
+<p>之后只需运行：</p>
+<div class="highlight"><pre><span></span><code>~/connect_headphone.sh
+</code></pre></div>
+
+<h2 id="mac">将MAC地址保存到配置文件（可选）</h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># 创建配置文件</span>
+nano<span class="w"> </span>~/.config/bluetooth/devices.conf
+</code></pre></div>
+
+<p>添加内容：</p>
+<div class="highlight"><pre><span></span><code><span class="k">[Devices]</span>
+<span class="na">headphone</span><span class="o">=</span><span class="s">08:F0:B6:C5:02:A6</span>
+</code></pre></div>
+
+<h3 id="_47">重要提示：</h3>
+<ul>
+<li>记得保存你的蓝牙设备MAC地址</li>
+<li>首次配对成功后，后续只需执行连接命令</li>
+<li>如果连接不上，检查耳机是否处于可配对状态</li>
+<li>确保没有其他设备已经连接到耳机</li>
+</ul>
+<h3 id="_48">重启后连接步骤：</h3>
+<ol>
+<li>确保耳机开启</li>
+<li>运行connect_headphone.sh脚本或使用bluetoothctl连接</li>
+<li>测试音频输出</li>
+</ol>
+<hr />
+<h2 id="8-md">8. 智能笔记网站生成系统.md</h2>
+<p><strong>日期:</strong> 2025-04-14<br />
+<strong>标签:</strong> LLM, 自动化, Python, 部署</p>
+<h1 id="_49">智能笔记网站生成系统</h1>
+<ul>
+<li><strong>GitHub Pages：</strong> 用于托管静态网页。</li>
+<li><strong>HTML 页面：</strong> 每篇笔记是一个独立 HTML 文件，展示形式高度自由。</li>
+<li><strong>JSON 配置文件：</strong> 集中管理每篇笔记的标题、描述、路径、时间、图片等。</li>
+<li><strong>Python 脚本：</strong> 读取 JSON 文件并批量生成 <code>index.html</code> 的卡片展示区。</li>
+<li><strong>ChatGPT：</strong> 用于自动将任意格式内容（Markdown / Word / 文本）转换成 HTML 笔记页面。</li>
+</ul>
+<h2 id="_50">使用流程</h2>
+<h3 id="_51">智能笔记生成流程图</h3>
+<ol>
+<li>
+<p><strong>输入内容：</strong> 可以是 Markdown、Word、文字、图片、代码……</p>
+</li>
+<li>
+<p><strong>用 LLM 转换为 HTML 页面</strong>（笔记的最终展示页面）</p>
+</li>
+<li>
+<p><strong>将该 HTML 文件放入仓库目录中</strong></p>
+</li>
+<li>
+<p><strong>更新 <code>notes.json</code> 文件</strong>（填写标题、日期、描述等）</p>
+</li>
+<li>
+<p><strong>运行 <code>generate_index.py</code></strong>，自动更新首页</p>
+</li>
+<li>
+<p><strong>GitHub 自动部署，在线访问即可</strong></p>
+</li>
+</ol>
+<h2 id="json">示例 JSON 配置</h2>
+<p>保存在项目根目录下的 <code>notes.json</code>：</p>
+<div class="highlight"><pre><span></span><code><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;file&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;smart-note-system.html&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;智能笔记网站生成系统&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;结合 LLM + GitHub Pages + Python 实现智能化静态笔记站搭建方案。&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-04-14&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;image&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://raw.githubusercontent.com/username/assets/main/diagram.png&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;file&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.html&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;学习笔记 1&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;这是第一个学习笔记的简短描述...&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-04-12&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;image&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
+</code></pre></div>
+
+<h2 id="_52">优点总结</h2>
+<h3 id="_53">格式自由转换</h3>
+<p>任意格式输入 → ChatGPT → 美观 HTML</p>
+<h3 id="_54">高度自定义</h3>
+<p>所有页面结构高度自定义，视觉精致</p>
+<h3 id="_55">集中管理</h3>
+<p>JSON 统一管理内容，方便维护</p>
+<h3 id="_56">自动生成</h3>
+<p>Python 自动生成卡片区，无需手工改 HTML</p>
+<h3 id="_57">简易部署</h3>
+<p>GitHub 免费托管，部署毫无门槛</p>
+<h2 id="llm_1">借助 LLM 的能力</h2>
+<p>比如把 Markdown 文件粘贴给 ChatGPT，说：</p>
+<div class="highlight"><pre><span></span><code>请把这段 Markdown 转换成适配我 GitHub Pages 的 HTML 页面，包含样式与代码高亮。
+</code></pre></div>
+
+<p>你就能轻松获得一个即用型 HTML 页面。再加到 notes.json 中，运行脚本，一气呵成。</p>
+<h2 id="_58">总结</h2>
+<p>这是一个适合任何人、支持任何笔记格式的<strong>个性化笔记站解决方案</strong>，值得推广。</p>
+<hr />
+<h2 id="9-wsl2-vllm-serve-md">9. WSL2 vLLM serve 局域网访问配置.md</h2>
+<p><strong>日期:</strong> 2025-04-12<br />
+<strong>标签:</strong> LLM, vLLM, WSL2, 局域网</p>
+<h1 id="wsl2-vllm-serve">WSL2 vLLM serve 局域网访问配置</h1>
+<p><strong>场景说明：</strong> 在WSL2中运行vLLM服务，需要使局域网中的其他设备能够访问该服务。</p>
+<h2 id="1-vllm">1. 启动vLLM服务</h2>
+<p>在WSL2中启动vLLM服务，确保监听所有网络接口：</p>
+<div class="highlight"><pre><span></span><code>vllm<span class="w"> </span>serve<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>./path/to/your/model.gguf<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--tokenizer<span class="w"> </span>./path/to/tokenizer_files<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--enable-auto-tool-choice<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--tool-call-parser<span class="w"> </span>hermes<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0
+</code></pre></div>
+
+<h2 id="2-ip">2. 获取必要的IP地址</h2>
+<p>Windows PowerShell中运行：</p>
+<div class="highlight"><pre><span></span><code>ipconfig
+</code></pre></div>
+
+<p>记录以下IP地址：
+- 物理网卡的IPv4地址（通常是类似 <code>59.78.x.x</code> 的地址）</p>
+<p>WSL2终端中运行：</p>
+<div class="highlight"><pre><span></span><code>ip<span class="w"> </span>a
+</code></pre></div>
+
+<p>记录WSL2的IP地址（通常是 <code>172.x.x.x</code>）</p>
+<h2 id="3_2">3. 配置端口转发</h2>
+<p>以管理员权限打开PowerShell，运行以下命令：</p>
+<div class="highlight"><pre><span></span><code><span class="nx">netsh</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="nx">portproxy</span><span class="w"> </span><span class="nx">add</span><span class="w"> </span><span class="nx">v4tov4</span><span class="w"> </span><span class="nx">listenaddress</span><span class="p">=</span><span class="m m-Double">0.0.0.0</span><span class="w"> </span><span class="nx">listenport</span><span class="p">=</span><span class="mi">8000</span><span class="w"> </span><span class="nx">connectaddress</span><span class="p">=&lt;</span><span class="nx">WSL2的IP</span><span class="p">&gt;</span><span class="w"> </span><span class="nx">connectport</span><span class="p">=</span><span class="mi">8000</span>
+</code></pre></div>
+
+<p>验证端口转发配置：</p>
+<div class="highlight"><pre><span></span><code><span class="nv">netsh</span><span class="w"> </span><span class="nv">interface</span><span class="w"> </span><span class="nv">portproxy</span><span class="w"> </span><span class="k">show</span><span class="w"> </span><span class="nv">all</span>
+</code></pre></div>
+
+<h2 id="4_2">4. 配置防火墙</h2>
+<p>添加防火墙入站规则：</p>
+<div class="highlight"><pre><span></span><code><span class="nb">New-NetFirewallRule</span> <span class="n">-DisplayName</span> <span class="s2">&quot;vLLM Server&quot;</span> <span class="n">-Direction</span> <span class="n">Inbound</span> <span class="n">-LocalPort</span> <span class="n">8000</span> <span class="n">-Protocol</span> <span class="n">TCP</span> <span class="n">-Action</span> <span class="n">Allow</span>
+</code></pre></div>
+
+<h2 id="5_2">5. 客户端配置</h2>
+<p>在局域网其他设备上使用以下配置访问服务：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAI</span>
+
+<span class="n">client</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span>
+    <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;http://&lt;Windows主机IP&gt;:8000/v1&quot;</span><span class="p">,</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;token-abc123&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+
+<h2 id="_59">故障排除</h2>
+<ol>
+<li>测试基本连通性：</li>
+</ol>
+<div class="highlight"><pre><span></span><code>ping<span class="w"> </span>&lt;Windows主机IP&gt;
+</code></pre></div>
+
+<ol>
+<li>测试服务可访问性：</li>
+</ol>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>http://&lt;Windows主机IP&gt;:8000/v1/completions
+</code></pre></div>
+
+<ol>
+<li>如需删除端口转发：</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="nx">netsh</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="nx">portproxy</span><span class="w"> </span><span class="nx">delete</span><span class="w"> </span><span class="nx">v4tov4</span><span class="w"> </span><span class="nx">listenaddress</span><span class="p">=</span><span class="m m-Double">0.0.0.0</span><span class="w"> </span><span class="nx">listenport</span><span class="p">=</span><span class="mi">8000</span>
+</code></pre></div>
+
+<p><strong>注意：</strong> 如果WSL2重启或IP地址发生变化，需要重新配置端口转发规则。</p>
+<hr />
+<h2 id="10-asr-llm-tts_realtimemd">10. 局域网内香橙派完全本地ASR-LLM-TTS_Realtime架构.md</h2>
+<p><strong>日期:</strong> 2025-8-24<br />
+<strong>标签:</strong> LLM, 边缘AI, Real-time, ASR-LLM-TTS, OrangePi</p>
+<h1 id="3ttfa">实时语音助手技术笔记：从3秒TTFA到踩坑实录</h1>
+<p>用香橙派Zero3 + PC服务器打造的本地化实时语音助手，核心交互延迟控制在3秒内的技术实现与优化记录。</p>
+<h2 id="_60">系统设计</h2>
+<p><strong>架构</strong>: 客户端-服务器分离，AI模型集中部署</p>
+<ul>
+<li><strong>客户端</strong>: 香橙派Zero3（音频采集+播放）</li>
+<li><strong>服务端</strong>: PC + RTX2080Ti（AI推理）</li>
+</ul>
+<p><strong>技术栈</strong>:
+SenseVoice-small (ASR) → Qwen2.5-7B-FP8 (LLM) → Index-TTS-VLLM (TTS)</p>
+<p><strong>关键选型理由</strong>:</p>
+<ul>
+<li><strong>SenseVoice</strong>: 168ms处理时间，中英混合识别精度高</li>
+<li><strong>Qwen2.5 FP8量化</strong>: 138ms首token延迟，在2080Ti上性能出色</li>
+<li><strong>Index-TTS-VLLM</strong>: 207ms首段音频延迟，流式合成</li>
+</ul>
+<h2 id="_61">性能实录</h2>
+<p>真实对话："你能听到我说话吗？纳西达。"</p>
+<div class="highlight"><pre><span></span><code>🎤 用户说话时长: 1.041s
+🔍 识别结果: 你能听到我说话吗？纳西达。
+
+⏱️ 核心交互延迟 (TTFA): 2.904s
+
+延迟分解:
+├── 🤫 静音监测延迟: 1.032s  (最大瓶颈)
+├── 🔎 ASR处理耗时: 0.168s
+├── 🤖 LLM首token延迟: 0.138s
+├── 🎵 TTS首段音频延迟: 0.207s
+└── 🔊 音频播放准备: 0.033s
+
+🎶 音频总时长: 15.48s | ⏱️ 端到端总耗时: 19.436s
+</code></pre></div>
+
+<p><strong>瓶颈分析</strong>: 静音监测占TTFA的35%，这是保证用户说完整句话的必要代价。AI处理链路(ASR→LLM→TTS)每环节都在200ms内。</p>
+<h2 id="_62">关键踩坑与解决方案</h2>
+<h3 id="1-vad">1. VAD灵敏度问题</h3>
+<p><strong>现象</strong>: 说完话要等很久才响应，体验割裂
+<strong>根因</strong>: 固定阈值VAD在不同环境下适应性差</p>
+<p><strong>解决</strong>: 动态相对阈值算法</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 核心思路：峰值音量 - N dB 作为静音判断基准</span>
+<span class="n">peak_volume</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">recent_volumes</span><span class="p">)</span>
+<span class="n">dynamic_threshold</span> <span class="o">=</span> <span class="n">peak_volume</span> <span class="o">-</span> <span class="n">dynamic_silence_threshold</span>
+</code></pre></div>
+
+<p><strong>调优参数</strong>:
+- <code>--silence-duration</code>: 命令行快速调整（推荐0.6-0.8s）
+- <code>dynamic_silence_threshold</code>: 代码内精细调优（推荐12-15dB）</p>
+<h3 id="2-orange-pi">2. Orange Pi音频播放静默失败</h3>
+<p><strong>现象</strong>: pygame不报错但扬声器无声
+<strong>原因</strong>: Linux SBC上SDL音频驱动自动选择失败</p>
+<p><strong>解决</strong>: 强制指定alsa驱动</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SDL_AUDIODRIVER&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;alsa&#39;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pygame</span>  <span class="c1"># 必须在设置环境变量后导入</span>
+</code></pre></div>
+
+<h3 id="3_3">3. 命令行参数传递失效</h3>
+<p><strong>现象</strong>: 修改 <code>--silence-duration</code> 等参数不生效
+<strong>根因</strong>: 参数传递链路中某环节断链</p>
+<p><strong>稳定解决方案</strong>: 直接修改类默认值</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ASRClient</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">silence_duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">):</span>  <span class="c1"># 直接改这里</span>
+        <span class="c1"># 比命令行参数更可靠</span>
+</code></pre></div>
+
+<h3 id="4-ollama">4. Ollama局域网连接问题</h3>
+<p><strong>现象</strong>: 客户端无法连接LLM服务
+<strong>原因</strong>: Ollama默认只监听127.0.0.1</p>
+<p><strong>解决</strong>: 启动时强制绑定LAN IP</p>
+<div class="highlight"><pre><span></span><code><span class="nv">OLLAMA_HOST</span><span class="o">=</span><span class="m">0</span>.0.0.0<span class="w"> </span>ollama<span class="w"> </span>serve
+</code></pre></div>
+
+<h3 id="5-asr">5. 首次ASR模型加载耗时</h3>
+<p><strong>现象</strong>: SenseVoice服务首次启动要下载模型</p>
+<p><strong>优化</strong>:
+- 预先准备好模型文件到 <code>./asr_models</code>
+- 启动脚本增加超时处理
+- GPU显存不足时自动降级CPU</p>
+<h2 id="_63">性能监控体系</h2>
+<p>实现了精确的时间戳统计，将TTFA分解到各环节：</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConversationMetrics</span><span class="p">:</span>
+    <span class="c1"># 关键时间节点</span>
+    <span class="n">speech_end_time</span>      <span class="c1"># 用户说话结束</span>
+    <span class="n">asr_start_time</span>       <span class="c1"># ASR开始处理  </span>
+    <span class="n">llm_first_token_time</span> <span class="c1"># LLM首token</span>
+    <span class="n">tts_first_audio_time</span> <span class="c1"># TTS首段音频</span>
+    <span class="n">audio_play_time</span>      <span class="c1"># 开始播放</span>
+</code></pre></div>
+
+<p>这套监控让性能优化有了精确的数据支撑，能快速定位瓶颈环节。</p>
+<h2 id="_64">关键启动参数</h2>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>realtime_voice_assistant.py<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--asr-url<span class="w"> </span>http://192.168.2.104:8001<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--tts-url<span class="w"> </span>http://192.168.2.104:11996/tts_url<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--ollama-host<span class="w"> </span><span class="m">192</span>.168.2.104:11434<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--device<span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="se">\ </span><span class="w">                   </span><span class="c1"># arecord -l查看设备ID</span>
+<span class="w">  </span>--volume-threshold<span class="w"> </span><span class="m">1</span>.0<span class="w"> </span><span class="se">\ </span><span class="w">       </span><span class="c1"># 触发录音音量变化(dB)</span>
+<span class="w">  </span>--silence-duration<span class="w"> </span><span class="m">0</span>.8<span class="w">          </span><span class="c1"># 静音判断时长(s)，核心调优参数</span>
+</code></pre></div>
+
+<h2 id="_65">后续优化方向</h2>
+<ol>
+<li><strong>VAD算法优化</strong>: 引入更智能的端点检测，减少静音监测时间</li>
+<li><strong>模型量化</strong>: 尝试INT4量化进一步提升推理速度</li>
+<li><strong>音频流水线</strong>: TTS和播放并行处理，减少播放准备时间</li>
+<li><strong>网络优化</strong>: 音频压缩传输，减少网络延迟</li>
+</ol>
+<h2 id="_66">技术感悟</h2>
+<p>这个项目最大的收获不是把TTFA做到3秒内，而是建立了一套完整的实时AI系统工程方法论：</p>
+<ul>
+<li><strong>分层监控</strong>: 精确的性能分析定位瓶颈</li>
+<li><strong>参数化设计</strong>: 关键阈值可调，适应不同场景</li>
+<li><strong>容错设计</strong>: 从网络到音频驱动的多层容错</li>
+<li><strong>渐进优化</strong>: 先跑通，再优化，数据驱动迭代</li>
+</ul>
+<p>在嵌入式AI的道路上，工程实现往往比算法选择更关键。</p>
+<p>事实上，香橙派等Linux设备实现ASR-LLM-TTS流程，相比于用ESP32等小型嵌入式设备，存在两个核心差异点：</p>
+<ol>
+<li>
+<p><strong>成本与难度</strong>: Linux设备硬件成本更高、开发难度更大（尤其是音频驱动、系统依赖等硬件适配环节）；</p>
+</li>
+<li>
+<p><strong>长期价值</strong>: 尽管初期门槛高，但Linux系统的开放性和扩展性更强——后期可轻松集成更多工具链（如Docker、日志监控、多设备协同），能支撑更复杂的功能迭代，这是小型嵌入式设备难以实现的。</p>
+</li>
+</ol>
+<p>因此，追求这类复杂项目的实践是必要的，其积累的Linux开发经验会成为后期技术突破的关键基础。</p>
+<p><strong>项目代码</strong>: https://github.com/HaxxorCialtion/local-ASR-TTS-LLM-realtime
+<strong>技术交流</strong>: cialtion@outlook.com &amp; cialtion737410@sjtu.edu.cn</p>
+<p><em>这份笔记大部分是AI结合项目代码生成的，具体使用可看github链接。</em></p></article>
+            <div class="contact-card">
+                <h3><i class="fas fa-heart"></i> Thanks for Reading</h3>
+                <p>If this article was helpful to you, feel free to connect with me!</p>
+                <div class="contact-links">
+                    <a href="https://github.com/HaxxorCialtion" class="contact-link" target="_blank"><i class="fab fa-github"></i>GitHub</a>
+                    <a href="mailto:cialtion737410@sjtu.edu.cn" class="contact-link"><i class="fas fa-envelope"></i>Email</a>
+                </div>
+            </div>
+        </main>
+    </div>
+    <a href="#" class="back-button" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script>
+        hljs.highlightAll();
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+            });
+        });
+        function highlightCurrentSection() {
+            const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+            const tocLinks = document.querySelectorAll('.toc a');
+            let current = '';
+            headings.forEach(heading => {
+                const rect = heading.getBoundingClientRect();
+                if (rect.top <= 100) { current = heading.id; }
+            });
+            tocLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) { link.classList.add('active'); }
+            });
+        }
+        window.addEventListener('scroll', highlightCurrentSection);
+        document.addEventListener('DOMContentLoaded', highlightCurrentSection);
+    </script>
+</body>
+</html>

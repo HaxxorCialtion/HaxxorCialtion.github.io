@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paper Reviews - Cialtion's Tech Blog</title>
+    <meta name="description" content="Academic paper reviews and analysis on LLM, AI and related research">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { 
+            --primary-color: #2c3e50; --secondary-color: #3498db; --accent-color: #e74c3c; 
+            --background-color: #f8fafc; --card-background: #ffffff; --text-primary: #2d3748; 
+            --text-secondary: #718096; --border-color: #e2e8f0; --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.07); 
+            --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1); --border-radius: 12px; --transition: all 0.3s ease; 
+        }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            background-color: var(--background-color); color: var(--text-primary); line-height: 1.6; 
+        }
+        .header { 
+            background: linear-gradient(135deg, var(--primary-color), #34495e); 
+            color: white; padding: 4rem 0; text-align: center; position: relative; overflow: hidden;
+        }
+        .header-bg-image { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            object-fit: cover; opacity: 0.2; z-index: 1; 
+        }
+        .header-content { 
+            max-width: 1200px; margin: 0 auto; padding: 0 2rem; position: relative; z-index: 2; 
+        }
+        .header h1 { 
+            font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem; 
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .header .subtitle { 
+            font-size: 1.2rem; opacity: 0.9; margin-bottom: 1rem; 
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        .nav-breadcrumb { 
+            display: flex; justify-content: center; align-items: center; 
+            gap: 0.5rem; font-size: 0.9rem; 
+        }
+        .nav-breadcrumb a { 
+            color: rgba(255, 255, 255, 0.8); text-decoration: none; 
+            transition: var(--transition); padding: 0.3rem 0.8rem; 
+            border-radius: 15px; background: rgba(255, 255, 255, 0.1);
+        }
+        .nav-breadcrumb a:hover { 
+            color: white; background: rgba(255, 255, 255, 0.2); 
+        }
+        .main-content { max-width: 1200px; margin: 2rem auto; padding: 0 2rem; }
+        
+        /* Papers Filter */
+        .papers-filter { 
+            background: var(--card-background); border-radius: var(--border-radius); 
+            padding: 1.5rem; margin-bottom: 2rem; box-shadow: var(--shadow-light); 
+            border: 1px solid var(--border-color); 
+        }
+        .filter-controls { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+        .search-box { position: relative; flex: 1; min-width: 250px; }
+        .search-input { 
+            width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; 
+            border: 2px solid var(--border-color); border-radius: 25px; 
+            background-color: var(--background-color); font-size: 0.9rem; 
+            transition: var(--transition); 
+        }
+        .search-input:focus { 
+            outline: none; border-color: var(--secondary-color); 
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1); 
+        }
+        .search-icon { 
+            position: absolute; left: 1rem; top: 50%; 
+            transform: translateY(-50%); color: var(--text-secondary); 
+        }
+        .filter-button { 
+            padding: 0.5rem 1rem; border: 2px solid var(--border-color); 
+            background: white; border-radius: 20px; cursor: pointer; 
+            transition: var(--transition); text-decoration: none; 
+            color: var(--text-secondary); font-size: 0.9rem; 
+        }
+        .filter-button:hover, .filter-button.active { 
+            border-color: var(--secondary-color); 
+            background: var(--secondary-color); color: white; 
+        }
+        
+        /* Papers Grid */
+        .papers-grid { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); 
+            gap: 1.5rem; 
+        }
+        .paper-card { 
+            background: var(--card-background); border-radius: var(--border-radius); 
+            overflow: hidden; box-shadow: var(--shadow-light); 
+            transition: var(--transition); border: 1px solid var(--border-color); 
+        }
+        .paper-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-medium); }
+        .paper-image { 
+            width: 100%; height: 200px; object-fit: cover; 
+            background: linear-gradient(135deg, var(--secondary-color), var(--accent-color)); 
+            transition: var(--transition);
+        }
+        .paper-image:hover { transform: scale(1.05); }
+        .paper-content { padding: 1.5rem; }
+        .paper-meta { 
+            display: flex; flex-wrap: wrap; gap: 0.5rem; 
+            margin-bottom: 1rem; font-size: 0.85rem; 
+        }
+        .meta-item { 
+            display: flex; align-items: center; color: var(--text-secondary); 
+            background: var(--background-color); padding: 0.25rem 0.5rem; 
+            border-radius: 15px; 
+        }
+        .meta-item i { margin-right: 0.3rem; color: var(--secondary-color); }
+        .paper-title { 
+            font-size: 1.3rem; font-weight: 600; color: var(--primary-color); 
+            margin-bottom: 0.75rem; line-height: 1.4; 
+        }
+        .paper-description { 
+            color: var(--text-secondary); font-size: 0.95rem; 
+            line-height: 1.6; margin-bottom: 1rem; 
+        }
+        .paper-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+        .tag { 
+            display: inline-block; padding: 0.25rem 0.75rem; 
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9); 
+            color: white; border-radius: 20px; font-size: 0.8rem; font-weight: 500; 
+            transition: var(--transition); 
+        }
+        .tag:hover { transform: scale(1.05); }
+        .read-more { 
+            display: inline-flex; align-items: center; color: var(--secondary-color); 
+            text-decoration: none; font-weight: 500; transition: var(--transition); 
+        }
+        .read-more:hover { color: var(--accent-color); transform: translateX(3px); }
+        .read-more i { margin-left: 0.5rem; transition: var(--transition); }
+        .read-more:hover i { transform: translateX(3px); }
+        
+        /* No papers state */
+        .no-papers { 
+            text-align: center; padding: 4rem 2rem; 
+            background: var(--card-background); border-radius: var(--border-radius); 
+            box-shadow: var(--shadow-light); border: 1px solid var(--border-color); 
+        }
+        .no-papers i { 
+            font-size: 4rem; color: var(--secondary-color); margin-bottom: 1rem; 
+        }
+        .no-papers h3 { 
+            font-size: 1.5rem; color: var(--primary-color); margin-bottom: 0.5rem; 
+        }
+        .no-papers p { color: var(--text-secondary); font-size: 1.1rem; }
+        
+        /* Stats */
+        .papers-stats { 
+            display: flex; justify-content: center; gap: 2rem; 
+            margin-bottom: 2rem; flex-wrap: wrap; 
+        }
+        .stat-item { 
+            text-align: center; background: var(--card-background); 
+            padding: 1rem 1.5rem; border-radius: var(--border-radius); 
+            box-shadow: var(--shadow-light); border: 1px solid var(--border-color); 
+        }
+        .stat-number { 
+            font-size: 2rem; font-weight: 700; 
+            color: var(--secondary-color); display: block; 
+        }
+        .stat-label { color: var(--text-secondary); font-size: 0.9rem; }
+        
+        @media (max-width: 768px) { 
+            .header h1 { font-size: 2rem; } 
+            .main-content { padding: 0 1rem; } 
+            .papers-grid { grid-template-columns: 1fr; gap: 1rem; } 
+            .filter-controls { flex-direction: column; align-items: stretch; }
+            .papers-stats { flex-direction: column; gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <img src="images/bronya_1.jpg" alt="Papers Header Background" class="header-bg-image">
+        <div class="header-content">
+            <h1><i class="fas fa-graduation-cap"></i> Paper Reviews</h1>
+            <p class="subtitle">Academic Paper Analysis & Research Notes</p>
+            <nav class="nav-breadcrumb">
+                <a href="index.html"><i class="fas fa-home"></i> Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <span>Paper Reviews</span>
+            </nav>
+        </div>
+    </header>
+    
+    <main class="main-content">
+        <div class="papers-filter">
+            <div class="filter-controls">
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="Search papers by title or tags..." id="searchInput">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                <a href="#" class="filter-button active" data-category="all">All</a>
+                <a href="#" class="filter-button" data-category="LLM">LLM</a>
+                <a href="#" class="filter-button" data-category="NLP">NLP</a>
+                <a href="#" class="filter-button" data-category="AI">AI</a>
+                <a href="#" class="filter-button" data-category="ML">ML</a>
+            </div>
+        </div>
+
+        <div class="papers-stats" id="papersStats"></div>
+        
+        <div class="papers-grid" id="papersContainer">
+            
+                <div class="paper-card">
+                    <img src="images/arknights_mizuki_0.jpg" alt="LifeSpan Cognitive Systems (LSCS) 论文学习笔记" class="paper-image" onerror="this.style.display='none'">
+                    <div class="paper-content">
+                        <div class="paper-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                2025-09-28
+                            </div>
+                        </div>
+                        <h3 class="paper-title">LifeSpan Cognitive Systems (LSCS) 论文学习笔记</h3>
+                        <p class="paper-description">- 标题: Towards LifeSpan Cognitive Systems - 发表: Transactions on Machine Learning Research (02/2025) - OpenReview链接: https://openreview.net/forum?id=LZ9...</p>
+                        <div class="paper-tags"></div>
+                        <a href="papers/LifeSpan_Cognitive_System.html" class="read-more">
+                            Read Review <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="paper-card">
+                    <img src="images/bronya_1.jpg" alt="MemoryLLM: Towards Self-Updatable Large Language Models" class="paper-image" onerror="this.style.display='none'">
+                    <div class="paper-content">
+                        <div class="paper-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                2025-09-28
+                            </div>
+                        </div>
+                        <h3 class="paper-title">MemoryLLM: Towards Self-Updatable Large Language Models</h3>
+                        <p class="paper-description">论文链接： https://github.com/wangyu-ustc/MemoryLLM 发表会议： ICML 2024 作者： Yu Wang et al. 总结 在transformer层之前，额外引入memory pool，维度R^(N×M×L) 其中N为base LLM的transfor...</p>
+                        <div class="paper-tags"></div>
+                        <a href="papers/MemoryLLM.html" class="read-more">
+                            Read Review <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="paper-card">
+                    <img src="images/bronya_mp.jpg" alt="MemLLM: Finetuning LLMs to Use Explicit Read-Write Memory" class="paper-image" onerror="this.style.display='none'">
+                    <div class="paper-content">
+                        <div class="paper-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                2025-09-26
+                            </div>
+                        </div>
+                        <h3 class="paper-title">MemLLM: Finetuning LLMs to Use Explicit Read-Write Memory</h3>
+                        <p class="paper-description">构造RAG数据库结构，微调LLM适配以提高benchmark score</p>
+                        <div class="paper-tags"><span class="tag">LLM</span> <span class="tag">Memory Systems</span> <span class="tag">RAG增强</span> <span class="tag">知识图谱</span> <span class="tag">微调</span> <span class="tag">三元组</span></div>
+                        <a href="papers/MemLLM_ft_read_write.html" class="read-more">
+                            Read Review <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="paper-card">
+                    <img src="images/bronya_mp.jpg" alt="LifelongAgentBench: Evaluating LLM Agents as Lifelong Learners" class="paper-image" onerror="this.style.display='none'">
+                    <div class="paper-content">
+                        <div class="paper-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                2025-09-26
+                            </div>
+                        </div>
+                        <h3 class="paper-title">LifelongAgentBench: Evaluating LLM Agents as Lifelong Learners</h3>
+                        <p class="paper-description">测试LLM In-context Learning能力的评估框架，而非真正的Lifelong能力</p>
+                        <div class="paper-tags"><span class="tag">命名夸大</span> <span class="tag">评估框架</span> <span class="tag">工具调用</span> <span class="tag">In-Context Learning</span> <span class="tag">Agent</span></div>
+                        <a href="papers/LifelongAgentBench.html" class="read-more">
+                            Read Review <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="paper-card">
+                    <img src="images/bronya_mp.jpg" alt="RAISE Agent: From LLM to Conversational Agent" class="paper-image" onerror="this.style.display='none'">
+                    <div class="paper-content">
+                        <div class="paper-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                2025-09-26
+                            </div>
+                        </div>
+                        <h3 class="paper-title">RAISE Agent: From LLM to Conversational Agent</h3>
+                        <p class="paper-description">ReAct + Context工程的记忆增强架构，展示微调在Agent领域的蒸馏学习价值</p>
+                        <div class="paper-tags"><span class="tag">传统方法</span> <span class="tag">上下文工程</span> <span class="tag">蒸馏学习</span> <span class="tag">ReAct</span> <span class="tag">对话系统</span></div>
+                        <a href="papers/RAISE_Agent_llm4conversational.html" class="read-more">
+                            Read Review <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="paper-card">
+                    <img src="images/bronya_mp.jpg" alt="Continual Fine-Tuning for Multilingual LLMs" class="paper-image" onerror="this.style.display='none'">
+                    <div class="paper-content">
+                        <div class="paper-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                2025-09-26
+                            </div>
+                        </div>
+                        <h3 class="paper-title">Continual Fine-Tuning for Multilingual LLMs</h3>
+                        <p class="paper-description">日期： 2025-9-26 链接： ArXiv keywords： 指标创新 多语言 方法过时 方法论价值：相似度度量指标和层冻结实验的参考价值 当Phase 1和Phase 2数据集编码相似任务时，任务能力不退化 - Heuristic Layer Freezing： 冻结Base→Phase1变...</p>
+                        <div class="paper-tags"><span class="tag">Continual Learning</span> <span class="tag">LLM</span> <span class="tag">Multilingual</span> <span class="tag">fine-tune</span></div>
+                        <a href="papers/continual_ft_multilingual.html" class="read-more">
+                            Read Review <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="paper-card">
+                    <img src="images/arknights_mizuki_0.jpg" alt="HippoRAG 2: From RAG to Memory" class="paper-image" onerror="this.style.display='none'">
+                    <div class="paper-content">
+                        <div class="paper-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                2025-09-26
+                            </div>
+                        </div>
+                        <h3 class="paper-title">HippoRAG 2: From RAG to Memory</h3>
+                        <p class="paper-description">基于知识图谱和个性化PageRank的检索增强框架，创新架构但计算开销大</p>
+                        <div class="paper-tags"><span class="tag">架构创新</span> <span class="tag">知识图谱</span> <span class="tag">计算开销大</span> <span class="tag">PageRank</span> <span class="tag">RAG</span> <span class="tag">Memory</span></div>
+                        <a href="papers/HippoRAG.html" class="read-more">
+                            Read Review <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="paper-card">
+                    <img src="images/bronya_mp.jpg" alt="SELF-PARAM: Self-Updatable Large Language Models" class="paper-image" onerror="this.style.display='none'">
+                    <div class="paper-content">
+                        <div class="paper-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                2025-09-26
+                            </div>
+                        </div>
+                        <h3 class="paper-title">SELF-PARAM: Self-Updatable Large Language Models</h3>
+                        <p class="paper-description">基于KL散度的知识注入方案，让LLM不需要上文即可给出对应答案，但存在过拟合风险</p>
+                        <div class="paper-tags"><span class="tag">参数化记忆</span> <span class="tag">KL散度</span> <span class="tag">过拟合风险</span> <span class="tag">知识污染</span> <span class="tag">微调</span> <span class="tag">蒸馏学习</span></div>
+                        <a href="papers/Memory_Self-Align-FT_Distillation.html" class="read-more">
+                            Read Review <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="paper-card">
+                    <img src="images/bronya_mp.jpg" alt="Large Scale Knowledge Washing: 大规模语言模型知识清洗" class="paper-image" onerror="this.style.display='none'">
+                    <div class="paper-content">
+                        <div class="paper-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                2025-01-15
+                            </div>
+                        </div>
+                        <h3 class="paper-title">Large Scale Knowledge Washing: 大规模语言模型知识清洗</h3>
+                        <p class="paper-description">通过修改Transformer MLP层权重实现大规模敏感知识删除，同时保持模型推理能力</p>
+                        <div class="paper-tags"><span class="tag">LLM</span> <span class="tag">知识遗忘</span> <span class="tag">模型编辑</span> <span class="tag">隐私保护</span> <span class="tag">机器学习安全</span> <span class="tag">MLP层操作</span></div>
+                        <a href="papers/LLM Knowledge Washing.html" class="read-more">
+                            Read Review <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+        </div>
+    </main>
+
+    <script>
+        // 搜索功能
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase();
+            const papers = document.querySelectorAll('.paper-card');
+            
+            papers.forEach(paper => {
+                const title = paper.querySelector('.paper-title').textContent.toLowerCase();
+                const description = paper.querySelector('.paper-description').textContent.toLowerCase();
+                const tags = Array.from(paper.querySelectorAll('.tag')).map(tag => tag.textContent.toLowerCase());
+                
+                const matches = title.includes(query) || 
+                               description.includes(query) || 
+                               tags.some(tag => tag.includes(query));
+                               
+                paper.style.display = matches ? 'block' : 'none';
+            });
+            
+            updateStats();
+        });
+
+        // 分类过滤
+        document.querySelectorAll('.filter-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // 更新按钮状态
+                document.querySelectorAll('.filter-button').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const category = this.dataset.category;
+                const papers = document.querySelectorAll('.paper-card');
+                
+                papers.forEach(paper => {
+                    if (category === 'all') {
+                        paper.style.display = 'block';
+                    } else {
+                        const tags = Array.from(paper.querySelectorAll('.tag')).map(tag => tag.textContent);
+                        const hasCategory = tags.includes(category);
+                        paper.style.display = hasCategory ? 'block' : 'none';
+                    }
+                });
+                
+                updateStats();
+            });
+        });
+
+        // 更新统计信息
+        function updateStats() {
+            const visiblePapers = document.querySelectorAll('.paper-card:not([style*="display: none"])');
+            const statsContainer = document.getElementById('papersStats');
+            
+            const totalTags = new Set(Array.from(visiblePapers).flatMap(paper => 
+                Array.from(paper.querySelectorAll('.tag')).map(tag => tag.textContent)
+            )).size;
+            
+            if (visiblePapers.length > 0) {
+                statsContainer.innerHTML = `
+                    <div class="stat-item">
+                        <span class="stat-number">${visiblePapers.length}</span>
+                        <span class="stat-label">Papers</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">${totalTags}</span>
+                        <span class="stat-label">Topics</span>
+                    </div>
+                `;
+            } else {
+                statsContainer.innerHTML = '';
+            }
+        }
+
+        // 初始化统计
+        document.addEventListener('DOMContentLoaded', updateStats);
+    </script>
+</body>
+</html>

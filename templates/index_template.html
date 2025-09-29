@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cialtion's Tech Blog</title>
-    <meta name="description" content="Sharing insights on LLM, LLM_Memory, Omni, AI Desktop Robot, AI Companion and Anime">
+    <title>{{BLOG_TITLE}}</title>
+    <meta name="description" content="{{DESCRIPTION}}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -100,33 +100,33 @@
     <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="avatar">C</div>
-            <h1>Cialtion</h1>
-            <p class="tagline">Simple Love</p>
+            <div class="avatar">{{AVATAR_TEXT}}</div>
+            <h1>{{AUTHOR}}</h1>
+            <p class="tagline">{{BLOG_SUBTITLE}}</p>
         </div>
         <nav class="nav-menu">
             <a href="#" class="nav-item active"><i class="fas fa-home"></i>Home</a>
         </nav>
         <div class="contact-info">
             <h4><i class="fas fa-graduation-cap"></i> Academic Info</h4>
-            <p>Graduated from SJTU (chemistry, 2021~2025), pursuing PhD degree in SJTU and Sii(LLM, 2025~)<br>LLM | LLM_Memory | Omni | AI Companion | AI Desktop Robot</p>
+            <p>{{UNIVERSITY}}<br>{{FIELDS}}</p>
         </div>
         <div class="social-links">
             <h3>Contact</h3>
             <div class="social-grid">
-                <a href="https://github.com/HaxxorCialtion" class="social-link" target="_blank"><i class="fab fa-github"></i>GitHub</a>
-                <a href="mailto:cialtion737410@sjtu.edu.cn" class="social-link"><i class="fas fa-envelope"></i>School Email</a>
-                <a href="mailto:cialtion@outlook.com" class="social-link"><i class="fas fa-envelope-open"></i>Personal Email</a>
-                <a href="https://space.bilibili.com/Cialtion" class="social-link" target="_blank"><i class="fab fa-bilibili"></i>Bilibili</a>
-                <a href="https://www.zhihu.com/people/Cialtion" class="social-link" target="_blank"><i class="fas fa-book"></i>Zhihu</a>
-                <a href="#" class="social-link" target="_blank"><i class="fab fa-twitter"></i>Twitter</a>
+                <a href="{{GITHUB_URL}}" class="social-link" target="_blank"><i class="fab fa-github"></i>GitHub</a>
+                <a href="mailto:{{EMAIL_SCHOOL}}" class="social-link"><i class="fas fa-envelope"></i>School Email</a>
+                <a href="mailto:{{EMAIL_PERSONAL}}" class="social-link"><i class="fas fa-envelope-open"></i>Personal Email</a>
+                <a href="{{BILIBILI_URL}}" class="social-link" target="_blank"><i class="fab fa-bilibili"></i>Bilibili</a>
+                <a href="{{ZHIHU_URL}}" class="social-link" target="_blank"><i class="fas fa-book"></i>Zhihu</a>
+                <a href="{{TWITTER_URL}}" class="social-link" target="_blank"><i class="fab fa-twitter"></i>Twitter</a>
             </div>
         </div>
     </aside>
     <main class="main-content">
         <header class="header">
             <div class="header-content">
-                <div><h2>Cialtion's Tech Blog</h2></div>
+                <div><h2>{{BLOG_TITLE}}</h2></div>
                 <div class="search-box">
                     <input type="text" class="search-input" placeholder="Search articles..." id="searchInput">
                     <i class="fas fa-search search-icon"></i>
@@ -135,51 +135,14 @@
         </header>
         <div class="content-area">
             <div class="hero-section">
-                <img src="images/arknights_mizuki_0.jpg" alt="Hero Background" class="hero-bg-image">
+                <img src="{{HEADER_IMAGE}}" alt="Hero Background" class="hero-bg-image">
                 <div class="hero-content">
                     <div class="hero-logo">Love is Simple, Simple is Love</div>
                     <h1 class="page-title">Welcome to My Tech World</h1>
-                    <p class="page-subtitle">Sharing insights on LLM, LLM_Memory, Omni, AI Desktop Robot, AI Companion and Anime</p>
+                    <p class="page-subtitle">{{DESCRIPTION}}</p>
                 </div>
             </div>
-            <div class="articles-grid" id="articlesContainer">
-        <div class="article-card special-card">
-        <div class="special-icon">
-        <i class="fas fa-graduation-cap"></i>
-        </div>
-        <div class="article-content">
-        <div class="article-date">
-        <i class="fas fa-star"></i>
-        Special Section
-        </div>
-        <h3 class="article-title">Paper Reviews & Analysis</h3>
-        <p class="article-description">Academic paper reviews, research notes and insights on LLM, AI and cutting-edge technologies</p>
-        <p class="disclaimer"><strong>Disclaimer:</strong> These notes represent personal viewpoints, and most interpretive content is generated with AI assistance (e.g., Claude 4). There may be understanding biases or factual errors. For reference only.</p>
-        <div class="article-tags">
-        <span class="tag">Research</span>
-        <span class="tag">Academic</span>
-        <span class="tag">Papers</span>
-        </div>
-        <a href="papers.html" class="read-more">
-        Explore Papers <i class="fas fa-arrow-right"></i>
-        </a>
-        </div>
-        </div>
-            <div class="article-card">
-                <img src="images/bronya_mp.jpg" alt="Former Notes" class="article-image" onerror="this.style.display='none'">
-                <div class="article-content">
-                    <div class="article-date">
-                        <i class="fas fa-calendar-alt"></i>
-                        2025-09-28
-                    </div>
-                    <h3 class="article-title">Former Notes</h3>
-                    <p class="article-description">日期: 2024-09-22 标签: LLM角色扮演, LLM, TTS, ASR 这是一个基于关键词检测、语音识别、语音合成和对话生成的智能语音助手系统。该系统能够通过特定的唤醒词（如"hey bro"）启动与用户的语音对话，并利用先进的自然语言处理技术提供智能回复。 1. 关键词检测： 使用 P...</p>
-                    <div class="article-tags"></div>
-                    <a href="posts/former_notes.html" class="read-more">
-                        Read More <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div></div>
+            <div class="articles-grid" id="articlesContainer">{{ARTICLES_HTML}}</div>
         </div>
     </main>
     <script>
