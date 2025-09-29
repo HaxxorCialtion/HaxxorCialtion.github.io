@@ -1,3 +1,10 @@
+---
+title: LifeSpan Cognitive Systems(LSCS)
+date: "2025-09-26"
+tags: ["Review", "Memory", "Excellent", ]
+description: "对LLM记忆研究作了深入浅出的分析报告，提出一个LifeSpan "
+---
+
 # LifeSpan Cognitive Systems (LSCS) 论文学习笔记
 
 ## 论文基本信息
