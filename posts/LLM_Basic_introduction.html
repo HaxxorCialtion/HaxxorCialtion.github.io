@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM完整工作流程：从文本到文本 - Cialtion's Tech Blog</title>
+    <meta name="description" content="本教程通过追踪张量的形状变化，完整解析大语言模型从用户输入到生成输出的全过程。 - Batch Size (B): 32 - Sequence Length (T): 128 - Embedding Dimension (Dmodel): 512 - Number of Heads (H): 8 -...">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-color: #2c3e50; --secondary-color: #3498db; --accent-color: #e74c3c;
+            --background-color: #f8fafc; --card-background: #ffffff; --text-primary: #2d3748;
+            --text-secondary: #718096; --border-color: #e2e8f0; --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1); --border-radius: 12px; --transition: all 0.3s ease;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: var(--background-color); color: var(--text-primary); line-height: 1.7; }
+        .navbar { background: var(--card-background); box-shadow: var(--shadow-light); padding: 1rem 0; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border-color); }
+        .nav-container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .nav-brand { display: flex; align-items: center; text-decoration: none; color: var(--primary-color); font-weight: 600; font-size: 1.2rem; }
+        .nav-brand i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-link { color: var(--text-secondary); text-decoration: none; transition: var(--transition); padding: 0.5rem 1rem; border-radius: 8px; }
+        .nav-link:hover { color: var(--secondary-color); background-color: rgba(52, 152, 219, 0.1); }
+        .main-container { display: flex; max-width: 1400px; margin: 0 auto; gap: 2rem; padding: 2rem; }
+        .toc-sidebar { width: 250px; flex-shrink: 0; position: sticky; top: 6rem; height: fit-content; max-height: calc(100vh - 8rem); overflow-y: auto; }
+        .toc-container { background: var(--card-background); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1.5rem; }
+        .toc-title { font-size: 1.1rem; font-weight: 600; color: var(--primary-color); margin-bottom: 1rem; display: flex; align-items: center; }
+        .toc-title i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .toc ul { list-style: none; padding-left: 0; }
+        .toc ul ul { padding-left: 1rem; margin-top: 0.3rem; }
+        .toc li { margin: 0.3rem 0; }
+        .toc a { color: var(--text-secondary); text-decoration: none; transition: var(--transition); display: block; padding: 0.3rem 0.5rem; border-radius: 4px; font-size: 0.9rem; line-height: 1.4; }
+        .toc a:hover, .toc a.active { color: var(--secondary-color); background-color: rgba(52, 152, 219, 0.1); }
+        .article-main { flex: 1; min-width: 0; }
+        .article-header { background: var(--card-background); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; box-shadow: var(--shadow-light); border: 1px solid var(--border-color); position: relative; overflow: hidden; }
+        .article-cover { width: 100%; height: 350px; object-fit: cover; border-radius: var(--border-radius); margin-bottom: 1.5rem; box-shadow: var(--shadow-medium); transition: var(--transition); }
+        .article-cover:hover { transform: scale(1.02); }
+        .article-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, var(--secondary-color), var(--accent-color)); }
+        .article-title { font-size: 2.5rem; font-weight: 700; color: var(--primary-color); margin-bottom: 1rem; line-height: 1.3; }
+        .article-meta { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.95rem; }
+        .meta-item { display: flex; align-items: center; background: var(--background-color); padding: 0.5rem 1rem; border-radius: 20px; }
+        .meta-item i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .article-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+        .tag { background: linear-gradient(135deg, var(--secondary-color), #2980b9); color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 500; box-shadow: var(--shadow-light); }
+        .article-description { color: var(--text-secondary); font-size: 1.1rem; line-height: 1.6; font-style: italic; background: var(--background-color); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--secondary-color); }
+        .article-content { background: var(--card-background); border-radius: var(--border-radius); padding: 2.5rem; box-shadow: var(--shadow-light); border: 1px solid var(--border-color); }
+        .article-content h1, .article-content h2, .article-content h3, .article-content h4, .article-content h5, .article-content h6 { color: var(--primary-color); margin: 2rem 0 1rem 0; font-weight: 600; line-height: 1.4; }
+        .article-content h1 { font-size: 2.2rem; border-bottom: 3px solid var(--secondary-color); padding-bottom: 0.5rem; }
+        .article-content h2 { font-size: 1.8rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.3rem; }
+        .article-content p { margin: 1rem 0; line-height: 1.8; }
+        .article-content img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: var(--shadow-light); margin: 1.5rem 0; }
+        .article-content blockquote { border-left: 4px solid var(--secondary-color); margin: 1.5rem 0; padding: 1rem 1.5rem; background: var(--background-color); border-radius: 0 8px 8px 0; font-style: italic; }
+        .article-content pre { background: #f6f8fa; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; overflow-x: auto; margin: 1.5rem 0; }
+        .article-content code { background: #f6f8fa; border: 1px solid var(--border-color); border-radius: 4px; padding: 0.2rem 0.4rem; font-family: 'Monaco', 'Consolas', monospace; font-size: 0.9em; }
+        .article-content pre code { background: none; border: none; padding: 0; }
+        .article-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-light); }
+        .article-content th, .article-content td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .article-content th { background: var(--background-color); font-weight: 600; color: var(--primary-color); }
+        .contact-card { background: linear-gradient(135deg, var(--primary-color), #34495e); color: white; border-radius: var(--border-radius); padding: 2rem; margin: 2rem 0; text-align: center; }
+        .contact-card h3 { margin-bottom: 1rem; color: white; }
+        .contact-links { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+        .contact-link { display: inline-flex; align-items: center; padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.1); border-radius: 25px; color: white; text-decoration: none; transition: var(--transition); }
+        .contact-link:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-1px); }
+        .contact-link i { margin-right: 0.5rem; }
+        .back-button { position: fixed; bottom: 2rem; right: 2rem; background: var(--secondary-color); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-medium); transition: var(--transition); text-decoration: none; }
+        .back-button:hover { background: #2980b9; transform: translateY(-2px); }
+        @media (max-width: 1024px) { .main-container { flex-direction: column; padding: 1rem; } .toc-sidebar { width: 100%; position: static; order: 2; margin-top: 2rem; } .article-main { order: 1; } }
+        @media (max-width: 768px) { .nav-container { padding: 0 1rem; flex-direction: column; gap: 1rem; } .article-header, .article-content { padding: 1.5rem; } .article-title { font-size: 2rem; } .back-button { bottom: 1rem; right: 1rem; width: 50px; height: 50px; } .article-cover { height: 250px; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-brand">
+                <i class="fas fa-home"></i>Cialtion's Tech Blog
+            </a>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link"><i class="fas fa-arrow-left"></i>Back to Home</a>
+                <a href="mailto:cialtion737410@sjtu.edu.cn" class="nav-link"><i class="fas fa-envelope"></i>Contact Me</a>
+            </div>
+        </div>
+    </nav>
+    <div class="main-container">
+        <aside class="toc-sidebar"><div class="toc-container">
+            <div class="toc-title">
+                <i class="fas fa-list"></i>
+                Table of Contents
+            </div>
+            <div class="toc"><div class="toc"><span class="toctitle">Table of Contents</span><ul>
+<li><a href="#llm">LLM完整工作流程：从文本到文本</a><ul>
+<li><a href="#_1">基础维度设定</a></li>
+<li><a href="#_2">第一阶段：输入预处理</a><ul>
+<li><a href="#1-tokenization">1. 分词 (Tokenization)</a></li>
+<li><a href="#2-token-id">2. Token ID转换</a></li>
+<li><a href="#3">3. 长度标准化</a></li>
+<li><a href="#4-embedding">4. 嵌入层 (Embedding)</a></li>
+</ul>
+</li>
+<li><a href="#transformer">第二阶段：Transformer块处理</a><ul>
+<li><a href="#1-multi-head-attention">子层1：多头自注意力 (Multi-Head Attention)</a><ul>
+<li><a href="#1layer-normalization">步骤1：Layer Normalization</a></li>
+<li><a href="#2q-k-v">步骤2：生成Q, K, V</a></li>
+<li><a href="#3_1">步骤3：拆分多头</a></li>
+<li><a href="#4">步骤4：缩放点积注意力</a></li>
+<li><a href="#5">步骤5：合并多头</a></li>
+<li><a href="#6">步骤6：残差连接</a></li>
+</ul>
+</li>
+<li><a href="#2-ffn">子层2：前馈网络 (FFN)</a><ul>
+<li><a href="#1layer-normalization_1">步骤1：Layer Normalization</a></li>
+<li><a href="#2mlp">步骤2：两层MLP</a></li>
+<li><a href="#3_2">步骤3：残差连接</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_3">第三阶段：输出生成</a><ul>
+<li><a href="#1-language-model-head">1. Language Model Head</a></li>
+<li><a href="#2-softmax">2. Softmax归一化</a></li>
+<li><a href="#3_3">3. 解码/采样</a></li>
+<li><a href="#4-de-tokenization">4. 反分词 (De-tokenization)</a></li>
+<li><a href="#5_1">5. 自回归生成循环</a></li>
+</ul>
+</li>
+<li><a href="#_4">完整数据流总结</a></li>
+<li><a href="#_5">核心要点</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+        </div></aside>
+        <main class="article-main">
+            <header class="article-header">
+                <img src="../images/bronya_1.jpg" alt="LLM完整工作流程：从文本到文本" class="article-cover" onerror="this.style.display='none'">
+                <h1 class="article-title">LLM完整工作流程：从文本到文本</h1>
+                <div class="article-meta">
+                    <div class="meta-item"><i class="fas fa-calendar-alt"></i>Published: 2025-10-01</div>
+                    <div class="meta-item"><i class="fas fa-user"></i>Author: Cialtion</div>
+                </div>
+                
+                <div class="article-description">本教程通过追踪张量的形状变化，完整解析大语言模型从用户输入到生成输出的全过程。 - Batch Size (B): 32 - Sequence Length (T): 128 - Embedding Dimension (Dmodel): 512 - Number of Heads (H): 8 -...</div>
+            </header>
+            <article class="article-content"><h1 id="llm">LLM完整工作流程：从文本到文本</h1>
+<p>本教程通过追踪张量的形状变化，完整解析大语言模型从用户输入到生成输出的全过程。</p>
+<h2 id="_1">基础维度设定</h2>
+<ul>
+<li><strong>Batch Size (B)</strong>: <code>32</code></li>
+<li><strong>Sequence Length (T)</strong>: <code>128</code></li>
+<li><strong>Embedding Dimension (D_model)</strong>: <code>512</code></li>
+<li><strong>Number of Heads (H)</strong>: <code>8</code></li>
+<li><strong>Dimension per Head (D_head)</strong>: <code>64</code></li>
+<li><strong>FFN Inner Dimension (D_ffn)</strong>: <code>2048</code></li>
+<li><strong>Vocabulary Size (V)</strong>: <code>10000</code></li>
+</ul>
+<hr />
+<h2 id="_2">第一阶段：输入预处理</h2>
+<h3 id="1-tokenization">1. 分词 (Tokenization)</h3>
+<p><strong>输入</strong>: <code>"你好，世界！"</code></p>
+<p><strong>操作</strong>: 使用预训练分词器将字符串切分为tokens</p>
+<p><strong>输出</strong>: <code>['你好', '，', '世界', '！']</code></p>
+<p><strong>形状变化</strong>: <code>String</code> → <code>List[String]</code> (长度=4)</p>
+<h3 id="2-token-id">2. Token ID转换</h3>
+<p><strong>操作</strong>: 将每个token映射到词汇表中的整数ID</p>
+<p><strong>输出</strong>: <code>[5091, 101, 8224, 102]</code></p>
+<p><strong>形状变化</strong>: <code>List[String]</code> → <code>List[int]</code> (长度=4)</p>
+<h3 id="3">3. 长度标准化</h3>
+<p><strong>核心问题</strong>: 输入长度可变，但模型需要固定形状的张量</p>
+<p><strong>解决方案</strong>:
+- <strong>填充 (Padding)</strong>: 长度不足时，用特殊token <code>[PAD]</code> (通常ID=0)填充至固定长度
+- <strong>截断 (Truncation)</strong>: 长度超出时，丢弃超出部分（或使用滑动窗口）</p>
+<p><strong>示例</strong>: <code>[5091, 101, 8224, 102]</code> → <code>[5091, 101, 8224, 102, 0, 0, ..., 0]</code></p>
+<p><strong>形状变化</strong>: <code>List[int]</code> (长度=4) → <code>Tensor</code> <strong>(1, 128)</strong></p>
+<h3 id="4-embedding">4. 嵌入层 (Embedding)</h3>
+<p>将整数ID转换为稠密的浮点向量，这是从"符号"到"语义"的关键转换。</p>
+<p><strong>a. 词嵌入 (Token Embedding)</strong>
+- <strong>权重矩阵</strong>: <code>(V, D_model)</code> = <code>(10000, 512)</code>
+- <strong>操作</strong>: 查表，每个ID取出对应的512维向量
+- <strong>形状变化</strong>: <code>(1, 128)</code> → <strong>(1, 128, 512)</strong></p>
+<p><strong>b. 位置嵌入 (Positional Embedding)</strong>
+- <strong>权重矩阵</strong>: <code>(T, D_model)</code> = <code>(128, 512)</code>
+- <strong>操作</strong>: 为位置0~127各生成一个512维向量
+- <strong>形状</strong>: <strong>(1, 128, 512)</strong></p>
+<p><strong>c. 融合</strong>
+- <strong>操作</strong>: <code>x = token_emb + position_emb</code>
+- <strong>最终输出</strong>: <strong>(1, 128, 512)</strong></p>
+<blockquote>
+<p>此时，数据已准备好进入Transformer的第一个块</p>
+</blockquote>
+<hr />
+<h2 id="transformer">第二阶段：Transformer块处理</h2>
+<p>每个Transformer块由两个子层组成：<strong>多头自注意力 (MHA)</strong> 和 <strong>前馈网络 (FFN)</strong></p>
+<p><strong>输入形状</strong>: <strong>(32, 128, 512)</strong></p>
+<h3 id="1-multi-head-attention">子层1：多头自注意力 (Multi-Head Attention)</h3>
+<h4 id="1layer-normalization">步骤1：Layer Normalization</h4>
+<ul>
+<li><strong>形状</strong>: <code>(32, 128, 512)</code> → <code>(32, 128, 512)</code> (形状不变)</li>
+</ul>
+<h4 id="2q-k-v">步骤2：生成Q, K, V</h4>
+<p><strong>线性投射</strong>
+- <strong>权重矩阵</strong>: <code>(512, 1536)</code> (一次性生成Q、K、V)
+- <strong>形状变化</strong>: <code>(32, 128, 512)</code> → <code>(32, 128, 1536)</code></p>
+<p><strong>拆分为Q, K, V</strong>
+- <strong>形状</strong>: 每个都是 <code>(32, 128, 512)</code></p>
+<h4 id="3_1">步骤3：拆分多头</h4>
+<p><strong>操作</strong>: 将512维拆分为8个头，每头64维
+- <code>view</code>: <code>(32, 128, 512)</code> → <code>(32, 128, 8, 64)</code>
+- <code>transpose</code>: <code>(32, 128, 8, 64)</code> → <strong>(32, 8, 128, 64)</strong></p>
+<blockquote>
+<p>关键：现在有8个并行的"注意力专家"，各自在64维空间观察整个序列</p>
+</blockquote>
+<h4 id="4">步骤4：缩放点积注意力</h4>
+<p><strong>计算注意力分数</strong>: <code>Q @ K^T</code>
+- <strong>Q形状</strong>: <code>(32, 8, 128, 64)</code>
+- <strong>K^T形状</strong>: <code>(32, 8, 64, 128)</code>
+- <strong>输出</strong>: <strong>(32, 8, 128, 128)</strong> — 这是注意力矩阵，<code>(i,j)</code>位置表示token i对token j的关注度</p>
+<p><strong>加权求和</strong>: <code>softmax(scores) @ V</code>
+- <strong>Softmax后</strong>: <code>(32, 8, 128, 128)</code> (形状不变，值转为概率)
+- <strong>V形状</strong>: <code>(32, 8, 128, 64)</code>
+- <strong>输出</strong>: <strong>(32, 8, 128, 64)</strong> — 每个token融合了全序列的上下文信息</p>
+<h4 id="5">步骤5：合并多头</h4>
+<p><strong>操作</strong>:
+- <code>transpose</code>: <code>(32, 8, 128, 64)</code> → <code>(32, 128, 8, 64)</code>
+- <code>reshape</code>: <code>(32, 128, 8, 64)</code> → <code>(32, 128, 512)</code></p>
+<p><strong>最终线性投射</strong>
+- <strong>权重矩阵</strong>: <code>(512, 512)</code>
+- <strong>输出</strong>: <code>(32, 128, 512)</code></p>
+<h4 id="6">步骤6：残差连接</h4>
+<p><strong>操作</strong>: <code>x = x + attention_output</code></p>
+<p><strong>输出形状</strong>: <strong>(32, 128, 512)</strong></p>
+<h3 id="2-ffn">子层2：前馈网络 (FFN)</h3>
+<h4 id="1layer-normalization_1">步骤1：Layer Normalization</h4>
+<ul>
+<li><strong>形状</strong>: <code>(32, 128, 512)</code> → <code>(32, 128, 512)</code></li>
+</ul>
+<h4 id="2mlp">步骤2：两层MLP</h4>
+<p><strong>第一层：扩展</strong>
+- <strong>权重</strong>: <code>(512, 2048)</code>
+- <strong>形状</strong>: <code>(32, 128, 512)</code> → <strong>(32, 128, 2048)</strong>
+- <strong>激活</strong>: GELU (形状不变)</p>
+<p><strong>第二层：收缩</strong>
+- <strong>权重</strong>: <code>(2048, 512)</code>
+- <strong>形状</strong>: <code>(32, 128, 2048)</code> → <strong>(32, 128, 512)</strong></p>
+<blockquote>
+<p>FFN让每个token在高维空间中独立"思考"，然后提炼结果</p>
+</blockquote>
+<h4 id="3_2">步骤3：残差连接</h4>
+<p><strong>操作</strong>: <code>x = x + ffn_output</code></p>
+<p><strong>Transformer块最终输出</strong>: <strong>(32, 128, 512)</strong></p>
+<hr />
+<h2 id="_3">第三阶段：输出生成</h2>
+<p>经过N个Transformer块后，得到最终隐藏状态。</p>
+<p><strong>输入形状</strong>: <strong>(32, 128, 512)</strong> (称为 <code>final_hidden_state</code>)</p>
+<h3 id="1-language-model-head">1. Language Model Head</h3>
+<p><strong>权重矩阵</strong>: <code>(512, 10000)</code> (与输入嵌入矩阵共享并转置)</p>
+<p><strong>操作</strong>: 线性变换，将语义空间映射回词汇空间</p>
+<p><strong>形状变化</strong>: <code>(32, 128, 512)</code> → <strong>(32, 128, 10000)</strong></p>
+<p><strong>解读</strong>: 对每个位置，得到词汇表中所有词的原始得分 (Logits)</p>
+<h3 id="2-softmax">2. Softmax归一化</h3>
+<p><strong>操作</strong>: 对最后一维应用Softmax</p>
+<p><strong>形状</strong>: <code>(32, 128, 10000)</code> → <code>(32, 128, 10000)</code> (值变为概率分布)</p>
+<h3 id="3_3">3. 解码/采样</h3>
+<p><strong>聚焦</strong>: 只取输入序列最后一个有效位置的概率分布</p>
+<p><strong>示例</strong>: 输入4个tokens，取第4个位置的 <code>(10000,)</code> 概率向量</p>
+<p><strong>采样策略</strong>:
+- <strong>贪心搜索</strong>: 选择概率最大的ID
+- <strong>随机采样</strong>: 根据概率分布随机抽取（可用Temperature/Top-k/Top-p控制）</p>
+<p><strong>输出</strong>: 一个整数ID，如 <code>6112</code></p>
+<h3 id="4-de-tokenization">4. 反分词 (De-tokenization)</h3>
+<p><strong>操作</strong>: 查询词汇表，ID → 文本</p>
+<p><strong>示例</strong>: <code>6112</code> → <code>"模型"</code></p>
+<h3 id="5_1">5. 自回归生成循环</h3>
+<p><strong>流程</strong>:
+1. 将新生成的ID追加到输入序列
+2. 将扩展后的序列作为新输入
+3. 重复整个流程（嵌入 → Transformer → 解码）
+4. 直到生成 <code>[EOS]</code> 标记或达到最大长度</p>
+<hr />
+<h2 id="_4">完整数据流总结</h2>
+<div class="highlight"><pre><span></span><code>文本 &quot;你好，世界！&quot;
+    ↓ 分词
+[&#39;你好&#39;, &#39;，&#39;, &#39;世界&#39;, &#39;！&#39;]
+    ↓ ID化
+[5091, 101, 8224, 102]
+    ↓ 填充
+[5091, 101, 8224, 102, 0, 0, ..., 0]  → (1, 128)
+    ↓ 嵌入
+(1, 128, 512) ← 进入Transformer
+    ↓ 
+× N个Transformer块 (每块内部：MHA → FFN，始终保持 (B, T, D_model))
+    ↓
+(1, 128, 512) ← 最终隐藏状态
+    ↓ LM Head
+(1, 128, 10000) ← Logits
+    ↓ Softmax
+(1, 128, 10000) ← 概率分布
+    ↓ 采样 (取最后一个位置)
+6112 ← 单个ID
+    ↓ 反分词
+&quot;模型&quot;
+    ↓ 追加到输入，循环生成
+&quot;你好，世界！模型正在...&quot;
+</code></pre></div>
+
+<h2 id="_5">核心要点</h2>
+<ol>
+<li>
+<p><strong>形状一致性</strong>: Transformer块的输入输出始终保持 <code>(B, T, D_model)</code>，这是残差连接和深度堆叠的基础</p>
+</li>
+<li>
+<p><strong>注意力的本质</strong>: <code>(T, T)</code> 的注意力矩阵捕获了序列中所有token对之间的关系</p>
+</li>
+<li>
+<p><strong>多头并行</strong>: 8个头在不同的64维子空间中独立学习不同类型的语义关系</p>
+</li>
+<li>
+<p><strong>自回归本质</strong>: 每次只生成一个token，然后将其作为下一次输入的一部分，逐步构建完整回复</p>
+</li>
+</ol></article>
+            <div class="contact-card">
+                <h3><i class="fas fa-heart"></i> Thanks for Reading</h3>
+                <p>If this article was helpful to you, feel free to connect with me!</p>
+                <div class="contact-links">
+                    <a href="https://github.com/HaxxorCialtion" class="contact-link" target="_blank"><i class="fab fa-github"></i>GitHub</a>
+                    <a href="mailto:cialtion737410@sjtu.edu.cn" class="contact-link"><i class="fas fa-envelope"></i>Email</a>
+                </div>
+            </div>
+        </main>
+    </div>
+    <a href="#" class="back-button" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script>
+        hljs.highlightAll();
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+            });
+        });
+        function highlightCurrentSection() {
+            const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+            const tocLinks = document.querySelectorAll('.toc a');
+            let current = '';
+            headings.forEach(heading => {
+                const rect = heading.getBoundingClientRect();
+                if (rect.top <= 100) { current = heading.id; }
+            });
+            tocLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) { link.classList.add('active'); }
+            });
+        }
+        window.addEventListener('scroll', highlightCurrentSection);
+        document.addEventListener('DOMContentLoaded', highlightCurrentSection);
+    </script>
+</body>
+</html>
