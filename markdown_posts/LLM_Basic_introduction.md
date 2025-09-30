@@ -1,3 +1,9 @@
+---
+title: "Large Language Model(LLM) Basic introduction"
+date: "2025-10-01"
+tags: ["LLM", "Basic"]
+---
+
 # LLM完整工作流程：从文本到文本
 
 本教程通过追踪张量的形状变化，完整解析大语言模型从用户输入到生成输出的全过程。
