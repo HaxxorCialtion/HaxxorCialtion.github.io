@@ -1,7 +1,7 @@
 ---
 title: "Large Language Model(LLM) Basic introduction"
 date: "2025-10-01"
-tags: ["LLM", "Basic"]
+tags: ["LLM", "Basic", "Full-attention"]
 ---
 
 # LLM完整工作流程：从文本到文本
