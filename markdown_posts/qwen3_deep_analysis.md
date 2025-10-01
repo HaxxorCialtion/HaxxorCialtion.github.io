@@ -1,9 +1,9 @@
 ---
 title: "Qwen3架构深度解析：从Base模型到Instruct模型"
-date: "2025-01-01"
+date: "2025-10-01"
 tags: ["LLM", "Qwen3", "Transformer", "Architecture", "Fine-tuning", "SFT", "YaRN", "RoPE"]
-author: "AI Research Notes"
-description: "全面解析Qwen3模型架构、参数配置、动态序列处理和后训练数据格式"
+author: "Cialtion"
+description: "全面解析Qwen3模型架构、参数配置、动态序列处理和后训练数据格式(no Coder and MoE)"
 ---
 
 # Qwen3架构深度解析：从Base到Instruct的演进
