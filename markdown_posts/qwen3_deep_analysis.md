@@ -1252,23 +1252,6 @@ graph LR
 }
 ```
 
-### B. 常用命令
-
-```bash
-# 查看模型配置
-python -c "from transformers import AutoConfig; \
-           cfg = AutoConfig.from_pretrained('Qwen/Qwen3-4B-instruct'); \
-           print(cfg)"
-
-# 检查tokenizer
-python -c "from transformers import AutoTokenizer; \
-           tok = AutoTokenizer.from_pretrained('Qwen/Qwen3-4B-instruct'); \
-           print(f'Vocab: {len(tok)}, EOS: {tok.eos_token}')"
-
-# 测试长上下文
-python test_long_context.py --model Qwen/Qwen3-4B-instruct --length 200000
-```
-
 ### C. 相关资源
 
 - [YaRN论文](https://arxiv.org/abs/2309.00071)
