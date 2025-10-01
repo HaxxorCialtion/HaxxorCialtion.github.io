@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Qwen3架构深度解析：从Base模型到Instruct模型 - Cialtion's Tech Blog</title>
-    <meta name="description" content="全面解析Qwen3模型架构、参数配置、动态序列处理和后训练数据格式">
+    <meta name="description" content="全面解析Qwen3模型架构、参数配置、动态序列处理和后训练数据格式(no Coder and MoE)">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" rel="stylesheet">
     <style>
@@ -166,7 +166,6 @@
 <li><a href="#65-base-vs-instruct">6.5 Base vs Instruct本质</a></li>
 <li><a href="#66">6.6 技术债务与未来方向</a></li>
 <li><a href="#67">6.7 给新手的建议</a></li>
-<li><a href="#b">B. 常用命令</a></li>
 <li><a href="#c">C. 相关资源</a></li>
 </ul>
 </li>
@@ -178,14 +177,14 @@
         </div></aside>
         <main class="article-main">
             <header class="article-header">
-                <img src="../images/arknights_mizuki_0.jpg" alt="Qwen3架构深度解析：从Base模型到Instruct模型" class="article-cover" onerror="this.style.display='none'">
+                <img src="../images/bronya_mp.jpg" alt="Qwen3架构深度解析：从Base模型到Instruct模型" class="article-cover" onerror="this.style.display='none'">
                 <h1 class="article-title">Qwen3架构深度解析：从Base模型到Instruct模型</h1>
                 <div class="article-meta">
-                    <div class="meta-item"><i class="fas fa-calendar-alt"></i>Published: 2025-01-01</div>
+                    <div class="meta-item"><i class="fas fa-calendar-alt"></i>Published: 2025-10-01</div>
                     <div class="meta-item"><i class="fas fa-user"></i>Author: Cialtion</div>
                 </div>
                 <div class="article-tags"><span class="tag">LLM</span><span class="tag">Qwen3</span><span class="tag">Transformer</span><span class="tag">Architecture</span><span class="tag">Fine-tuning</span><span class="tag">SFT</span><span class="tag">YaRN</span><span class="tag">RoPE</span></div>
-                <div class="article-description">全面解析Qwen3模型架构、参数配置、动态序列处理和后训练数据格式</div>
+                <div class="article-description">全面解析Qwen3模型架构、参数配置、动态序列处理和后训练数据格式(no Coder and MoE)</div>
             </header>
             <article class="article-content"><h1 id="qwen3baseinstruct">Qwen3架构深度解析：从Base到Instruct的演进</h1>
 <h2 id="_1">📋 目录</h2>
@@ -1677,21 +1676,6 @@ ChatML示例:
 <span class="w">    </span><span class="nt">&quot;eos_str&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;|im_end|&gt;&quot;</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</code></pre></div>
-
-<h3 id="b">B. 常用命令</h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># 查看模型配置</span>
-python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from transformers import AutoConfig; \</span>
-<span class="s2">           cfg = AutoConfig.from_pretrained(&#39;Qwen/Qwen3-4B-instruct&#39;); \</span>
-<span class="s2">           print(cfg)&quot;</span>
-
-<span class="c1"># 检查tokenizer</span>
-python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from transformers import AutoTokenizer; \</span>
-<span class="s2">           tok = AutoTokenizer.from_pretrained(&#39;Qwen/Qwen3-4B-instruct&#39;); \</span>
-<span class="s2">           print(f&#39;Vocab: {len(tok)}, EOS: {tok.eos_token}&#39;)&quot;</span>
-
-<span class="c1"># 测试长上下文</span>
-python<span class="w"> </span>test_long_context.py<span class="w"> </span>--model<span class="w"> </span>Qwen/Qwen3-4B-instruct<span class="w"> </span>--length<span class="w"> </span><span class="m">200000</span>
 </code></pre></div>
 
 <h3 id="c">C. 相关资源</h3>
