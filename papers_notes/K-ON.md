@@ -1,5 +1,5 @@
 ---
-title: K-ON: Stacking Knowledge On the Head Layer of Large Language Model
+title: K-ON Stacking Knowledge On the Head Layer of Large Language Model
 date: "2025-10-03"
 tags: ["KG Completion", "Multi-token Prediction", "LLM", "Contrastive Learning"]
 description: "提出K-ON方法，通过多头层预测和实体级对比学习解决LLM在知识图谱补全任务中的粒度不匹配问题"

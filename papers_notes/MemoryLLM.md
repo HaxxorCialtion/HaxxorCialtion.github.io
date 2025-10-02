@@ -1,3 +1,11 @@
+---
+title: MemoryLLM Towards Self-Updatable Large Language Models
+date: "2025-10-03"
+tags: ["LLM Memory", "Memory", "Continuous Learning", "Parametric Memory","Infer update memory"]
+description: "提出K-ON方法，通过多头层预测和实体级对比学习解决LLM在知识图谱补全任务中的粒度不匹配问题"
+---
+
+
 # MemoryLLM: Towards Self-Updatable Large Language Models
 
 **论文链接：** https://github.com/wangyu-ustc/MemoryLLM  
