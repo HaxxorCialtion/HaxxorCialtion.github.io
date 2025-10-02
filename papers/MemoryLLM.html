@@ -132,7 +132,7 @@
         </div></aside>
         <main class="article-main">
             <header class="article-header">
-                <img src="../images/bronya_1.jpg" alt="MemoryLLM: Towards Self-Updatable Large Language Models" class="article-cover" onerror="this.style.display='none'">
+                <img src="../images/bronya_mp.jpg" alt="MemoryLLM: Towards Self-Updatable Large Language Models" class="article-cover" onerror="this.style.display='none'">
                 <h1 class="article-title">MemoryLLM: Towards Self-Updatable Large Language Models</h1>
                 <div class="article-meta">
                     <div class="meta-item"><i class="fas fa-calendar-alt"></i>Published: 2025-10-02</div>
@@ -146,7 +146,8 @@
 <strong>发表会议：</strong> ICML 2024<br />
 <strong>作者：</strong> Yu Wang et al.</p>
 <p><strong>总结</strong> 在transformer层之前，额外引入memory pool，维度R^(N×M×L)<br />
-其中N为base LLM的transformer层数，例如32；M为每层memory pool每层向量维度，L为原模型hidden size</p>
+其中N为base LLM的transformer层数，例如32；M为每层memory pool每层向量维度，L为原模型hidden size<br />
+相当于强行拓展了输入向量的维度，建立memory pool</p>
 <hr />
 <h2 id="_1">核心问题与动机</h2>
 <p><strong>目标问题：</strong> 现有LLM部署后参数静态，难以注入新知识

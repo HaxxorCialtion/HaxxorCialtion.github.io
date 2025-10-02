@@ -5,7 +5,8 @@
 **作者：** Yu Wang et al.
 
 **总结** 在transformer层之前，额外引入memory pool，维度R^(N×M×L)  
-其中N为base LLM的transformer层数，例如32；M为每层memory pool每层向量维度，L为原模型hidden size
+其中N为base LLM的transformer层数，例如32；M为每层memory pool每层向量维度，L为原模型hidden size  
+相当于强行拓展了输入向量的维度，建立memory pool
 ---
 
 ## 核心问题与动机
