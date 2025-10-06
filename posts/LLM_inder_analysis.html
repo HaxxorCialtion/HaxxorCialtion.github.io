@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qwen3-8B-Base 性能测试笔记 - Cialtion's Tech Blog</title>
+    <meta name="description" content="- 模型: Qwen3-8B-Base - 设备: NVIDIA GeForce RTX 4090 (48G显存版) - 词表大小: 151,643 --- - Prompt 长度: 7 tokens - 生成 Token 数: 287 tokens | 阶段 | 耗时 (ms) | 占比 | 吞吐...">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-color: #2c3e50; --secondary-color: #3498db; --accent-color: #e74c3c;
+            --background-color: #f8fafc; --card-background: #ffffff; --text-primary: #2d3748;
+            --text-secondary: #718096; --border-color: #e2e8f0; --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1); --border-radius: 12px; --transition: all 0.3s ease;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: var(--background-color); color: var(--text-primary); line-height: 1.7; }
+        .navbar { background: var(--card-background); box-shadow: var(--shadow-light); padding: 1rem 0; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border-color); }
+        .nav-container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .nav-brand { display: flex; align-items: center; text-decoration: none; color: var(--primary-color); font-weight: 600; font-size: 1.2rem; }
+        .nav-brand i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-link { color: var(--text-secondary); text-decoration: none; transition: var(--transition); padding: 0.5rem 1rem; border-radius: 8px; }
+        .nav-link:hover { color: var(--secondary-color); background-color: rgba(52, 152, 219, 0.1); }
+        .main-container { display: flex; max-width: 1400px; margin: 0 auto; gap: 2rem; padding: 2rem; }
+        .toc-sidebar { width: 250px; flex-shrink: 0; position: sticky; top: 6rem; height: fit-content; max-height: calc(100vh - 8rem); overflow-y: auto; }
+        .toc-container { background: var(--card-background); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1.5rem; }
+        .toc-title { font-size: 1.1rem; font-weight: 600; color: var(--primary-color); margin-bottom: 1rem; display: flex; align-items: center; }
+        .toc-title i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .toc ul { list-style: none; padding-left: 0; }
+        .toc ul ul { padding-left: 1rem; margin-top: 0.3rem; }
+        .toc li { margin: 0.3rem 0; }
+        .toc a { color: var(--text-secondary); text-decoration: none; transition: var(--transition); display: block; padding: 0.3rem 0.5rem; border-radius: 4px; font-size: 0.9rem; line-height: 1.4; }
+        .toc a:hover, .toc a.active { color: var(--secondary-color); background-color: rgba(52, 152, 219, 0.1); }
+        .article-main { flex: 1; min-width: 0; }
+        .article-header { background: var(--card-background); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; box-shadow: var(--shadow-light); border: 1px solid var(--border-color); position: relative; overflow: hidden; }
+        .article-cover { width: 100%; height: 350px; object-fit: cover; border-radius: var(--border-radius); margin-bottom: 1.5rem; box-shadow: var(--shadow-medium); transition: var(--transition); }
+        .article-cover:hover { transform: scale(1.02); }
+        .article-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, var(--secondary-color), var(--accent-color)); }
+        .article-title { font-size: 2.5rem; font-weight: 700; color: var(--primary-color); margin-bottom: 1rem; line-height: 1.3; }
+        .article-meta { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.95rem; }
+        .meta-item { display: flex; align-items: center; background: var(--background-color); padding: 0.5rem 1rem; border-radius: 20px; }
+        .meta-item i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .article-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+        .tag { background: linear-gradient(135deg, var(--secondary-color), #2980b9); color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 500; box-shadow: var(--shadow-light); }
+        .article-description { color: var(--text-secondary); font-size: 1.1rem; line-height: 1.6; font-style: italic; background: var(--background-color); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--secondary-color); }
+        .article-content { background: var(--card-background); border-radius: var(--border-radius); padding: 2.5rem; box-shadow: var(--shadow-light); border: 1px solid var(--border-color); }
+        .article-content h1, .article-content h2, .article-content h3, .article-content h4, .article-content h5, .article-content h6 { color: var(--primary-color); margin: 2rem 0 1rem 0; font-weight: 600; line-height: 1.4; }
+        .article-content h1 { font-size: 2.2rem; border-bottom: 3px solid var(--secondary-color); padding-bottom: 0.5rem; }
+        .article-content h2 { font-size: 1.8rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.3rem; }
+        .article-content p { margin: 1rem 0; line-height: 1.8; }
+        .article-content img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: var(--shadow-light); margin: 1.5rem 0; }
+        .article-content blockquote { border-left: 4px solid var(--secondary-color); margin: 1.5rem 0; padding: 1rem 1.5rem; background: var(--background-color); border-radius: 0 8px 8px 0; font-style: italic; }
+        .article-content pre { background: #f6f8fa; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; overflow-x: auto; margin: 1.5rem 0; }
+        .article-content code { background: #f6f8fa; border: 1px solid var(--border-color); border-radius: 4px; padding: 0.2rem 0.4rem; font-family: 'Monaco', 'Consolas', monospace; font-size: 0.9em; }
+        .article-content pre code { background: none; border: none; padding: 0; }
+        .article-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-light); }
+        .article-content th, .article-content td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .article-content th { background: var(--background-color); font-weight: 600; color: var(--primary-color); }
+        .contact-card { background: linear-gradient(135deg, var(--primary-color), #34495e); color: white; border-radius: var(--border-radius); padding: 2rem; margin: 2rem 0; text-align: center; }
+        .contact-card h3 { margin-bottom: 1rem; color: white; }
+        .contact-links { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+        .contact-link { display: inline-flex; align-items: center; padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.1); border-radius: 25px; color: white; text-decoration: none; transition: var(--transition); }
+        .contact-link:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-1px); }
+        .contact-link i { margin-right: 0.5rem; }
+        .back-button { position: fixed; bottom: 2rem; right: 2rem; background: var(--secondary-color); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-medium); transition: var(--transition); text-decoration: none; }
+        .back-button:hover { background: #2980b9; transform: translateY(-2px); }
+        @media (max-width: 1024px) { .main-container { flex-direction: column; padding: 1rem; } .toc-sidebar { width: 100%; position: static; order: 2; margin-top: 2rem; } .article-main { order: 1; } }
+        @media (max-width: 768px) { .nav-container { padding: 0 1rem; flex-direction: column; gap: 1rem; } .article-header, .article-content { padding: 1.5rem; } .article-title { font-size: 2rem; } .back-button { bottom: 1rem; right: 1rem; width: 50px; height: 50px; } .article-cover { height: 250px; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-brand">
+                <i class="fas fa-home"></i>Cialtion's Tech Blog
+            </a>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link"><i class="fas fa-arrow-left"></i>Back to Home</a>
+                <a href="mailto:cialtion737410@sjtu.edu.cn" class="nav-link"><i class="fas fa-envelope"></i>Contact Me</a>
+            </div>
+        </div>
+    </nav>
+    <div class="main-container">
+        <aside class="toc-sidebar"><div class="toc-container">
+            <div class="toc-title">
+                <i class="fas fa-list"></i>
+                Table of Contents
+            </div>
+            <div class="toc"><div class="toc"><span class="toctitle">Table of Contents</span><ul>
+<li><a href="#qwen3-8b-base">Qwen3-8B-Base 性能测试笔记</a><ul>
+<li><a href="#1">1. 测试环境</a></li>
+<li><a href="#2">2. 实验总结</a><ul>
+<li><a href="#1-prompt">实验 1: 短 Prompt</a></li>
+<li><a href="#2-prompt">实验 2: 长 Prompt</a></li>
+</ul>
+</li>
+<li><a href="#3">3. 对比分析与结论</a><ul>
+<li><a href="#_1">数据对比</a></li>
+<li><a href="#_2">关键结论</a></li>
+</ul>
+</li>
+<li><a href="#4">4. 附录</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+        </div></aside>
+        <main class="article-main">
+            <header class="article-header">
+                <img src="../images/arknights_mizuki_0.jpg" alt="Qwen3-8B-Base 性能测试笔记" class="article-cover" onerror="this.style.display='none'">
+                <h1 class="article-title">Qwen3-8B-Base 性能测试笔记</h1>
+                <div class="article-meta">
+                    <div class="meta-item"><i class="fas fa-calendar-alt"></i>Published: 2025-10-06</div>
+                    <div class="meta-item"><i class="fas fa-user"></i>Author: Cialtion</div>
+                </div>
+                
+                <div class="article-description">- 模型: Qwen3-8B-Base - 设备: NVIDIA GeForce RTX 4090 (48G显存版) - 词表大小: 151,643 --- - Prompt 长度: 7 tokens - 生成 Token 数: 287 tokens | 阶段 | 耗时 (ms) | 占比 | 吞吐...</div>
+            </header>
+            <article class="article-content"><h1 id="qwen3-8b-base">Qwen3-8B-Base 性能测试笔记</h1>
+<h2 id="1">1. 测试环境</h2>
+<ul>
+<li><strong>模型</strong>: Qwen3-8B-Base</li>
+<li><strong>设备</strong>: NVIDIA GeForce RTX 4090 (48G显存版)</li>
+<li><strong>词表大小</strong>: 151,643</li>
+</ul>
+<hr />
+<h2 id="2">2. 实验总结</h2>
+<h3 id="1-prompt">实验 1: 短 Prompt</h3>
+<ul>
+<li><strong>Prompt 长度</strong>: 7 tokens</li>
+<li><strong>生成 Token 数</strong>: 287 tokens</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">阶段</th>
+<th style="text-align: left;">耗时 (ms)</th>
+<th style="text-align: left;">占比</th>
+<th style="text-align: left;">吞吐量 (tokens/s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Prefill</td>
+<td style="text-align: left;">70.87</td>
+<td style="text-align: left;">0.47%</td>
+<td style="text-align: left;">98.77</td>
+</tr>
+<tr>
+<td style="text-align: left;">Decode</td>
+<td style="text-align: left;">14966.21</td>
+<td style="text-align: left;">99.53%</td>
+<td style="text-align: left;">19.11 (52.33 ms/token)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>总计</strong></td>
+<td style="text-align: left;"><strong>15037.09</strong></td>
+<td style="text-align: left;"><strong>100%</strong></td>
+<td style="text-align: left;"><strong>19.09 (整体)</strong></td>
+</tr>
+</tbody>
+</table>
+<details>
+<summary>点击查看 Prefill 阶段模块分析</summary>
+
+| 模块                | 总时间(ms) | 占比    |
+| :------------------ | :--------- | :------ |
+| Attention.K_proj    | 12.27      | 24.61 % |
+| FFN.down_proj       | 5.23       | 10.48 % |
+| FFN.gate_proj       | 5.07       | 10.17 % |
+| FFN.up_proj         | 4.84       | 9.71 %  |
+| LayerNorm.post_attn | 3.34       | 6.71 %  |
+| ...                 | ...        | ...     |
+
+</details>
+
+<details>
+<summary>点击查看 Decode 阶段模块分析 (平均每步)</summary>
+
+| 模块                | 平均(ms) | 占比    |
+| :------------------ | :------- | :------ |
+| FFN.gate_proj       | 0.1309   | 13.27 % |
+| FFN.down_proj       | 0.1302   | 13.19 % |
+| FFN.up_proj         | 0.1281   | 12.99 % |
+| LayerNorm.post_attn | 0.0876   | 8.88 %  |
+| LayerNorm.pre_attn  | 0.0852   | 8.64 %  |
+| ...                 | ...      | ...     |
+
+</details>
+
+<hr />
+<h3 id="2-prompt">实验 2: 长 Prompt</h3>
+<ul>
+<li><strong>Prompt 长度</strong>: 293 tokens</li>
+<li><strong>生成 Token 数</strong>: 55 tokens</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">阶段</th>
+<th style="text-align: left;">耗时 (ms)</th>
+<th style="text-align: left;">占比</th>
+<th style="text-align: left;">吞吐量 (tokens/s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Prefill</td>
+<td style="text-align: left;">80.42</td>
+<td style="text-align: left;">2.76%</td>
+<td style="text-align: left;">3643.30</td>
+</tr>
+<tr>
+<td style="text-align: left;">Decode</td>
+<td style="text-align: left;">2838.66</td>
+<td style="text-align: left;">97.24%</td>
+<td style="text-align: left;">19.02 (52.57 ms/token)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>总计</strong></td>
+<td style="text-align: left;"><strong>2919.08</strong></td>
+<td style="text-align: left;"><strong>100%</strong></td>
+<td style="text-align: left;"><strong>18.84 (整体)</strong></td>
+</tr>
+</tbody>
+</table>
+<details>
+<summary>点击查看 Prefill 阶段模块分析</summary>
+
+| 模块            | 总时间(ms) | 占比    |
+| :-------------- | :--------- | :------ |
+| FFN.gate_proj   | 9.46       | 16.20 % |
+| FFN.up_proj     | 9.07       | 15.53 % |
+| FFN.down_proj   | 9.04       | 15.48 % |
+| Attention.Q_proj| 4.34       | 7.43 %  |
+| Attention.O_proj| 4.12       | 7.05 %  |
+| ...             | ...        | ...     |
+
+</details>
+
+<details>
+<summary>点击查看 Decode 阶段模块分析 (平均每步)</summary>
+
+| 模块                | 平均(ms) | 占比    |
+| :------------------ | :------- | :------ |
+| FFN.gate_proj       | 0.1306   | 13.20 % |
+| FFN.down_proj       | 0.1302   | 13.16 % |
+| FFN.up_proj         | 0.1281   | 12.95 % |
+| LayerNorm.post_attn | 0.0886   | 8.95 %  |
+| LayerNorm.pre_attn  | 0.0860   | 8.69 %  |
+| ...                 | ...      | ...     |
+
+</details>
+
+<hr />
+<h2 id="3">3. 对比分析与结论</h2>
+<h3 id="_1">数据对比</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">指标</th>
+<th style="text-align: left;">实验1 (短prompt)</th>
+<th style="text-align: left;">实验2 (长prompt)</th>
+<th style="text-align: left;">比值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Prompt 长度</strong></td>
+<td style="text-align: left;">7</td>
+<td style="text-align: left;">293</td>
+<td style="text-align: left;">41.9 x</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Prefill 时间 (ms)</strong></td>
+<td style="text-align: left;">70.87</td>
+<td style="text-align: left;">80.42</td>
+<td style="text-align: left;">1.1 x</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Decode 平均时间 (ms/token)</strong></td>
+<td style="text-align: left;">52.33</td>
+<td style="text-align: left;">52.57</td>
+<td style="text-align: left;">1.00 x</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>生成 token 数</strong></td>
+<td style="text-align: left;">287</td>
+<td style="text-align: left;">55</td>
+<td style="text-align: left;">-</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_2">关键结论</h3>
+<ol>
+<li>
+<p><strong>Prefill 阶段是计算密集型 (Compute-Bound)</strong></p>
+<ul>
+<li>当 Prompt 长度从 7 增加到 293 (约42倍)时，Prefill 时间仅增加了 1.1倍。这表明对于短文本，Prefill 的固定开销较大，但随着长度增加，处理时间近似线性增长。长 Prompt 下的高吞吐量 (3643 tokens/s) 也证明了并行计算的效率。</li>
+</ul>
+</li>
+<li>
+<p><strong>Decode 阶段是访存密集型 (Memory-Bound)</strong></p>
+<ul>
+<li>无论 Prompt 长短，解码（生成）单个 token 的平均时间几乎恒定 (52.33 ms vs 52.57 ms)。这说明 Decode 阶段的瓶颈在于从显存中读写 KV Cache，而不是在矩阵计算上。</li>
+</ul>
+</li>
+<li>
+<p><strong>推理的主要瓶颈是 Decode</strong></p>
+<ul>
+<li>在两个实验中，Decode 阶段的耗时都占了总时间的绝对主导地位（短 Prompt 占 99.5%，长 Prompt 占 97.2%）。这是典型的自回归模型生成长序列时的性能特征。</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="4">4. 附录</h2>
+<details>
+<summary>点击查看测试代码</summary>
+
+```python
+#!/usr/bin/env python3
+import os
+import torch
+import time
+from collections import defaultdict
+
+os.environ['HF_HUB_OFFLINE'] = '1'
+os.environ['TRANSFORMERS_OFFLINE'] = '1'
+
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+print("="*80)
+print("加载模型和分词器...")
+print("="*80)
+
+model_path = "./Qwen/Qwen3-8B-Base/"
+tokenizer = AutoTokenizer.from_pretrained(model_path, local_files_only=True)
+
+model = AutoModelForCausalLM.from_pretrained(
+    model_path,
+    local_files_only=True,
+    torch_dtype=torch.float16,
+    device_map="cuda:0"
+)
+
+print(f"模型加载完成, 设备: {model.device}")
+print(f"词表大小: {tokenizer.vocab_size}")
+
+# ============================================
+# 修正版：更精确的模块性能分析
+# ============================================
+
+class ModuleProfiler:
+    """改进版：避免父子模块重复计时"""
+    def __init__(self, model):
+        self.model = model
+        self.module_times = defaultdict(list)
+        self.hooks = []
+        self.active_modules = []  # 跟踪活动模块栈
+
+    def register_hooks(self):
+        """只为叶子模块注册 hooks"""
+
+        # 识别所有叶子模块（没有子模块的模块）
+        leaf_modules = {}
+        for name, module in self.model.named_modules():
+            if len(list(module.children())) == 0:  # 叶子模块
+                leaf_modules[id(module)] = name
+
+        def pre_forward_hook(module, input):
+            if id(module) in leaf_modules:
+                torch.cuda.synchronize()
+                self.active_modules.append({
+                    'name': leaf_modules[id(module)],
+                    'start': time.time()
+                })
+
+        def forward_hook(module, input, output):
+            if id(module) in leaf_modules and self.active_modules:
+                torch.cuda.synchronize()
+                module_info = self.active_modules.pop()
+                elapsed = time.time() - module_info['start']
+
+                # 简化模块名称
+                name = self._simplify_name(module_info['name'])
+                self.module_times[name].append(elapsed)
+
+        # 注册 hooks
+        for name, module in self.model.named_modules():
+            if id(module) in leaf_modules:
+                h1 = module.register_forward_pre_hook(pre_forward_hook)
+                h2 = module.register_forward_hook(forward_hook)
+                self.hooks.append(h1)
+                self.hooks.append(h2)
+
+    def _simplify_name(self, full_name):
+        """简化模块名称"""
+        if 'embed_tokens' in full_name:
+            return 'Embedding'
+        elif 'lm_head' in full_name:
+            return 'LM_Head'
+        elif 'model.norm' in full_name:
+            return 'Final_LayerNorm'
+
+        # Attention 相关
+        elif 'self_attn.q_proj' in full_name:
+            return 'Attention.Q_proj'
+        elif 'self_attn.k_proj' in full_name:
+            return 'Attention.K_proj'
+        elif 'self_attn.v_proj' in full_name:
+            return 'Attention.V_proj'
+        elif 'self_attn.o_proj' in full_name:
+            return 'Attention.O_proj'
+        elif 'rotary_emb' in full_name:
+            return 'Attention.RoPE'
+
+        # FFN 相关
+        elif 'mlp.gate_proj' in full_name:
+            return 'FFN.gate_proj'
+        elif 'mlp.up_proj' in full_name:
+            return 'FFN.up_proj'
+        elif 'mlp.down_proj' in full_name:
+            return 'FFN.down_proj'
+        elif 'mlp.act_fn' in full_name:
+            return 'FFN.activation'
+
+        # LayerNorm
+        elif 'input_layernorm' in full_name:
+            return 'LayerNorm.pre_attn'
+        elif 'post_attention_layernorm' in full_name:
+            return 'LayerNorm.post_attn'
+
+        return full_name
+
+    def remove_hooks(self):
+        for hook in self.hooks:
+            hook.remove()
+        self.hooks = []
+
+    def reset(self):
+        self.module_times = defaultdict(list)
+        self.active_modules = []
+
+    def report(self, title="模块性能统计", top_n=15):
+        print(f"\n{'='*90}")
+        print(f"{title}")
+        print(f"{'='*90}")
+
+        # 聚合统计
+        aggregated = {}
+        for name, times in self.module_times.items():
+            total = sum(times)
+            count = len(times)
+            aggregated[name] = {
+                'total': total,
+                'count': count,
+                'avg': total / count if count > 0 else 0
+            }
+
+        total_time = sum(s['total'] for s in aggregated.values())
+
+        # 按总时间排序
+        sorted_items = sorted(aggregated.items(), key=lambda x: x[1]['total'], reverse=True)
+
+        print(f"{'模块':<35} {'总时间(ms)':<12} {'调用次数':<10} {'平均(ms)':<12} {'占比':<8}")
+        print("-"*90)
+
+        for name, stats in sorted_items[:top_n]:
+            pct = (stats['total'] / total_time * 100) if total_time > 0 else 0
+            print(f"{name:<35} {stats['total']*1000:<12.2f} {stats['count']:<10} "
+                  f"{stats['avg']*1000:<12.4f} {pct:<8.2f}%")
+
+        if len(sorted_items) > top_n:
+            other_time = sum(s['total'] for _, s in sorted_items[top_n:])
+            other_pct = (other_time / total_time * 100) if total_time > 0 else 0
+            print(f"{'(其他模块)':<35} {other_time*1000:<12.2f} {'---':<10} "
+                  f"{'---':<12} {other_pct:<8.2f}%")
+
+        print("-"*90)
+        print(f"{'总计':<35} {total_time*1000:<12.2f}")
+        print()
+
+# ============================================
+# Warmup：消除首次运行的 CUDA 开销
+# ============================================
+
+print("\n" + "="*80)
+print("Warmup: 预热 GPU（消除 CUDA 编译开销）")
+print("="*80)
+
+warmup_prompt = "测试"
+warmup_inputs = tokenizer(warmup_prompt, return_tensors="pt").to(model.device)
+
+print("进行 3 次 warmup...")
+for i in range(3):
+    with torch.no_grad():
+        _ = model(**warmup_inputs, use_cache=True)
+    print(f"  Warmup {i+1}/3 完成")
+
+torch.cuda.synchronize()
+print("Warmup 完成！\n")
+
+# ============================================
+# 性能分析函数
+# ============================================
+
+def profile_generation(model, tokenizer, prompt, max_new_tokens, profiler, experiment_name):
+    """带性能分析的生成"""
+    print(f"\n{'='*80}")
+    print(f"{experiment_name}")
+    print(f"{'='*80}\n")
+
+    # Tokenize
+    torch.cuda.synchronize()
+    t0 = time.time()
+    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+    torch.cuda.synchronize()
+    tokenize_time = time.time() - t0
+
+    input_ids = inputs['input_ids']
+    prompt_len = input_ids.shape[1]
+
+    print(f"Prompt 长度: {prompt_len} tokens")
+    print(f"Max new tokens: {max_new_tokens}\n")
+
+    # ============================================
+    # Prefill
+    # ============================================
+    print("--- Prefill 阶段 ---")
+    profiler.reset()
+
+    torch.cuda.synchronize()
+    t_prefill = time.time()
+
+    with torch.no_grad():
+        outputs = model(input_ids=input_ids, use_cache=True)
+
+    torch.cuda.synchronize()
+    prefill_time = time.time() - t_prefill
+
+    print(f"Prefill 时间: {prefill_time*1000:.2f} ms")
+    print(f"吞吐量: {prompt_len/prefill_time:.2f} tokens/s")
+
+    profiler.report(f"{experiment_name} - Prefill 模块分析")
+
+    # ============================================
+    # Decode
+    # ============================================
+    print("--- Decode 阶段 ---")
+    profiler.reset()
+
+    past_key_values = outputs.past_key_values
+    logits = outputs.logits[:, -1, :]
+    next_token_id = torch.argmax(logits, dim=-1).item()
+
+    generated_tokens = [next_token_id]
+    current_token = torch.tensor([[next_token_id]], device=model.device)
+
+    decode_times = []
+
+    for step in range(1, max_new_tokens):
+        torch.cuda.synchronize()
+        t_step = time.time()
+
+        with torch.no_grad():
+            outputs = model(
+                input_ids=current_token,
+                past_key_values=past_key_values,
+                use_cache=True
+            )
+
+        torch.cuda.synchronize()
+        decode_times.append(time.time() - t_step)
+
+        logits = outputs.logits[:, -1, :]
+        past_key_values = outputs.past_key_values
+        next_token_id = torch.argmax(logits, dim=-1).item()
+
+        generated_tokens.append(next_token_id)
+        current_token = torch.tensor([[next_token_id]], device=model.device)
+
+        if next_token_id == tokenizer.eos_token_id:
+            print(f"遇到 EOS，停止于第 {step+1} 步")
+            break
+
+    avg_decode = sum(decode_times) / len(decode_times) * 1000
+    total_decode = sum(decode_times) * 1000
+
+    print(f"生成 token 数: {len(generated_tokens)}")
+    print(f"平均 decode 时间: {avg_decode:.2f} ms/token")
+    print(f"Decode 吞吐量: {1000/avg_decode:.2f} tokens/s")
+
+    profiler.report(f"{experiment_name} - Decode 模块分析（平均每步）")
+
+    # 解码文本
+    generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
+
+    # 总结
+    total_time = prefill_time + sum(decode_times)
+    print(f"\n{'='*80}")
+    print(f"{experiment_name} - 总结")
+    print(f"{'='*80}")
+    print(f"Tokenization:  {tokenize_time*1000:>10.2f} ms  ({tokenize_time/total_time*100:>5.2f}%)")
+    print(f"Prefill:       {prefill_time*1000:>10.2f} ms  ({prefill_time/total_time*100:>5.2f}%)")
+    print(f"Decode:        {total_decode:>10.2f} ms  ({sum(decode_times)/total_time*100:>5.2f}%)")
+    print(f"{'总计:':<15} {total_time*1000:>10.2f} ms")
+    print(f"\n整体吞吐量: {len(generated_tokens)/total_time:.2f} tokens/s")
+    print(f"生成文本（前150字符）: {generated_text[:150]}")
+    print()
+
+    return generated_text, {
+        'prefill_time': prefill_time,
+        'decode_time': sum(decode_times),
+        'avg_decode': avg_decode,
+        'prompt_len': prompt_len,
+        'generated_len': len(generated_tokens)
+    }
+
+# ============================================
+# 实验
+# ============================================
+
+profiler = ModuleProfiler(model)
+profiler.register_hooks()
+
+# 实验 1
+prompt1 = "莎士比亚是哪国人?"
+text1, stats1 = profile_generation(
+    model, tokenizer, prompt1, 500, profiler, "实验 1: 短 Prompt"
+)
+
+# 实验 2
+prompt2 = prompt1 + text1
+text2, stats2 = profile_generation(
+    model, tokenizer, prompt2, 500, profiler, "实验 2: 长 Prompt"
+)
+
+profiler.remove_hooks()
+
+# ============================================
+# 对比分析
+# ============================================
+
+print("\n" + "="*80)
+print("实验对比分析")
+print("="*80)
+
+print(f"\n{'指标':<30} {'实验1 (短prompt)':<20} {'实验2 (长prompt)':<20} {'比值':<10}")
+print("-"*80)
+print(f"{'Prompt 长度':<30} {stats1['prompt_len']:<20} {stats2['prompt_len']:<20} "
+      f"{stats2['prompt_len']/stats1['prompt_len']:<10.1f}x")
+print(f"{'Prefill 时间 (ms)':<30} {stats1['prefill_time']*1000:<20.2f} "
+      f"{stats2['prefill_time']*1000:<20.2f} "
+      f"{stats2['prefill_time']/stats1['prefill_time']:<10.1f}x")
+print(f"{'Decode 平均时间 (ms/token)':<30} {stats1['avg_decode']:<20.2f} "
+      f"{stats2['avg_decode']:<20.2f} "
+      f"{stats2['avg_decode']/stats1['avg_decode']:<10.2f}x")
+print(f"{'生成 token 数':<30} {stats1['generated_len']:<20} {stats2['generated_len']:<20}")
+
+print("\n" + "="*80)
+print("关键结论")
+print("="*80)
+print("1. Prefill 是 compute-bound:")
+print(f"    - 时间随 prompt 长度线性增长（{stats2['prefill_time']/stats1['prefill_time']:.1f}x）")
+print("\n2. Decode 是 memory-bound:")
+print(f"    - 平均时间几乎不变（{stats2['avg_decode']/stats1['avg_decode']:.2f}x，接近1.0）")
+print(f"    - 瓶颈在内存带宽，不在计算")
+print("\n3. 主要耗时：")
+print(f"    - 实验1: Decode占 {stats1['decode_time']/(stats1['prefill_time']+stats1['decode_time'])*100:.1f}%")
+print(f"    - 实验2: Decode占 {stats2['decode_time']/(stats2['prefill_time']+stats2['decode_time'])*100:.1f}%")
+print("="*80)</article>
+            <div class="contact-card">
+                <h3><i class="fas fa-heart"></i> Thanks for Reading</h3>
+                <p>If this article was helpful to you, feel free to connect with me!</p>
+                <div class="contact-links">
+                    <a href="https://github.com/HaxxorCialtion" class="contact-link" target="_blank"><i class="fab fa-github"></i>GitHub</a>
+                    <a href="mailto:cialtion737410@sjtu.edu.cn" class="contact-link"><i class="fas fa-envelope"></i>Email</a>
+                </div>
+            </div>
+        </main>
+    </div>
+    <a href="#" class="back-button" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script>
+        hljs.highlightAll();
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+            });
+        });
+        function highlightCurrentSection() {
+            const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+            const tocLinks = document.querySelectorAll('.toc a');
+            let current = '';
+            headings.forEach(heading => {
+                const rect = heading.getBoundingClientRect();
+                if (rect.top <= 100) { current = heading.id; }
+            });
+            tocLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) { link.classList.add('active'); }
+            });
+        }
+        window.addEventListener('scroll', highlightCurrentSection);
+        document.addEventListener('DOMContentLoaded', highlightCurrentSection);
+    </script>
+</body>
+</html>
