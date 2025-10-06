@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MemoryLLM Towards Self-Updatable Large Language Models - Cialtion's Tech Blog</title>
-    <meta name="description" content="提出K-ON方法，通过多头层预测和实体级对比学习解决LLM在知识图谱补全任务中的粒度不匹配问题">
+    <meta name="description" content="在input进入transformer块之前，添加一个memory pool，将input tensor维度增加，作为记忆，每次推理对这个memory pool随机增加和删减，实现记忆的动态注入和遗忘">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" rel="stylesheet">
     <style>
@@ -132,14 +132,14 @@
         </div></aside>
         <main class="article-main">
             <header class="article-header">
-                <img src="../images/bronya_1.jpg" alt="MemoryLLM Towards Self-Updatable Large Language Models" class="article-cover" onerror="this.style.display='none'">
+                <img src="../images/arknights_mizuki_0.jpg" alt="MemoryLLM Towards Self-Updatable Large Language Models" class="article-cover" onerror="this.style.display='none'">
                 <h1 class="article-title">MemoryLLM Towards Self-Updatable Large Language Models</h1>
                 <div class="article-meta">
                     <div class="meta-item"><i class="fas fa-calendar-alt"></i>Published: 2025-10-03</div>
                     <div class="meta-item"><i class="fas fa-user"></i>Author: Cialtion</div>
                 </div>
                 <div class="article-tags"><span class="tag">LLM Memory</span><span class="tag">Memory</span><span class="tag">Continuous Learning</span><span class="tag">Parametric Memory</span><span class="tag">Infer update memory</span></div>
-                <div class="article-description">提出K-ON方法，通过多头层预测和实体级对比学习解决LLM在知识图谱补全任务中的粒度不匹配问题</div>
+                <div class="article-description">在input进入transformer块之前，添加一个memory pool，将input tensor维度增加，作为记忆，每次推理对这个memory pool随机增加和删减，实现记忆的动态注入和遗忘</div>
             </header>
             <article class="article-content"><h1 id="memoryllm-towards-self-updatable-large-language-models">MemoryLLM: Towards Self-Updatable Large Language Models</h1>
 <p><strong>论文链接：</strong> https://github.com/wangyu-ustc/MemoryLLM<br />

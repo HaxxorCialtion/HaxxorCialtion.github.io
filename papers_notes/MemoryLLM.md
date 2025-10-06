@@ -2,7 +2,7 @@
 title: MemoryLLM Towards Self-Updatable Large Language Models
 date: "2025-10-03"
 tags: ["LLM Memory", "Memory", "Continuous Learning", "Parametric Memory","Infer update memory"]
-description: "提出K-ON方法，通过多头层预测和实体级对比学习解决LLM在知识图谱补全任务中的粒度不匹配问题"
+description: "在input进入transformer块之前，添加一个memory pool，将input tensor维度增加，作为记忆，每次推理对这个memory pool随机增加和删减，实现记忆的动态注入和遗忘"
 ---
 
 
