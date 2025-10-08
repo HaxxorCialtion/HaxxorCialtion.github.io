@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MemLLM: Finetuning LLMs to Use Explicit Read-Write Memory - Cialtion's Tech Blog</title>
-    <meta name="description" content="构造RAG数据库结构，微调LLM适配以提高benchmark score">
+    <meta name="description" content="对MemLLM论文的精炼分析报告，该工作通过微调教会LLM使用一个可读写的外部结构化记忆库，以解决知识更新、幻觉等核心问题。">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" rel="stylesheet">
     <style>
@@ -89,16 +89,19 @@
                 Table of Contents
             </div>
             <div class="toc"><div class="toc"><span class="toctitle">Table of Contents</span><ul>
-<li><a href="#memllm-finetuning-llms-to-use-explicit-read-write-memory">MemLLM: Finetuning LLMs to Use Explicit Read-Write Memory</a><ul>
-<li><a href="#_1">核心观点</a></li>
-<li><a href="#_2">技术架构</a><ul>
-<li><a href="#_3">并非直接存储</a></li>
-<li><a href="#_4">知识库构建</a></li>
+<li><a href="#memllm">MemLLM 精读分析笔记</a><ul>
+<li><a href="#_1">概括</a></li>
+<li><a href="#1">1. 核心解决的问题</a></li>
+<li><a href="#2">2. 核心创新点</a></li>
+<li><a href="#3">3. 核心技术栈</a></li>
+<li><a href="#4">4. 微调与数据集构建细节</a><ul>
+<li><a href="#a-mem_write">A. MEM_WRITE 数据构建 (学习“提取”)</a></li>
+<li><a href="#b-mem_read">B. MEM_READ 数据构建 (学习“何时查、查什么、怎么用”)</a></li>
+<li><a href="#api">关键澄清：API指令是普通字符串</a></li>
 </ul>
 </li>
-<li><a href="#_5">微调的核心作用</a></li>
-<li><a href="#_6">技术特点</a></li>
-<li><a href="#_7">应用场景</a></li>
+<li><a href="#5">5. 工作流：同步阻塞模式</a></li>
+<li><a href="#6">6. 局限性</a></li>
 </ul>
 </li>
 </ul>
@@ -107,45 +110,88 @@
         </div></aside>
         <main class="article-main">
             <header class="article-header">
-                <img src="../images/arknights_mizuki_0.jpg" alt="MemLLM: Finetuning LLMs to Use Explicit Read-Write Memory" class="article-cover" onerror="this.style.display='none'">
+                <img src="../images/bronya_mp.jpg" alt="MemLLM: Finetuning LLMs to Use Explicit Read-Write Memory" class="article-cover" onerror="this.style.display='none'">
                 <h1 class="article-title">MemLLM: Finetuning LLMs to Use Explicit Read-Write Memory</h1>
                 <div class="article-meta">
-                    <div class="meta-item"><i class="fas fa-calendar-alt"></i>Published: 2025-09-26</div>
+                    <div class="meta-item"><i class="fas fa-calendar-alt"></i>Published: 2025-10-08</div>
                     <div class="meta-item"><i class="fas fa-user"></i>Author: Cialtion</div>
                 </div>
-                <div class="article-tags"><span class="tag">LLM</span><span class="tag">Memory Systems</span><span class="tag">RAG增强</span><span class="tag">知识图谱</span><span class="tag">微调</span><span class="tag">三元组</span></div>
-                <div class="article-description">构造RAG数据库结构，微调LLM适配以提高benchmark score</div>
+                <div class="article-tags"><span class="tag">LLM</span><span class="tag">Memory</span><span class="tag">Finetuning</span><span class="tag">Read-Write</span><span class="tag">LLM Mode Learning</span></div>
+                <div class="article-description">对MemLLM论文的精炼分析报告，该工作通过微调教会LLM使用一个可读写的外部结构化记忆库，以解决知识更新、幻觉等核心问题。</div>
             </header>
-            <article class="article-content"><h1 id="memllm-finetuning-llms-to-use-explicit-read-write-memory">MemLLM: Finetuning LLMs to Use Explicit Read-Write Memory</h1>
-<p><strong>日期：</strong> 2025-9-26<br />
-<strong>链接：</strong> <a href="https://openreview.net/forum?id=dghM7sOudh">OpenReview</a><br />
-<strong>标签：</strong> <code>LLM</code> <code>Memory Systems</code> <code>RAG增强</code> <code>知识图谱</code> <code>微调</code></p>
-<h2 id="_1">核心观点</h2>
-<p>构造RAG数据库结构，微调LLM适配以提高benchmark score</p>
-<h2 id="_2">技术架构</h2>
-<h3 id="_3">并非直接存储</h3>
-<p>不是参数化记忆，而是通过LLM微调提升与一个<strong>外部的、结构化的动态知识库</strong>交互的benchmark scores</p>
-<h3 id="_4">知识库构建</h3>
-<p>知识库通过<strong>三元组 (subject, relation, object)</strong> 的形式存储事实，并使用特殊标记符号（如 <code>MEM_WRITE</code> 和 <code>MEM_READ</code>）进行操作</p>
-<h2 id="_5">微调的核心作用</h2>
+            <article class="article-content"><h1 id="memllm">MemLLM 精读分析笔记</h1>
+<h2 id="_1">概括</h2>
+<p>MemLLM 是一项旨在解决大型语言模型（LLM）知识静态、更新困难及幻觉问题的开创性工作。其核心思想并非设计复杂的模型结构，而是通过<strong>参数高效微调（LoRA）</strong>，教会一个标准的LLM（如Mistral-7B）<strong>主动学习使用一个外部的、可读写的、结构化的记忆库</strong>。</p>
+<p>模型通过在精心构建的数据集上训练，学会在生成文本的过程中，在适当的时机生成特定的<strong>API调用字符串</strong>（如 <code>({MEM_WRITE--&gt;...})</code> 和 <code>({MEM_READ(...)--&gt;...})</code>），从而实现对外部记忆的实时写入和读取。这使得LLM从一个静态的知识库转变为一个能够动态学习、更新和纠错的智能体，极大地增强了其事实准确性、可解释性和个性化能力。</p>
+<hr />
+<h2 id="1">1. 核心解决的问题</h2>
 <ul>
-<li>通过微调 <strong>Mistral-7B</strong>，让模型能够<strong>自发判断</strong>在生成某些关键信息之前，主动发起 <code>MEM_READ</code> 查询请求</li>
-<li>训练模型<strong>在关键节点生成有效查询的决策能力</strong>，以及从文本中提取关系并写入知识库的能力 (<code>MEM_WRITE</code>)</li>
+<li><strong>知识更新困难</strong>：LLM参数中存储的知识是静态的，难以适应事实变化（时间退化）。</li>
+<li><strong>长尾知识遗忘</strong>：对训练数据中的稀有事件或实体记忆效果差。</li>
+<li><strong>幻觉问题</strong>：倾向于生成不符合事实的、看似合理的内容。</li>
+<li><strong>现有方案局限</strong>：<ul>
+<li><strong>模型编辑（Model Editing）</strong>：存在损害模型通用能力（局部性问题）的风险。</li>
+<li><strong>检索增强生成（RAG）</strong>：通常是只读的，且非结构化文本难以精确修改单个事实。</li>
 </ul>
-<h2 id="_6">技术特点</h2>
-<p>✅ <strong>优势：</strong>
-- 将外部知识库与LLM有机结合
-- 通过微调提升交互效率
-- 结构化知识存储</p>
-<p>⚠️ <strong>局限：</strong>
-- 需要微调特定模型
-- 知识库构建成本较高
-- 依赖特定的标记符号系统</p>
-<h2 id="_7">应用场景</h2>
+</li>
+</ul>
+<hr />
+<h2 id="2">2. 核心创新点</h2>
+<ol>
+<li><strong>显式读写记忆（Explicit Read-Write Memory）</strong>：赋予LLM<strong>读取</strong>和<strong>写入</strong>外部记忆的能力，使知识库动态可增长。</li>
+<li><strong>结构化记忆（Structured Memory）</strong>：记忆以<code>（主体, 关系, 客体）</code>的三元组形式存储，相比非结构化文本，具有<strong>可解释、可编辑、存储高效</strong>的优点。</li>
+<li><strong>通过微调学习API调用（API via Finetuning）</strong>：创新地通过构建特定格式的训练数据，让LLM在标准的语言模型目标下，自然地学会生成API调用指令，无需复杂的提示工程或修改模型架构。</li>
+</ol>
+<hr />
+<h2 id="3">3. 核心技术栈</h2>
 <ul>
-<li>需要频繁更新知识的问答系统</li>
-<li>企业知识库管理</li>
-<li>学术研究辅助工具</li>
+<li><strong>基础模型</strong>: Mistral-7B</li>
+<li><strong>微调技术</strong>: LoRA (参数高效微调)</li>
+<li><strong>记忆库</strong>: 类数据库系统，包含实体、关系、三元组三个表，使用向量相似度进行查询。</li>
+<li><strong>训练数据</strong>: 利用 <strong>Re-DocRED</strong> 等标注语料库，自动化构建用于<code>读</code>和<code>写</code>操作的训练样本。</li>
+</ul>
+<hr />
+<h2 id="4">4. 微调与数据集构建细节</h2>
+<h3 id="a-mem_write">A. <code>MEM_WRITE</code> 数据构建 (学习“提取”)</h3>
+<ul>
+<li><strong>目标</strong>: 从句子中提取事实，生成写入指令。</li>
+<li><strong>流程</strong>:<ol>
+<li>将句子用 <code>({USER_ST})</code> 和 <code>({USER_END})</code> 包裹，作为输入。</li>
+<li>将句子中包含的关系三元组格式化为 <code>({MEM_WRITE--&gt;...})</code> 字符串，作为输出标签。</li>
+<li>训练模型学习这种 "输入句子 -&gt; 输出API指令" 的映射。</li>
+</ol>
+</li>
+</ul>
+<h3 id="b-mem_read">B. <code>MEM_READ</code> 数据构建 (学习“何时查、查什么、怎么用”)</h3>
+<ul>
+<li><strong>目标</strong>: 在需要信息时，生成查询指令，并利用返回结果继续生成。</li>
+<li><strong>流程</strong>:<ol>
+<li><strong>时机 (When)</strong>: 在文档中某个“目标实体”即将出现的位置插入API调用。</li>
+<li><strong>内容 (What)</strong>: 利用上文中已出现的相关实体，构建查询。</li>
+<li><strong>使用 (How)</strong>: 将<code>查询指令</code>和从一个<strong>不完美的</strong>记忆库中返回的<code>查询结果</code>一同插入原文，构成训练样本。</li>
+<li>训练模型学会生成查询，并利用查询结果准确地生成“目标实体”及后续文本。</li>
+</ol>
+</li>
+</ul>
+<h3 id="api">关键澄清：API指令是普通字符串</h3>
+<p><code>({MEM_WRITE--&gt;...})</code> 和 <code>({MEM_READ(...)--&gt;...})</code> <strong>不是</strong>在Tokenizer中定义的特殊Token。它们是模型词汇表中<strong>已有字符组成的普通文本序列</strong>。LLM通过微调，学会了在特定上下文模式下，将这些普通字符以这种有特殊功能的顺序组合起来，从而实现对外部系统的“指令调用”。</p>
+<hr />
+<h2 id="5">5. 工作流：同步阻塞模式</h2>
+<p>MemLLM的读写操作是<strong>同步且阻塞的</strong>，而非异步并行。</p>
+<ol>
+<li>LLM生成文本，直到生成一个完整的 <code>MEM_READ</code> 指令。</li>
+<li><strong>LLM暂停生成</strong>。</li>
+<li>外部系统执行API查询。</li>
+<li>查询结果返回，并<strong>拼接</strong>到当前上下文中。</li>
+<li>LLM接收这个<strong>新的、包含查询结果的完整上下文</strong>，然后继续自回归生成。</li>
+</ol>
+<p>因此，API的查询延迟会直接影响总体的生成速度。</p>
+<hr />
+<h2 id="6">6. 局限性</h2>
+<ul>
+<li><strong>关系类型有限</strong>：当前仅支持96种关系。</li>
+<li><strong>无复合推理能力</strong>：无法从 <code>(A, in, B)</code> 和 <code>(B, in, C)</code> 推理出 <code>(A, in, C)</code>。</li>
+<li><strong>非记忆感知</strong>：当记忆库中不存在某个事实时，模型不知道自己“不知道”，可能会退回到使用内部参数知识，导致幻觉。</li>
 </ul></article>
             <div class="contact-card">
                 <h3><i class="fas fa-heart"></i> Thanks for Reading</h3>
