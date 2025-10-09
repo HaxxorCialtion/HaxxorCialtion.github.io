@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM强化学习深度解析：从PPO到DPO的完整理解 - Cialtion's Tech Blog</title>
+    <meta name="description" content="深入解析LLM中的强化学习算法，包括PPO、DPO、GRPO的工作原理、数学推导、以及工业界应用案例">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-color: #2c3e50; --secondary-color: #3498db; --accent-color: #e74c3c;
+            --background-color: #f8fafc; --card-background: #ffffff; --text-primary: #2d3748;
+            --text-secondary: #718096; --border-color: #e2e8f0; --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1); --border-radius: 12px; --transition: all 0.3s ease;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: var(--background-color); color: var(--text-primary); line-height: 1.7; }
+        .navbar { background: var(--card-background); box-shadow: var(--shadow-light); padding: 1rem 0; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border-color); }
+        .nav-container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .nav-brand { display: flex; align-items: center; text-decoration: none; color: var(--primary-color); font-weight: 600; font-size: 1.2rem; }
+        .nav-brand i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-link { color: var(--text-secondary); text-decoration: none; transition: var(--transition); padding: 0.5rem 1rem; border-radius: 8px; }
+        .nav-link:hover { color: var(--secondary-color); background-color: rgba(52, 152, 219, 0.1); }
+        .main-container { display: flex; max-width: 1400px; margin: 0 auto; gap: 2rem; padding: 2rem; }
+        .toc-sidebar { width: 250px; flex-shrink: 0; position: sticky; top: 6rem; height: fit-content; max-height: calc(100vh - 8rem); overflow-y: auto; }
+        .toc-container { background: var(--card-background); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1.5rem; }
+        .toc-title { font-size: 1.1rem; font-weight: 600; color: var(--primary-color); margin-bottom: 1rem; display: flex; align-items: center; }
+        .toc-title i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .toc ul { list-style: none; padding-left: 0; }
+        .toc ul ul { padding-left: 1rem; margin-top: 0.3rem; }
+        .toc li { margin: 0.3rem 0; }
+        .toc a { color: var(--text-secondary); text-decoration: none; transition: var(--transition); display: block; padding: 0.3rem 0.5rem; border-radius: 4px; font-size: 0.9rem; line-height: 1.4; }
+        .toc a:hover, .toc a.active { color: var(--secondary-color); background-color: rgba(52, 152, 219, 0.1); }
+        .article-main { flex: 1; min-width: 0; }
+        .article-header { background: var(--card-background); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; box-shadow: var(--shadow-light); border: 1px solid var(--border-color); position: relative; overflow: hidden; }
+        .article-cover { width: 100%; height: 350px; object-fit: cover; border-radius: var(--border-radius); margin-bottom: 1.5rem; box-shadow: var(--shadow-medium); transition: var(--transition); }
+        .article-cover:hover { transform: scale(1.02); }
+        .article-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, var(--secondary-color), var(--accent-color)); }
+        .article-title { font-size: 2.5rem; font-weight: 700; color: var(--primary-color); margin-bottom: 1rem; line-height: 1.3; }
+        .article-meta { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.95rem; }
+        .meta-item { display: flex; align-items: center; background: var(--background-color); padding: 0.5rem 1rem; border-radius: 20px; }
+        .meta-item i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .article-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+        .tag { background: linear-gradient(135deg, var(--secondary-color), #2980b9); color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 500; box-shadow: var(--shadow-light); }
+        .article-description { color: var(--text-secondary); font-size: 1.1rem; line-height: 1.6; font-style: italic; background: var(--background-color); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--secondary-color); }
+        .article-content { background: var(--card-background); border-radius: var(--border-radius); padding: 2.5rem; box-shadow: var(--shadow-light); border: 1px solid var(--border-color); }
+        .article-content h1, .article-content h2, .article-content h3, .article-content h4, .article-content h5, .article-content h6 { color: var(--primary-color); margin: 2rem 0 1rem 0; font-weight: 600; line-height: 1.4; }
+        .article-content h1 { font-size: 2.2rem; border-bottom: 3px solid var(--secondary-color); padding-bottom: 0.5rem; }
+        .article-content h2 { font-size: 1.8rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.3rem; }
+        .article-content p { margin: 1rem 0; line-height: 1.8; }
+        .article-content img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: var(--shadow-light); margin: 1.5rem 0; }
+        .article-content blockquote { border-left: 4px solid var(--secondary-color); margin: 1.5rem 0; padding: 1rem 1.5rem; background: var(--background-color); border-radius: 0 8px 8px 0; font-style: italic; }
+        .article-content pre { background: #f6f8fa; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; overflow-x: auto; margin: 1.5rem 0; }
+        .article-content code { background: #f6f8fa; border: 1px solid var(--border-color); border-radius: 4px; padding: 0.2rem 0.4rem; font-family: 'Monaco', 'Consolas', monospace; font-size: 0.9em; }
+        .article-content pre code { background: none; border: none; padding: 0; }
+        .article-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-light); }
+        .article-content th, .article-content td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .article-content th { background: var(--background-color); font-weight: 600; color: var(--primary-color); }
+        .contact-card { background: linear-gradient(135deg, var(--primary-color), #34495e); color: white; border-radius: var(--border-radius); padding: 2rem; margin: 2rem 0; text-align: center; }
+        .contact-card h3 { margin-bottom: 1rem; color: white; }
+        .contact-links { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+        .contact-link { display: inline-flex; align-items: center; padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.1); border-radius: 25px; color: white; text-decoration: none; transition: var(--transition); }
+        .contact-link:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-1px); }
+        .contact-link i { margin-right: 0.5rem; }
+        .back-button { position: fixed; bottom: 2rem; right: 2rem; background: var(--secondary-color); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-medium); transition: var(--transition); text-decoration: none; }
+        .back-button:hover { background: #2980b9; transform: translateY(-2px); }
+        @media (max-width: 1024px) { .main-container { flex-direction: column; padding: 1rem; } .toc-sidebar { width: 100%; position: static; order: 2; margin-top: 2rem; } .article-main { order: 1; } }
+        @media (max-width: 768px) { .nav-container { padding: 0 1rem; flex-direction: column; gap: 1rem; } .article-header, .article-content { padding: 1.5rem; } .article-title { font-size: 2rem; } .back-button { bottom: 1rem; right: 1rem; width: 50px; height: 50px; } .article-cover { height: 250px; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-brand">
+                <i class="fas fa-home"></i>Cialtion's Tech Blog
+            </a>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link"><i class="fas fa-arrow-left"></i>Back to Home</a>
+                <a href="mailto:cialtion737410@sjtu.edu.cn" class="nav-link"><i class="fas fa-envelope"></i>Contact Me</a>
+            </div>
+        </div>
+    </nav>
+    <div class="main-container">
+        <aside class="toc-sidebar"><div class="toc-container">
+            <div class="toc-title">
+                <i class="fas fa-list"></i>
+                Table of Contents
+            </div>
+            <div class="toc"><div class="toc"><span class="toctitle">Table of Contents</span><ul>
+<li><a href="#llmppodpo">LLM强化学习深度解析：从PPO到DPO的完整理解</a><ul>
+<li><a href="#_1">目录</a></li>
+<li><a href="#1">1. 核心概念澄清</a><ul>
+<li><a href="#11">1.1 概念层次区分</a></li>
+<li><a href="#12">1.2 不同领域的主流算法</a></li>
+</ul>
+</li>
+<li><a href="#2-ppo">2. PPO算法详解</a><ul>
+<li><a href="#21">2.1 完整流程（三阶段）</a></li>
+<li><a href="#22-ppo4">2.2 PPO需要的4个模型</a></li>
+<li><a href="#23-ppoclipped-objective">2.3 PPO的Clipped Objective</a></li>
+</ul>
+</li>
+<li><a href="#3-dpo">3. DPO算法详解</a><ul>
+<li><a href="#31">3.1 完整流程（两阶段）</a></li>
+<li><a href="#32-dpo">3.2 DPO的核心损失函数</a></li>
+<li><a href="#33-ppo-vs-dpo">3.3 PPO vs DPO对比</a></li>
+</ul>
+</li>
+<li><a href="#4-sft">4. SFT的目的与必要性</a><ul>
+<li><a href="#41-sft">4.1 SFT的三个核心目的</a><ul>
+<li><a href="#1_1">目的1：格式对齐（最重要）</a></li>
+<li><a href="#2">目的2：能力适配</a></li>
+<li><a href="#3rl">目的3：为RL打基础</a></li>
+</ul>
+</li>
+<li><a href="#42-sft">4.2 SFT是否必要？</a></li>
+</ul>
+</li>
+<li><a href="#5-reward-model">5. Reward Model深度解析</a><ul>
+<li><a href="#51-reward-model">5.1 Reward Model的架构</a></li>
+<li><a href="#52-reward-model">5.2 Reward Model的训练</a></li>
+<li><a href="#53-llm-apireward-model">5.3 可以用LLM API作为Reward Model吗？</a></li>
+<li><a href="#54-vs-reward-model">5.4 硬编码规则 vs Reward Model</a></li>
+</ul>
+</li>
+<li><a href="#6-ppo">6. PPO参数更新机制</a><ul>
+<li><a href="#61">6.1 完整的更新步骤</a></li>
+<li><a href="#62">6.2 形象比喻</a></li>
+</ul>
+</li>
+<li><a href="#7-vs">7. 策略模型 vs 参考模型</a><ul>
+<li><a href="#71-ppo">7.1 PPO中的例子</a></li>
+<li><a href="#72">7.2 为什么需要参考模型？</a></li>
+<li><a href="#73-dpo">7.3 DPO中的参考模型</a></li>
+</ul>
+</li>
+<li><a href="#8-dpo">8. DPO的反向传播机制</a><ul>
+<li><a href="#81-labellog">8.1 关键理解：不是用label，而是用log概率</a></li>
+<li><a href="#82">8.2 完整的计算过程</a></li>
+<li><a href="#83">8.3 梯度流动</a></li>
+<li><a href="#84-sft">8.4 与SFT的对比</a></li>
+</ul>
+</li>
+<li><a href="#9-reference-model">9. Reference Model的更新策略</a><ul>
+<li><a href="#91-reference-model">9.1 正确答案：Reference Model在整个训练中保持固定！</a></li>
+<li><a href="#92">9.2 标准做法</a></li>
+<li><a href="#93-reference_model">9.3 为什么reference_model保持固定？</a><ul>
+<li><a href="#1_2">原因1：提供稳定的"锚点"</a></li>
+<li><a href="#2_1">原因2：防止模型崩溃</a></li>
+</ul>
+</li>
+<li><a href="#94-reference">9.4 不常见的变体：定期更新reference</a></li>
+</ul>
+</li>
+<li><a href="#10-vs-policy-gradient">10. 概率链式法则 vs Policy Gradient</a><ul>
+<li><a href="#101">10.1 两者是不同层次的概念</a></li>
+<li><a href="#102-probability-chain-rule">10.2 概率链式法则（Probability Chain Rule）</a></li>
+<li><a href="#103-policy-gradient">10.3 Policy Gradient（策略梯度）</a></li>
+<li><a href="#104">10.4 两者如何结合</a></li>
+<li><a href="#105">10.5 形象比喻</a></li>
+<li><a href="#106">10.6 为什么求和不会"牺牲自回归能力"？</a></li>
+</ul>
+</li>
+<li><a href="#11-dpo">11. DPO对表达多样性的影响</a><ul>
+<li><a href="#111">11.1 是的，这是一个真实存在的问题！</a></li>
+<li><a href="#112">11.2 为什么会这样？</a></li>
+<li><a href="#113">11.3 实际例子：多样性崩溃</a></li>
+<li><a href="#114">11.4 缓解机制（部分有效）</a><ul>
+<li><a href="#1reference-modelkl">机制1：Reference Model的KL约束</a></li>
+<li><a href="#2trade-off">机制2：β参数的trade-off</a></li>
+</ul>
+</li>
+<li><a href="#115">11.5 工业界的解决方案</a><ul>
+<li><a href="#1_3">方案1：高质量、多样化的偏好数据</a></li>
+<li><a href="#2_2">方案2：混合训练目标</a></li>
+<li><a href="#3grpo">方案3：GRPO的优势</a></li>
+</ul>
+</li>
+<li><a href="#116-vs">11.6 代码 vs 自然语言的差异</a></li>
+</ul>
+</li>
+<li><a href="#12_1">12. 工业界应用案例</a><ul>
+<li><a href="#121-1openai-o1o3">12.1 案例1：OpenAI o1/o3系列</a><ul>
+<li><a href="#_2">数学领域的突破</a></li>
+<li><a href="#_3">编程领域的突破</a></li>
+<li><a href="#_4">科学推理</a></li>
+<li><a href="#_5">关键技术</a></li>
+</ul>
+</li>
+<li><a href="#122-2deepseek-mathr1">12.2 案例2：DeepSeek-Math/R1（开源挑战闭源）</a><ul>
+<li><a href="#deepseek-math">DeepSeek-Math的成就</a></li>
+<li><a href="#deepseek-r1">DeepSeek-R1的突破</a></li>
+<li><a href="#_6">自然涌现的能力</a></li>
+</ul>
+</li>
+<li><a href="#123-rl">12.3 为什么RL能在特定领域超越？</a><ul>
+<li><a href="#1_4">原因1：可验证的奖励信号</a></li>
+<li><a href="#2_3">原因2：超越人类思维的限制</a></li>
+<li><a href="#3">原因3：持续自我进化</a></li>
+</ul>
+</li>
+<li><a href="#124">12.4 实际应用场景</a></li>
+<li><a href="#125">12.5 局限性</a><ul>
+<li><a href="#_7">仅限可验证任务</a></li>
+<li><a href="#_8">计算成本极高</a></li>
+<li><a href="#_9">过度优化问题</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#13">13. 实践建议</a><ul>
+<li><a href="#131">13.1 选择合适的算法</a></li>
+<li><a href="#132">13.2 数据质量至关重要</a></li>
+<li><a href="#133">13.3 训练技巧</a></li>
+<li><a href="#134">13.4 避免常见错误</a></li>
+<li><a href="#135-grpo">13.5 你的GRPO代码改进建议</a></li>
+</ul>
+</li>
+<li><a href="#14">14. 关键洞察总结</a><ul>
+<li><a href="#141">14.1 概念层面</a></li>
+<li><a href="#142">14.2 数学层面</a></li>
+<li><a href="#143">14.3 实践层面</a></li>
+</ul>
+</li>
+<li><a href="#15">15. 进一步学习资源</a><ul>
+<li><a href="#_10">论文</a></li>
+<li><a href="#_11">实现参考</a></li>
+<li><a href="#_12">工具</a></li>
+</ul>
+</li>
+<li><a href="#_13">附录：代码模板</a><ul>
+<li><a href="#dpo">DPO训练模板</a></li>
+<li><a href="#grpo">GRPO训练模板</a></li>
+</ul>
+</li>
+<li><a href="#_14">结语</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+        </div></aside>
+        <main class="article-main">
+            <header class="article-header">
+                <img src="../images/arknights_mizuki_0.jpg" alt="LLM强化学习深度解析：从PPO到DPO的完整理解" class="article-cover" onerror="this.style.display='none'">
+                <h1 class="article-title">LLM强化学习深度解析：从PPO到DPO的完整理解</h1>
+                <div class="article-meta">
+                    <div class="meta-item"><i class="fas fa-calendar-alt"></i>Published: 2025-01-09</div>
+                    <div class="meta-item"><i class="fas fa-user"></i>Author: Cialtion</div>
+                </div>
+                <div class="article-tags"><span class="tag">RL</span><span class="tag">LLM</span><span class="tag">PPO</span><span class="tag">DPO</span><span class="tag">GRPO</span><span class="tag">Deep Dive</span></div>
+                <div class="article-description">深入解析LLM中的强化学习算法，包括PPO、DPO、GRPO的工作原理、数学推导、以及工业界应用案例</div>
+            </header>
+            <article class="article-content"><h1 id="llmppodpo">LLM强化学习深度解析：从PPO到DPO的完整理解</h1>
+<blockquote>
+<p>本笔记记录了从困惑到理解的完整学习过程，涵盖强化学习在大语言模型训练中的核心概念、算法细节、以及实际应用。</p>
+</blockquote>
+<h2 id="_1">目录</h2>
+<ul>
+<li><a href="#1-核心概念澄清">1. 核心概念澄清</a></li>
+<li><a href="#2-ppo算法详解">2. PPO算法详解</a></li>
+<li><a href="#3-dpo算法详解">3. DPO算法详解</a></li>
+<li><a href="#4-sft的目的与必要性">4. SFT的目的与必要性</a></li>
+<li><a href="#5-reward-model深度解析">5. Reward Model深度解析</a></li>
+<li><a href="#6-ppo参数更新机制">6. PPO参数更新机制</a></li>
+<li><a href="#7-策略模型-vs-参考模型">7. 策略模型 vs 参考模型</a></li>
+<li><a href="#8-dpo的反向传播机制">8. DPO的反向传播机制</a></li>
+<li><a href="#9-reference-model的更新策略">9. Reference Model的更新策略</a></li>
+<li><a href="#10-概率链式法则-vs-policy-gradient">10. 概率链式法则 vs Policy Gradient</a></li>
+<li><a href="#11-dpo对表达多样性的影响">11. DPO对表达多样性的影响</a></li>
+<li><a href="#12-工业界应用案例">12. 工业界应用案例</a></li>
+<li><a href="#13-实践建议">13. 实践建议</a></li>
+</ul>
+<hr />
+<h2 id="1">1. 核心概念澄清</h2>
+<h3 id="11">1.1 概念层次区分</h3>
+<p><strong>困惑点</strong>：RLHF、PPO、DPO是什么关系？</p>
+<p><strong>解答</strong>：
+- <strong>RLHF（人类反馈强化学习）</strong>：框架/范式，不是具体算法
+- <strong>PPO（近端策略优化）</strong>：具体的RL算法，可用于实现RLHF
+- <strong>DPO（直接偏好优化）</strong>：新的优化方法，绕过了显式的reward model</p>
+<div class="highlight"><pre><span></span><code>范式层：RLHF (Reinforcement Learning from Human Feedback)
+        ├── 需要reward model
+        └── 需要RL算法来优化
+
+算法层：PPO, TRPO, A3C, ...
+        └── 传统RL算法，用于RLHF
+
+新方法：DPO, IPO, KTO, SimPO
+        └── 直接从偏好数据学习，不需要显式reward model
+</code></pre></div>
+
+<h3 id="12">1.2 不同领域的主流算法</h3>
+<table>
+<thead>
+<tr>
+<th>领域</th>
+<th>主流算法</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>通用RL</strong>（游戏、机器人）</td>
+<td>PPO, SAC, TD3</td>
+<td>稳定、通用</td>
+</tr>
+<tr>
+<td><strong>LLM对齐</strong>（2022-2023）</td>
+<td>RLHF + PPO</td>
+<td>OpenAI GPT系列使用</td>
+</tr>
+<tr>
+<td><strong>LLM对齐</strong>（2024-2025）</td>
+<td>DPO及其变体</td>
+<td>更简单、更稳定</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-ppo">2. PPO算法详解</h2>
+<h3 id="21">2.1 完整流程（三阶段）</h3>
+<div class="highlight"><pre><span></span><code><span class="err">阶段</span><span class="mi">1</span><span class="o">:</span><span class="w"> </span><span class="err">监督微调（</span><span class="n">SFT</span><span class="err">）</span>
+<span class="err">├──</span><span class="w"> </span><span class="err">输入：高质量示范数据</span>
+<span class="err">└──</span><span class="w"> </span><span class="err">输出：</span><span class="n">SFT模型</span><span class="err">（基础对齐）</span>
+
+<span class="err">阶段</span><span class="mi">2</span><span class="o">:</span><span class="w"> </span><span class="err">训练</span><span class="n">Reward</span><span class="w"> </span><span class="n">Model</span>
+<span class="err">├──</span><span class="w"> </span><span class="err">输入：人类偏好数据</span><span class="w"> </span><span class="o">(</span><span class="n">prompt</span><span class="o">,</span><span class="w"> </span><span class="n">chosen</span><span class="o">,</span><span class="w"> </span><span class="n">rejected</span><span class="o">)</span>
+<span class="err">└──</span><span class="w"> </span><span class="err">输出：独立的奖励模型（打分器）</span>
+
+<span class="err">阶段</span><span class="mi">3</span><span class="o">:</span><span class="w"> </span><span class="n">PPO强化学习</span>
+<span class="err">├──</span><span class="w"> </span><span class="err">输入：</span><span class="n">SFT模型</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Reward</span><span class="w"> </span><span class="n">Model</span>
+<span class="err">├──</span><span class="w"> </span><span class="err">过程：</span>
+<span class="err">│</span><span class="w">   </span><span class="mi">1</span><span class="o">.</span><span class="w"> </span><span class="n">SFT模型生成回复</span>
+<span class="err">│</span><span class="w">   </span><span class="mi">2</span><span class="o">.</span><span class="w"> </span><span class="n">Reward</span><span class="w"> </span><span class="n">Model给回复打分</span>
+<span class="err">│</span><span class="w">   </span><span class="mi">3</span><span class="o">.</span><span class="w"> </span><span class="err">用</span><span class="n">PPO算法更新策略模型</span>
+<span class="err">│</span><span class="w">   </span><span class="mi">4</span><span class="o">.</span><span class="w"> </span><span class="err">重复迭代</span>
+<span class="err">└──</span><span class="w"> </span><span class="err">输出：对齐后的模型</span>
+</code></pre></div>
+
+<h3 id="22-ppo4">2.2 PPO需要的4个模型</h3>
+<p><strong>困惑点</strong>：为什么PPO这么复杂，需要4个模型？</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>作用</th>
+<th>是否更新</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>策略模型（Policy）</strong></td>
+<td>生成回复</td>
+<td>✅ 持续更新</td>
+</tr>
+<tr>
+<td><strong>价值模型（Value）</strong></td>
+<td>预测期望回报</td>
+<td>✅ 持续更新</td>
+</tr>
+<tr>
+<td><strong>参考模型（Reference）</strong></td>
+<td>计算KL散度，防偏离</td>
+<td>❌ 固定不变</td>
+</tr>
+<tr>
+<td><strong>奖励模型（Reward）</strong></td>
+<td>给回复打分</td>
+<td>❌ 固定不变</td>
+</tr>
+</tbody>
+</table>
+<p><strong>为什么需要这么多模型？</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 策略模型：决定生成什么</span>
+<span class="n">policy_output</span> <span class="o">=</span> <span class="n">policy_model</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+
+<span class="c1"># 奖励模型：评价生成的好坏</span>
+<span class="n">reward</span> <span class="o">=</span> <span class="n">reward_model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">policy_output</span><span class="p">)</span>
+
+<span class="c1"># 价值模型：预测平均能得多少分（用于计算advantage）</span>
+<span class="n">baseline</span> <span class="o">=</span> <span class="n">value_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+<span class="n">advantage</span> <span class="o">=</span> <span class="n">reward</span> <span class="o">-</span> <span class="n">baseline</span>  <span class="c1"># 比平均好多少</span>
+
+<span class="c1"># 参考模型：防止模型变化太激进</span>
+<span class="n">kl_penalty</span> <span class="o">=</span> <span class="n">KL</span><span class="p">(</span><span class="n">policy_model</span> <span class="o">||</span> <span class="n">reference_model</span><span class="p">)</span>
+<span class="n">final_reward</span> <span class="o">=</span> <span class="n">reward</span> <span class="o">-</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">kl_penalty</span>
+</code></pre></div>
+
+<h3 id="23-ppoclipped-objective">2.3 PPO的Clipped Objective</h3>
+<p><strong>困惑点</strong>：为什么需要clip操作？</p>
+<p><strong>不用clip的问题</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 旧策略: P(好回答) = 0.1, P(坏回答) = 0.9</span>
+<span class="c1"># 新策略: P(好回答) = 0.9, P(坏回答) = 0.1  # 变化太大！</span>
+
+<span class="err">→</span> <span class="n">可能导致</span><span class="err">：</span>
+  <span class="o">-</span> <span class="n">模型突然</span><span class="s2">&quot;忘记&quot;</span><span class="n">之前学的东西</span>
+  <span class="o">-</span> <span class="n">训练不稳定</span>
+  <span class="o">-</span> <span class="n">输出质量崩溃</span>
+</code></pre></div>
+
+<p><strong>clip的作用</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="n">epsilon</span> <span class="o">=</span> <span class="mf">0.2</span>  <span class="c1"># clip范围</span>
+
+<span class="c1"># 概率比</span>
+<span class="n">ratio</span> <span class="o">=</span> <span class="n">π_new</span><span class="p">(</span><span class="n">action</span><span class="p">)</span> <span class="o">/</span> <span class="n">π_old</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+
+<span class="c1"># 限制在 [0.8, 1.2] 范围内</span>
+<span class="n">clipped_ratio</span> <span class="o">=</span> <span class="n">clip</span><span class="p">(</span><span class="n">ratio</span><span class="p">,</span> <span class="mi">1</span><span class="o">-</span><span class="n">epsilon</span><span class="p">,</span> <span class="mi">1</span><span class="o">+</span><span class="n">epsilon</span><span class="p">)</span>
+
+<span class="c1"># 取保守的更新</span>
+<span class="n">objective</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">ratio</span> <span class="o">*</span> <span class="n">advantage</span><span class="p">,</span> <span class="n">clipped_ratio</span> <span class="o">*</span> <span class="n">advantage</span><span class="p">)</span>
+
+<span class="err">→</span> <span class="n">每次更新都是</span><span class="s2">&quot;小步前进&quot;</span>
+<span class="err">→</span> <span class="n">训练稳定</span>
+</code></pre></div>
+
+<hr />
+<h2 id="3-dpo">3. DPO算法详解</h2>
+<h3 id="31">3.1 完整流程（两阶段）</h3>
+<div class="highlight"><pre><span></span><code><span class="err">阶段</span><span class="mi">1</span><span class="o">:</span><span class="w"> </span><span class="err">监督微调（</span><span class="n">SFT</span><span class="err">）</span>
+<span class="err">├──</span><span class="w"> </span><span class="err">与</span><span class="n">PPO相同</span>
+<span class="err">└──</span><span class="w"> </span><span class="err">得到基础模型</span>
+
+<span class="err">阶段</span><span class="mi">2</span><span class="o">:</span><span class="w"> </span><span class="err">直接偏好优化</span>
+<span class="err">├──</span><span class="w"> </span><span class="err">输入：偏好对数据</span><span class="w"> </span><span class="o">(</span><span class="n">prompt</span><span class="o">,</span><span class="w"> </span><span class="n">chosen</span><span class="o">,</span><span class="w"> </span><span class="n">rejected</span><span class="o">)</span>
+<span class="err">├──</span><span class="w"> </span><span class="err">关键创新：跳过训练</span><span class="n">Reward</span><span class="w"> </span><span class="n">Model</span>
+<span class="err">└──</span><span class="w"> </span><span class="err">直接从偏好数据学习</span>
+</code></pre></div>
+
+<h3 id="32-dpo">3.2 DPO的核心损失函数</h3>
+<p><strong>困惑点</strong>：DPO如何不用reward model就能学习？</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># DPO损失（数学形式）</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">log</span><span class="p">(</span><span class="n">σ</span><span class="p">(</span><span class="n">β</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="n">π_θ</span><span class="p">(</span><span class="n">y_w</span><span class="o">|</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">π_ref</span><span class="p">(</span><span class="n">y_w</span><span class="o">|</span><span class="n">x</span><span class="p">))</span> 
+              <span class="o">-</span> <span class="n">β</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="n">π_θ</span><span class="p">(</span><span class="n">y_l</span><span class="o">|</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">π_ref</span><span class="p">(</span><span class="n">y_l</span><span class="o">|</span><span class="n">x</span><span class="p">))))</span>
+
+<span class="c1"># 其中：</span>
+<span class="c1"># y_w: 被选中的回复（win）</span>
+<span class="c1"># y_l: 被拒绝的回复（lose）</span>
+<span class="c1"># π_θ: 当前模型（会更新）</span>
+<span class="c1"># π_ref: 参考模型（固定）</span>
+<span class="c1"># β: 温度参数</span>
+</code></pre></div>
+
+<p><strong>直觉理解</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 传统RLHF：</span>
+<span class="c1"># 步骤1: 训练 reward_model: r(x,y) ≈ 人类偏好</span>
+<span class="c1"># 步骤2: 优化策略: max E[reward_model(x, policy(x))]</span>
+
+<span class="c1"># DPO：</span>
+<span class="c1"># 一步到位：让 P(chosen) / P(rejected) 的比值变大</span>
+<span class="c1"># 不需要显式的reward，偏好信息&quot;隐式&quot;编码在损失函数中</span>
+</code></pre></div>
+
+<h3 id="33-ppo-vs-dpo">3.3 PPO vs DPO对比</h3>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>PPO (RLHF)</th>
+<th>DPO</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>训练阶段</strong></td>
+<td>3阶段（SFT → RM → RL）</td>
+<td>2阶段（SFT → DPO）</td>
+</tr>
+<tr>
+<td><strong>需要的模型</strong></td>
+<td>4个模型</td>
+<td>2个模型</td>
+</tr>
+<tr>
+<td><strong>训练稳定性</strong></td>
+<td>较难调，容易崩溃</td>
+<td>稳定，类似监督学习</td>
+</tr>
+<tr>
+<td><strong>显存需求</strong></td>
+<td>非常高（4个模型同时在显存）</td>
+<td>中等（2个模型）</td>
+</tr>
+<tr>
+<td><strong>实现复杂度</strong></td>
+<td>高（需要RL框架）</td>
+<td>低（标准梯度下降）</td>
+</tr>
+<tr>
+<td><strong>数据需求</strong></td>
+<td>需要标注偏好数据</td>
+<td>需要偏好对数据（相同）</td>
+</tr>
+<tr>
+<td><strong>性能</strong></td>
+<td>理论上限可能更高</td>
+<td>实践中往往不输PPO</td>
+</tr>
+<tr>
+<td><strong>可解释性</strong></td>
+<td>Reward model可单独分析</td>
+<td>隐式奖励，较难解释</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-sft">4. SFT的目的与必要性</h2>
+<p><strong>困惑点</strong>：为什么需要SFT？能不能直接RL？</p>
+<h3 id="41-sft">4.1 SFT的三个核心目的</h3>
+<h4 id="1_1">目的1：格式对齐（最重要）</h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># ❌ 预训练模型：</span>
+<span class="n">User</span><span class="p">:</span> <span class="s2">&quot;2+2等于多少？&quot;</span>
+<span class="n">Model</span><span class="p">:</span> <span class="s2">&quot;这是一个数学问题，让我来...&quot;</span> <span class="p">[</span><span class="n">可能输出各种格式</span><span class="p">]</span>
+
+<span class="c1"># ✅ SFT后：</span>
+<span class="n">User</span><span class="p">:</span> <span class="s2">&quot;2+2等于多少？&quot;</span>
+<span class="n">Model</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">&lt;start_working_out&gt;</span>
+<span class="s2">2 + 2 = 4</span>
+<span class="s2">&lt;end_working_out&gt;</span>
+<span class="s2">&lt;SOLUTION&gt;4&lt;/SOLUTION&gt;</span>
+<span class="s2">&quot;&quot;&quot;</span>  <span class="c1"># 严格遵循你定义的格式</span>
+</code></pre></div>
+
+<p><strong>为什么重要？</strong>
+- RL阶段需要从输出中提取答案
+- 如果格式不统一，reward计算会失败
+- RL很难从头学会复杂格式</p>
+<h4 id="2">目的2：能力适配</h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># 预训练模型：有知识，但不知道&quot;怎么用&quot;</span>
+<span class="n">预训练模型</span><span class="err">：</span><span class="s2">&quot;量子纠缠是...&quot;</span><span class="p">[</span><span class="n">知道概念</span><span class="p">]</span>
+
+<span class="c1"># SFT：教它如何组织答案、如何推理</span>
+<span class="n">SFT后</span><span class="err">：</span><span class="s2">&quot;首先，量子纠缠的定义是...</span>
+        <span class="n">其次</span><span class="err">，</span><span class="n">它的物理原理包括</span><span class="o">...</span>
+        <span class="n">最后</span><span class="err">，</span><span class="n">应用场景有</span><span class="o">...</span><span class="s2">&quot;</span>
+</code></pre></div>
+
+<h4 id="3rl">目的3：为RL打基础</h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># 如果直接RL：</span>
+<span class="n">初始模型</span> <span class="err">→</span> <span class="n">随机探索</span> <span class="err">→</span> <span class="mf">99.99</span><span class="o">%</span><span class="n">的输出都得负分</span> <span class="err">→</span> <span class="n">无法学习</span>
+
+<span class="c1"># 有SFT基础：</span>
+<span class="n">SFT模型</span> <span class="err">→</span> <span class="n">已经在</span><span class="s2">&quot;好答案&quot;</span><span class="n">附近</span> <span class="err">→</span> <span class="n">探索空间小</span> <span class="err">→</span> <span class="n">RL可以微调</span>
+</code></pre></div>
+
+<h3 id="42-sft">4.2 SFT是否必要？</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>是否必要</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>格式化输出</strong></td>
+<td>✅ 强烈建议</td>
+<td>RL很难学会复杂格式</td>
+</tr>
+<tr>
+<td><strong>任务特化</strong></td>
+<td>✅ 必要</td>
+<td>让模型知道任务是什么</td>
+</tr>
+<tr>
+<td><strong>预训练模型很强</strong></td>
+<td>⚠️ 可选</td>
+<td>GPT-4可能few-shot就够</td>
+</tr>
+<tr>
+<td><strong>只做偏好学习</strong></td>
+<td>⚠️ 看情况</td>
+<td>DPO可能不需要，但效果更好</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-reward-model">5. Reward Model深度解析</h2>
+<p><strong>困惑点</strong>：Reward Model是什么？是一个独立的LLM吗？可以用API替代吗？</p>
+<h3 id="51-reward-model">5.1 Reward Model的架构</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 典型的Reward Model结构</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RewardModel</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_model</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_model</span> <span class="o">=</span> <span class="n">base_model</span>  <span class="c1"># 比如 Llama-7B</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value_head</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">4096</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># 输出标量分数</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_ids</span><span class="p">):</span>
+        <span class="c1"># 编码整个(prompt + response)</span>
+        <span class="n">hidden</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_model</span><span class="p">(</span><span class="n">input_ids</span><span class="p">)</span><span class="o">.</span><span class="n">last_hidden_state</span>
+
+        <span class="c1"># 取最后一个token的hidden state</span>
+        <span class="n">last_hidden</span> <span class="o">=</span> <span class="n">hidden</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="c1"># 输出一个分数</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_head</span><span class="p">(</span><span class="n">last_hidden</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">score</span>  <span class="c1"># 标量，比如 8.5</span>
+</code></pre></div>
+
+<p><strong>是的，Reward Model通常是一个独立的LLM（或基于LLM）！</strong></p>
+<h3 id="52-reward-model">5.2 Reward Model的训练</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 训练数据：人类偏好对</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;prompt&quot;</span><span class="p">:</span> <span class="s2">&quot;写一首关于春天的诗&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;response_A&quot;</span><span class="p">:</span> <span class="s2">&quot;春眠不觉晓，处处闻啼鸟...&quot;</span><span class="p">,</span>  <span class="c1"># 人类选择 👍</span>
+        <span class="s2">&quot;response_B&quot;</span><span class="p">:</span> <span class="s2">&quot;春天来了...&quot;</span>                  <span class="c1"># 人类拒绝 👎</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+
+<span class="c1"># 训练目标：Bradley-Terry模型</span>
+<span class="c1"># P(A &gt; B) = σ(r(A) - r(B))</span>
+
+<span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">log</span><span class="p">(</span><span class="n">σ</span><span class="p">(</span><span class="n">reward_model</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span> <span class="o">-</span> <span class="n">reward_model</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">B</span><span class="p">)))</span>
+
+<span class="c1"># 训练后，reward_model能够预测人类偏好分数</span>
+</code></pre></div>
+
+<h3 id="53-llm-apireward-model">5.3 可以用LLM API作为Reward Model吗？</h3>
+<p><strong>✅ 完全可以！这叫 LLM-as-a-Judge</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">api_reward_function</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">completion</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;用GPT-4作为reward model&quot;&quot;&quot;</span>
+
+    <span class="n">judge_prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">请对以下回答打分（0-10分）：</span>
+
+<span class="s2">问题：</span><span class="si">{</span><span class="n">prompt</span><span class="si">}</span>
+<span class="s2">回答：</span><span class="si">{</span><span class="n">completion</span><span class="si">}</span>
+
+<span class="s2">评分标准：</span>
+<span class="s2">- 准确性（0-4分）</span>
+<span class="s2">- 格式规范（0-3分）</span>
+<span class="s2">- 推理清晰（0-3分）</span>
+
+<span class="s2">只输出分数，如：8.5</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">openai</span><span class="o">.</span><span class="n">ChatCompletion</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="s2">&quot;gpt-4&quot;</span><span class="p">,</span>
+        <span class="n">messages</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">judge_prompt</span><span class="p">}]</span>
+    <span class="p">)</span>
+
+    <span class="n">score</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">score</span>
+</code></pre></div>
+
+<p><strong>优点</strong>：
+- 🎯 不需要人工标注偏好数据
+- 🎯 不需要训练reward model
+- 🎯 可以定义复杂的评分标准</p>
+<p><strong>缺点</strong>：
+- 💰 成本高（每个样本都要调用API）
+- 🐌 速度慢
+- 🎲 可能不稳定（API的输出有随机性）</p>
+<h3 id="54-vs-reward-model">5.4 硬编码规则 vs Reward Model</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 方式1：硬编码规则（适合有明确标准的任务）</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rule_based_reward</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">completion</span><span class="p">,</span> <span class="n">answer</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">extract_answer</span><span class="p">(</span><span class="n">completion</span><span class="p">)</span> <span class="o">==</span> <span class="n">answer</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">10.0</span>  <span class="c1"># 完全正确</span>
+    <span class="k">elif</span> <span class="n">is_close</span><span class="p">(</span><span class="n">extract_answer</span><span class="p">(</span><span class="n">completion</span><span class="p">),</span> <span class="n">answer</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">5.0</span>   <span class="c1"># 接近正确</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span>   <span class="c1"># 错误</span>
+
+<span class="c1"># 方式2：训练Reward Model（适合主观评价）</span>
+<span class="n">reward_score</span> <span class="o">=</span> <span class="n">reward_model</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">completion</span><span class="p">)</span>  <span class="c1"># 学习人类偏好</span>
+
+<span class="c1"># 方式3：LLM API（灵活但昂贵）</span>
+<span class="n">reward_score</span> <span class="o">=</span> <span class="n">gpt4_judge</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">completion</span><span class="p">)</span>
+</code></pre></div>
+
+<hr />
+<h2 id="6-ppo">6. PPO参数更新机制</h2>
+<p><strong>困惑点</strong>：PPO具体是如何更新模型参数的？</p>
+<h3 id="61">6.1 完整的更新步骤</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ========== PPO的一次迭代 ==========</span>
+
+<span class="c1"># 初始化</span>
+<span class="n">prompt</span> <span class="o">=</span> <span class="s2">&quot;写一首关于春天的诗&quot;</span>
+<span class="n">current_policy</span> <span class="o">=</span> <span class="n">your_model</span>          <span class="c1"># 会被更新</span>
+<span class="n">reference_policy</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">your_model</span><span class="p">)</span>  <span class="c1"># 固定不变</span>
+<span class="n">value_network</span> <span class="o">=</span> <span class="n">separate_model</span>       <span class="c1"># 会被更新</span>
+<span class="n">reward_model</span> <span class="o">=</span> <span class="n">trained_rm</span>            <span class="c1"># 固定不变</span>
+
+<span class="c1"># Step 1: 采样（用当前策略生成回答）</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">current_policy</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+<span class="c1"># response = &quot;春眠不觉晓，处处闻啼鸟&quot;</span>
+
+<span class="c1"># Step 2: 计算reward</span>
+<span class="n">reward</span> <span class="o">=</span> <span class="n">reward_model</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>  <span class="c1"># 比如得到 8.5分</span>
+
+<span class="c1"># Step 3: 计算value（预测的期望回报）</span>
+<span class="n">value</span> <span class="o">=</span> <span class="n">value_network</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>  <span class="c1"># 预测这个prompt的平均回报，比如 7.0</span>
+
+<span class="c1"># Step 4: 计算advantage（这个回答比平均好多少）</span>
+<span class="n">advantage</span> <span class="o">=</span> <span class="n">reward</span> <span class="o">-</span> <span class="n">value</span>  <span class="c1"># 8.5 - 7.0 = 1.5</span>
+
+<span class="c1"># Step 5: 计算概率比（当前策略 vs 旧策略）</span>
+<span class="n">current_prob</span> <span class="o">=</span> <span class="n">current_policy</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">response</span> <span class="o">|</span> <span class="n">prompt</span><span class="p">)</span>  <span class="c1"># -2.3</span>
+<span class="n">old_prob</span> <span class="o">=</span> <span class="n">reference_policy</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">response</span> <span class="o">|</span> <span class="n">prompt</span><span class="p">)</span>    <span class="c1"># -2.5</span>
+<span class="n">ratio</span> <span class="o">=</span> <span class="n">exp</span><span class="p">(</span><span class="n">current_prob</span> <span class="o">-</span> <span class="n">old_prob</span><span class="p">)</span>  <span class="c1"># exp(0.2) ≈ 1.22</span>
+
+<span class="c1"># Step 6: PPO的Clipped目标</span>
+<span class="n">epsilon</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">unclipped</span> <span class="o">=</span> <span class="n">ratio</span> <span class="o">*</span> <span class="n">advantage</span>          <span class="c1"># 1.22 * 1.5 = 1.83</span>
+<span class="n">clipped</span> <span class="o">=</span> <span class="n">clip</span><span class="p">(</span><span class="n">ratio</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">)</span> <span class="o">*</span> <span class="n">advantage</span>  <span class="c1"># 1.2 * 1.5 = 1.8</span>
+<span class="n">objective</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">unclipped</span><span class="p">,</span> <span class="n">clipped</span><span class="p">)</span>    <span class="c1"># 取保守的：1.8</span>
+
+<span class="c1"># Step 7: 反向传播更新</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">objective</span>  <span class="c1"># 负号因为要最大化objective</span>
+<span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>  <span class="c1"># ✅ 更新 current_policy</span>
+</code></pre></div>
+
+<h3 id="62">6.2 形象比喻</h3>
+<div class="highlight"><pre><span></span><code>PPO更新就像&quot;小心翼翼地改进&quot;：
+
+1. 生成一个回答
+2. 看看得了多少分
+3. 跟平均水平比较（advantage）
+4. 但不能改得太激进（clip）
+5. 小步更新参数
+
+就像学生改进答题策略：
+- 这次比平均好 → 以后多这样答 ✅
+- 但不能突然完全改变风格 ⚠️
+- 一点点改进，保持稳定 👍
+</code></pre></div>
+
+<hr />
+<h2 id="7-vs">7. 策略模型 vs 参考模型</h2>
+<p><strong>困惑点</strong>：策略模型和参考模型有什么区别？为什么需要两个？</p>
+<h3 id="71-ppo">7.1 PPO中的例子</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ========== 训练开始 ==========</span>
+<span class="c1"># 初始模型（都一样）</span>
+<span class="n">policy_model</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span><span class="s2">&quot;llama-7b-sft&quot;</span><span class="p">)</span>      <span class="c1"># 策略模型（会更新）</span>
+<span class="n">reference_model</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span><span class="s2">&quot;llama-7b-sft&quot;</span><span class="p">)</span>   <span class="c1"># 参考模型（固定）</span>
+<span class="n">reference_model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>  <span class="c1"># 设为评估模式</span>
+<span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">reference_model</span><span class="o">.</span><span class="n">parameters</span><span class="p">():</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># 冻结所有参数</span>
+
+<span class="c1"># ========== 迭代1 ==========</span>
+<span class="n">prompt</span> <span class="o">=</span> <span class="s2">&quot;如何学习编程？&quot;</span>
+
+<span class="c1"># 策略模型生成（会不断改进）</span>
+<span class="n">response_v1</span> <span class="o">=</span> <span class="n">policy_model</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+<span class="c1"># &quot;学习编程需要多练习&quot;</span>
+
+<span class="n">reward</span> <span class="o">=</span> <span class="n">reward_model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">response_v1</span><span class="p">)</span>  <span class="c1"># 6.0分</span>
+
+<span class="c1"># 用参考模型计算KL散度（防止偏离太远）</span>
+<span class="n">kl_divergence</span> <span class="o">=</span> <span class="n">KL</span><span class="p">(</span><span class="n">policy_model</span> <span class="o">||</span> <span class="n">reference_model</span><span class="p">)</span>  <span class="c1"># 0.05</span>
+<span class="n">final_reward</span> <span class="o">=</span> <span class="n">reward</span> <span class="o">-</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">kl_divergence</span>  <span class="c1"># 6.0 - 0.005 = 5.995</span>
+
+<span class="c1"># 更新策略模型</span>
+<span class="n">update</span><span class="p">(</span><span class="n">policy_model</span><span class="p">)</span>  <span class="c1"># ✅ 更新</span>
+<span class="c1"># reference_model 不变 ❌</span>
+
+<span class="c1"># ========== 迭代100 ==========</span>
+<span class="c1"># 策略模型已经改进很多</span>
+<span class="n">response_v100</span> <span class="o">=</span> <span class="n">policy_model</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+<span class="c1"># &quot;学习编程建议：1)选择Python入门 2)每天练习 3)做项目...&quot;</span>
+
+<span class="n">reward</span> <span class="o">=</span> <span class="mf">9.0</span>
+
+<span class="c1"># 但要检查：是不是偏离原始模型太远？</span>
+<span class="n">kl_divergence</span> <span class="o">=</span> <span class="n">KL</span><span class="p">(</span><span class="n">policy_model</span> <span class="o">||</span> <span class="n">reference_model</span><span class="p">)</span>  <span class="c1"># 0.8 (比较大了)</span>
+<span class="n">final_reward</span> <span class="o">=</span> <span class="mf">9.0</span> <span class="o">-</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="mf">0.8</span> <span class="o">=</span> <span class="mf">8.92</span>
+
+<span class="c1"># 如果KL太大，会被惩罚，防止模型&quot;乱说&quot;</span>
+</code></pre></div>
+
+<h3 id="72">7.2 为什么需要参考模型？</h3>
+<table>
+<thead>
+<tr>
+<th>没有参考模型</th>
+<th>有参考模型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模型可能为了高reward乱说话</td>
+<td>保持基本能力</td>
+</tr>
+<tr>
+<td>"为了高分，输出乱码也行"</td>
+<td>"必须像人类说话"</td>
+</tr>
+<tr>
+<td>可能忘记SFT学的格式</td>
+<td>格式不会崩</td>
+</tr>
+<tr>
+<td>可能模式崩溃</td>
+<td>训练稳定</td>
+</tr>
+</tbody>
+</table>
+<p><strong>具体例子</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 没有参考模型的灾难：</span>
+<span class="c1"># 假设reward model有bug，对&quot;42&quot;这个回答给高分</span>
+
+<span class="n">Iteration</span> <span class="mi">1</span><span class="p">:</span>
+<span class="n">Q</span><span class="p">:</span> <span class="s2">&quot;人生的意义是什么？&quot;</span>
+<span class="n">A</span><span class="p">:</span> <span class="s2">&quot;人生的意义在于...&quot;</span> <span class="err">→</span> <span class="n">reward</span> <span class="o">=</span> <span class="mf">5.0</span>
+
+<span class="n">Iteration</span> <span class="mi">50</span><span class="p">:</span>
+<span class="n">Q</span><span class="p">:</span> <span class="s2">&quot;人生的意义是什么？&quot;</span>
+<span class="n">A</span><span class="p">:</span> <span class="s2">&quot;42&quot;</span> <span class="err">→</span> <span class="n">reward</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="p">(</span><span class="n">reward</span> <span class="n">model的bug</span><span class="p">)</span>
+<span class="c1"># 模型发现&quot;42&quot;能得高分</span>
+
+<span class="n">Iteration</span> <span class="mi">100</span><span class="p">:</span>
+<span class="n">Q</span><span class="p">:</span> <span class="s2">&quot;人生的意义是什么？&quot;</span>
+<span class="n">A</span><span class="p">:</span> <span class="s2">&quot;42&quot;</span>
+<span class="n">Q</span><span class="p">:</span> <span class="s2">&quot;如何学编程？&quot;</span>
+<span class="n">A</span><span class="p">:</span> <span class="s2">&quot;42&quot;</span>  <span class="c1"># 什么都答&quot;42&quot;，模式崩溃！</span>
+<span class="n">Q</span><span class="p">:</span> <span class="s2">&quot;今天天气？&quot;</span>
+<span class="n">A</span><span class="p">:</span> <span class="s2">&quot;42&quot;</span>
+
+<span class="c1"># 有参考模型的保护：</span>
+<span class="n">KL</span><span class="p">(</span><span class="n">policy</span> <span class="o">||</span> <span class="n">reference</span><span class="p">)</span> <span class="n">会变得非常大</span>
+<span class="err">→</span> <span class="n">final_reward</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="o">-</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">huge_KL</span> <span class="o">=</span> <span class="n">负数</span>
+<span class="err">→</span> <span class="n">模型不会学习这种</span><span class="s2">&quot;作弊&quot;</span><span class="n">行为</span>
+</code></pre></div>
+
+<h3 id="73-dpo">7.3 DPO中的参考模型</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ========== DPO训练 ==========</span>
+<span class="n">policy_model</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span><span class="s2">&quot;llama-7b-sft&quot;</span><span class="p">)</span>
+<span class="n">reference_model</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span><span class="s2">&quot;llama-7b-sft&quot;</span><span class="p">)</span>  <span class="c1"># 复制一份</span>
+<span class="n">reference_model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>  <span class="c1"># 冻结</span>
+
+<span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">:</span>
+    <span class="n">prompt</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s1">&#39;prompt&#39;</span><span class="p">]</span>
+    <span class="n">y_win</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s1">&#39;chosen&#39;</span><span class="p">]</span>
+    <span class="n">y_lose</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s1">&#39;rejected&#39;</span><span class="p">]</span>
+
+    <span class="c1"># 计算当前策略的log概率</span>
+    <span class="n">log_prob_win_policy</span> <span class="o">=</span> <span class="n">policy_model</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">y_win</span> <span class="o">|</span> <span class="n">prompt</span><span class="p">)</span>
+    <span class="n">log_prob_lose_policy</span> <span class="o">=</span> <span class="n">policy_model</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">y_lose</span> <span class="o">|</span> <span class="n">prompt</span><span class="p">)</span>
+
+    <span class="c1"># 计算参考策略的log概率（不更新）</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="n">log_prob_win_ref</span> <span class="o">=</span> <span class="n">reference_model</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">y_win</span> <span class="o">|</span> <span class="n">prompt</span><span class="p">)</span>
+        <span class="n">log_prob_lose_ref</span> <span class="o">=</span> <span class="n">reference_model</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">y_lose</span> <span class="o">|</span> <span class="n">prompt</span><span class="p">)</span>
+
+    <span class="c1"># DPO损失（让chosen的相对概率更高）</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="mf">0.1</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">log_sigmoid</span><span class="p">(</span>
+        <span class="n">beta</span> <span class="o">*</span> <span class="p">(</span><span class="n">log_prob_win_policy</span> <span class="o">-</span> <span class="n">log_prob_win_ref</span><span class="p">)</span> <span class="o">-</span>
+        <span class="n">beta</span> <span class="o">*</span> <span class="p">(</span><span class="n">log_prob_lose_policy</span> <span class="o">-</span> <span class="n">log_prob_lose_ref</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># 更新</span>
+    <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>  <span class="c1"># 只更新 policy_model</span>
+    <span class="c1"># reference_model 保持不变！</span>
+</code></pre></div>
+
+<p><strong>解释</strong>：
+- <strong>policy_model</strong>: "我正在学习更偏好chosen"
+- <strong>reference_model</strong>: "我记住原始模型长什么样，防止你学歪"</p>
+<hr />
+<h2 id="8-dpo">8. DPO的反向传播机制</h2>
+<p><strong>困惑点</strong>：DPO如何反向传播？是否把概率最大的输出作为label？</p>
+<h3 id="81-labellog">8.1 关键理解：不是用label，而是用log概率</h3>
+<p><strong>❌ 错误理解</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 把最大概率的输出作为label，然后计算loss？</span>
+<span class="c1"># 不是这样的！</span>
+</code></pre></div>
+
+<p><strong>✅ 正确理解</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># DPO直接优化整个序列的log概率</span>
+<span class="c1"># 不需要label，通过chosen vs rejected的相对概率来更新</span>
+</code></pre></div>
+
+<h3 id="82">8.2 完整的计算过程</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ========== Step 1: 准备输入 ==========</span>
+<span class="n">batch</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;prompt&quot;</span><span class="p">:</span> <span class="s2">&quot;解释量子纠缠&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;chosen&quot;</span><span class="p">:</span> <span class="s2">&quot;量子纠缠是指两个粒子之间存在关联...&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rejected&quot;</span><span class="p">:</span> <span class="s2">&quot;量子纠缠就是很神奇的现象&quot;</span>
+<span class="p">}</span>
+
+<span class="c1"># 拼接（注意：不是作为label，而是作为input）</span>
+<span class="n">chosen_input</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;prompt&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;chosen&quot;</span><span class="p">])</span>
+<span class="n">rejected_input</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;prompt&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;rejected&quot;</span><span class="p">])</span>
+
+<span class="c1"># ========== Step 2: 计算每个token的log概率 ==========</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_log_prob</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">input_ids</span><span class="p">,</span> <span class="n">prompt_length</span><span class="p">):</span>
+    <span class="c1"># 前向传播</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">input_ids</span><span class="p">)</span>
+    <span class="n">logits</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">logits</span>  <span class="c1"># [batch, seq_len, vocab_size]</span>
+
+    <span class="c1"># 只关注response部分（跳过prompt）</span>
+    <span class="n">response_logits</span> <span class="o">=</span> <span class="n">logits</span><span class="p">[:,</span> <span class="n">prompt_length</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">response_labels</span> <span class="o">=</span> <span class="n">input_ids</span><span class="p">[:,</span> <span class="n">prompt_length</span><span class="p">:]</span>
+
+    <span class="c1"># 计算每个token的log概率</span>
+    <span class="n">log_probs</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">response_logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># 选出实际生成的token的log概率</span>
+    <span class="n">token_log_probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+        <span class="n">log_probs</span><span class="p">,</span> 
+        <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> 
+        <span class="n">index</span><span class="o">=</span><span class="n">response_labels</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># 整个response的log概率 = 所有token log概率之和</span>
+    <span class="n">sequence_log_prob</span> <span class="o">=</span> <span class="n">token_log_probs</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sequence_log_prob</span>
+
+<span class="c1"># ========== Step 3: 计算policy和reference的log概率 ==========</span>
+<span class="c1"># Policy model（正在训练的）</span>
+<span class="n">policy_chosen_logprob</span> <span class="o">=</span> <span class="n">compute_log_prob</span><span class="p">(</span>
+    <span class="n">policy_model</span><span class="p">,</span> <span class="n">chosen_input_ids</span><span class="p">,</span> <span class="n">prompt_length</span>
+<span class="p">)</span>
+<span class="n">policy_rejected_logprob</span> <span class="o">=</span> <span class="n">compute_log_prob</span><span class="p">(</span>
+    <span class="n">policy_model</span><span class="p">,</span> <span class="n">rejected_input_ids</span><span class="p">,</span> <span class="n">prompt_length</span>
+<span class="p">)</span>
+
+<span class="c1"># Reference model（固定不变的）</span>
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>  <span class="c1"># 不需要梯度！</span>
+    <span class="n">ref_chosen_logprob</span> <span class="o">=</span> <span class="n">compute_log_prob</span><span class="p">(</span>
+        <span class="n">reference_model</span><span class="p">,</span> <span class="n">chosen_input_ids</span><span class="p">,</span> <span class="n">prompt_length</span>
+    <span class="p">)</span>
+    <span class="n">ref_rejected_logprob</span> <span class="o">=</span> <span class="n">compute_log_prob</span><span class="p">(</span>
+        <span class="n">reference_model</span><span class="p">,</span> <span class="n">rejected_input_ids</span><span class="p">,</span> <span class="n">prompt_length</span>
+    <span class="p">)</span>
+
+<span class="c1"># ========== Step 4: 计算DPO损失 ==========</span>
+<span class="n">beta</span> <span class="o">=</span> <span class="mf">0.1</span>
+
+<span class="c1"># 计算相对对数比率</span>
+<span class="n">policy_logratios</span> <span class="o">=</span> <span class="n">policy_chosen_logprob</span> <span class="o">-</span> <span class="n">policy_rejected_logprob</span>
+<span class="n">ref_logratios</span> <span class="o">=</span> <span class="n">ref_chosen_logprob</span> <span class="o">-</span> <span class="n">ref_rejected_logprob</span>
+
+<span class="c1"># DPO损失：让chosen的相对概率更高</span>
+<span class="n">logits</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">*</span> <span class="p">(</span><span class="n">policy_logratios</span> <span class="o">-</span> <span class="n">ref_logratios</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">F</span><span class="o">.</span><span class="n">logsigmoid</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+<span class="c1"># ========== Step 5: 反向传播 ==========</span>
+<span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>  <span class="c1"># 梯度只回传到policy_model！</span>
+<span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</code></pre></div>
+
+<h3 id="83">8.3 梯度流动</h3>
+<div class="highlight"><pre><span></span><code>loss → logits → policy_logratios 
+             → policy_chosen_logprob, policy_rejected_logprob
+             → policy_model的每个token的logits
+             → policy_model的参数 ✅ 被更新
+
+reference_model没有梯度 ❌ 不更新
+</code></pre></div>
+
+<h3 id="84-sft">8.4 与SFT的对比</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ========== SFT: Token-level的梯度 ==========</span>
+<span class="n">Input</span><span class="p">:</span>  <span class="s2">&quot;天空是&quot;</span>
+<span class="n">Target</span><span class="p">:</span> <span class="s2">&quot;天空是蓝色的&quot;</span>
+
+<span class="n">Position</span> <span class="mi">0</span><span class="p">:</span> <span class="n">Loss</span><span class="p">(</span><span class="n">predict</span><span class="o">=</span><span class="s2">&quot;天&quot;</span> <span class="o">|</span> <span class="nb">input</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="n">Position</span> <span class="mi">1</span><span class="p">:</span> <span class="n">Loss</span><span class="p">(</span><span class="n">predict</span><span class="o">=</span><span class="s2">&quot;空&quot;</span> <span class="o">|</span> <span class="nb">input</span><span class="o">=</span><span class="s2">&quot;天&quot;</span><span class="p">)</span>
+<span class="n">Position</span> <span class="mi">2</span><span class="p">:</span> <span class="n">Loss</span><span class="p">(</span><span class="n">predict</span><span class="o">=</span><span class="s2">&quot;是&quot;</span> <span class="o">|</span> <span class="nb">input</span><span class="o">=</span><span class="s2">&quot;天空&quot;</span><span class="p">)</span>
+<span class="n">Position</span> <span class="mi">3</span><span class="p">:</span> <span class="n">Loss</span><span class="p">(</span><span class="n">predict</span><span class="o">=</span><span class="s2">&quot;蓝&quot;</span> <span class="o">|</span> <span class="nb">input</span><span class="o">=</span><span class="s2">&quot;天空是&quot;</span><span class="p">)</span>
+<span class="c1"># → 每个token独立计算loss</span>
+
+<span class="c1"># ========== DPO: Sequence-level的梯度 ==========</span>
+<span class="n">Chosen</span><span class="p">:</span>   <span class="s2">&quot;天空是蓝色的&quot;</span>
+<span class="n">Rejected</span><span class="p">:</span> <span class="s2">&quot;天空是绿色的&quot;</span>
+
+<span class="c1"># 计算整个序列的log概率差</span>
+<span class="n">log_prob_chosen</span> <span class="o">=</span> <span class="n">Σ</span> <span class="n">log</span> <span class="n">P</span><span class="p">(</span><span class="n">token_i</span> <span class="o">|</span> <span class="n">previous</span><span class="p">)</span>
+<span class="n">log_prob_rejected</span> <span class="o">=</span> <span class="n">Σ</span> <span class="n">log</span> <span class="n">P</span><span class="p">(</span><span class="n">token_i</span> <span class="o">|</span> <span class="n">previous</span><span class="p">)</span>
+
+<span class="c1"># Loss让chosen的概率相对更高</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">β</span> <span class="o">*</span> <span class="p">(</span><span class="n">log_prob_chosen</span> <span class="o">-</span> <span class="n">log_prob_rejected</span> <span class="o">-</span> <span class="o">...</span><span class="p">))</span>
+<span class="c1"># → 梯度回传到影响整个序列概率的参数</span>
+</code></pre></div>
+
+<hr />
+<h2 id="9-reference-model">9. Reference Model的更新策略</h2>
+<p><strong>困惑点</strong>：Reference Model是否每次更新后，上一步的policy成为下一步的reference？</p>
+<h3 id="91-reference-model">9.1 正确答案：Reference Model在整个训练中保持固定！</h3>
+<p><strong>❌ 错误理解</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 每次更新后，policy变成reference？</span>
+<span class="c1"># 不是这样的！</span>
+</code></pre></div>
+
+<p><strong>✅ 正确理解</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Reference model在整个DPO/PPO训练中保持固定</span>
+<span class="c1"># 始终是训练开始时的SFT模型</span>
+</code></pre></div>
+
+<h3 id="92">9.2 标准做法</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ========== DPO训练的完整流程 ==========</span>
+
+<span class="c1"># 初始化（只在开始时做一次）</span>
+<span class="n">policy_model</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span><span class="s2">&quot;llama-7b-sft&quot;</span><span class="p">)</span>      <span class="c1"># 会被更新</span>
+<span class="n">reference_model</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span><span class="s2">&quot;llama-7b-sft&quot;</span><span class="p">)</span>   <span class="c1"># 克隆一份</span>
+<span class="n">reference_model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>                          <span class="c1"># 设为评估模式</span>
+<span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">reference_model</span><span class="o">.</span><span class="n">parameters</span><span class="p">():</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">False</span>                 <span class="c1"># 冻结所有参数</span>
+
+<span class="c1"># 训练循环</span>
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>
+        <span class="c1"># Step 1: policy_model前向传播（需要梯度）</span>
+        <span class="n">policy_logprobs</span> <span class="o">=</span> <span class="n">compute_log_prob</span><span class="p">(</span><span class="n">policy_model</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+
+        <span class="c1"># Step 2: reference_model前向传播（不需要梯度）</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">ref_logprobs</span> <span class="o">=</span> <span class="n">compute_log_prob</span><span class="p">(</span><span class="n">reference_model</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+
+        <span class="c1"># Step 3: 计算loss并更新policy_model</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">dpo_loss</span><span class="p">(</span><span class="n">policy_logprobs</span><span class="p">,</span> <span class="n">ref_logprobs</span><span class="p">)</span>
+        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>  <span class="c1"># ✅ 只更新policy_model</span>
+
+        <span class="c1"># reference_model始终保持不变！❌ 不更新</span>
+</code></pre></div>
+
+<h3 id="93-reference_model">9.3 为什么reference_model保持固定？</h3>
+<h4 id="1_2">原因1：提供稳定的"锚点"</h4>
+<div class="highlight"><pre><span></span><code>如果reference_model也跟着更新：
+
+Iteration 1:
+policy: 远离初始点
+reference: 也远离初始点
+→ 失去了&quot;初始分布&quot;的参考
+
+Iteration 1000:
+policy: 可能已经偏离很远
+reference: 也偏离了
+→ KL惩罚失效，可能reward hacking
+</code></pre></div>
+
+<h4 id="2_1">原因2：防止模型崩溃</h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># 如果reference也更新（错误做法）</span>
+<span class="n">beta</span> <span class="o">*</span> <span class="p">(</span><span class="n">log</span><span class="p">(</span><span class="n">π_policy</span><span class="p">(</span><span class="n">chosen</span><span class="p">))</span> <span class="o">-</span> <span class="n">log</span><span class="p">(</span><span class="n">π_policy</span><span class="p">(</span><span class="n">rejected</span><span class="p">))</span>
+      <span class="o">-</span> <span class="n">log</span><span class="p">(</span><span class="n">π_ref</span><span class="p">(</span><span class="n">chosen</span><span class="p">))</span> <span class="o">+</span> <span class="n">log</span><span class="p">(</span><span class="n">π_ref</span><span class="p">(</span><span class="n">rejected</span><span class="p">)))</span>
+
+<span class="c1"># 如果policy和ref都朝一个方向更新，会导致：</span>
+<span class="c1"># π_policy(chosen)/π_ref(chosen) → 1</span>
+<span class="c1"># π_policy(rejected)/π_ref(rejected) → 1</span>
+<span class="c1"># → 损失变为0，没有训练信号！</span>
+</code></pre></div>
+
+<h3 id="94-reference">9.4 不常见的变体：定期更新reference</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ========== 动态更新reference（较少用）==========</span>
+
+<span class="c1"># Iteration 1-100:</span>
+<span class="n">reference_model</span> <span class="o">=</span> <span class="n">initial_policy</span>  <span class="c1"># 固定</span>
+
+<span class="c1"># Iteration 101-200:</span>
+<span class="n">reference_model</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">policy_model_at_100</span><span class="p">)</span>  <span class="c1"># 更新一次</span>
+<span class="c1"># 之后再固定100步</span>
+
+<span class="c1"># Iteration 201-300:</span>
+<span class="n">reference_model</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">policy_model_at_200</span><span class="p">)</span>
+<span class="c1"># ...</span>
+
+<span class="c1"># 这种做法的理由：</span>
+<span class="c1"># - 避免policy偏离太远</span>
+<span class="c1"># - 渐进式优化</span>
+
+<span class="c1"># 但问题：</span>
+<span class="c1"># - 容易过拟合</span>
+<span class="c1"># - 失去初始分布的约束</span>
+<span class="c1"># - 训练不稳定</span>
+</code></pre></div>
+
+<hr />
+<h2 id="10-vs-policy-gradient">10. 概率链式法则 vs Policy Gradient</h2>
+<p><strong>困惑点</strong>：为什么求所有token log概率之和？这是概率链式法则还是Policy Gradient？</p>
+<h3 id="101">10.1 两者是不同层次的概念</h3>
+<div class="highlight"><pre><span></span><code>概率链式法则 = 数学工具（概率论）
+Policy Gradient = 优化方法（强化学习）
+
+关系：Policy Gradient在计算时使用链式法则
+</code></pre></div>
+
+<h3 id="102-probability-chain-rule">10.2 概率链式法则（Probability Chain Rule）</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ========== 纯粹的概率论 ==========</span>
+
+<span class="c1"># 定义：联合概率的分解</span>
+<span class="n">P</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span> <span class="o">=</span> <span class="n">P</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="err">·</span> <span class="n">P</span><span class="p">(</span><span class="n">B</span><span class="o">|</span><span class="n">A</span><span class="p">)</span> <span class="err">·</span> <span class="n">P</span><span class="p">(</span><span class="n">C</span><span class="o">|</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">)</span>
+
+<span class="c1"># 在文本生成中：</span>
+<span class="n">P</span><span class="p">(</span><span class="s2">&quot;吃苹果&quot;</span><span class="p">)</span> <span class="o">=</span> <span class="n">P</span><span class="p">(</span><span class="n">吃</span><span class="p">)</span> <span class="err">·</span> <span class="n">P</span><span class="p">(</span><span class="n">苹</span><span class="o">|</span><span class="n">吃</span><span class="p">)</span> <span class="err">·</span> <span class="n">P</span><span class="p">(</span><span class="n">果</span><span class="o">|</span><span class="n">吃苹</span><span class="p">)</span>
+
+<span class="c1"># 取对数：</span>
+<span class="n">log</span> <span class="n">P</span><span class="p">(</span><span class="s2">&quot;吃苹果&quot;</span><span class="p">)</span> <span class="o">=</span> <span class="n">log</span> <span class="n">P</span><span class="p">(</span><span class="n">吃</span><span class="p">)</span> <span class="o">+</span> <span class="n">log</span> <span class="n">P</span><span class="p">(</span><span class="n">苹</span><span class="o">|</span><span class="n">吃</span><span class="p">)</span> <span class="o">+</span> <span class="n">log</span> <span class="n">P</span><span class="p">(</span><span class="n">果</span><span class="o">|</span><span class="n">吃苹</span><span class="p">)</span>
+                 <span class="o">=</span> <span class="n">Σ</span> <span class="n">log</span> <span class="n">P</span><span class="p">(</span><span class="n">token_i</span> <span class="o">|</span> <span class="n">previous_tokens</span><span class="p">)</span>
+
+<span class="c1"># 这是概率论的数学事实，与机器学习无关</span>
+</code></pre></div>
+
+<p><strong>为什么用求和？</strong>
+- 这不是人为选择，而是概率论的必然结果
+- 整个序列的概率 = 各个token概率的乘积
+- 取对数后变成求和（避免数值下溢）</p>
+<h3 id="103-policy-gradient">10.3 Policy Gradient（策略梯度）</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ========== 强化学习的优化方法 ==========</span>
+
+<span class="c1"># 目标：最大化期望回报</span>
+<span class="n">J</span><span class="p">(</span><span class="n">θ</span><span class="p">)</span> <span class="o">=</span> <span class="n">E_τ</span><span class="o">~</span><span class="n">π_θ</span><span class="p">[</span><span class="n">R</span><span class="p">(</span><span class="n">τ</span><span class="p">)]</span>
+     <span class="o">=</span> <span class="n">Σ_τ</span> <span class="n">π_θ</span><span class="p">(</span><span class="n">τ</span><span class="p">)</span> <span class="err">·</span> <span class="n">R</span><span class="p">(</span><span class="n">τ</span><span class="p">)</span>  <span class="c1"># 对所有可能轨迹求期望</span>
+
+<span class="c1"># Policy Gradient Theorem（核心定理）：</span>
+<span class="err">∇</span><span class="n">_θ</span> <span class="n">J</span><span class="p">(</span><span class="n">θ</span><span class="p">)</span> <span class="o">=</span> <span class="n">E_τ</span><span class="o">~</span><span class="n">π_θ</span><span class="p">[</span><span class="n">R</span><span class="p">(</span><span class="n">τ</span><span class="p">)</span> <span class="err">·</span> <span class="err">∇</span><span class="n">_θ</span> <span class="n">log</span> <span class="n">π_θ</span><span class="p">(</span><span class="n">τ</span><span class="p">)]</span>
+
+<span class="c1"># 这是强化学习的优化理论</span>
+</code></pre></div>
+
+<h3 id="104">10.4 两者如何结合</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ========== Policy Gradient需要计算 log π(τ) ==========</span>
+
+<span class="c1"># 对于文本生成，τ = (token_1, token_2, ..., token_n)</span>
+
+<span class="c1"># 这里用到概率链式法则：</span>
+<span class="n">log</span> <span class="n">π_θ</span><span class="p">(</span><span class="n">τ</span><span class="p">)</span> <span class="o">=</span> <span class="n">log</span> <span class="n">π_θ</span><span class="p">(</span><span class="n">token_1</span><span class="p">,</span> <span class="n">token_2</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="n">token_n</span><span class="p">)</span>
+           <span class="o">=</span> <span class="n">log</span> <span class="n">π_θ</span><span class="p">(</span><span class="n">token_1</span><span class="p">)</span> 
+             <span class="o">+</span> <span class="n">log</span> <span class="n">π_θ</span><span class="p">(</span><span class="n">token_2</span><span class="o">|</span><span class="n">token_1</span><span class="p">)</span>
+             <span class="o">+</span> <span class="n">log</span> <span class="n">π_θ</span><span class="p">(</span><span class="n">token_3</span><span class="o">|</span><span class="n">token_1</span><span class="p">,</span><span class="n">token_2</span><span class="p">)</span>
+             <span class="o">+</span> <span class="o">...</span>
+           <span class="o">=</span> <span class="n">Σ_i</span> <span class="n">log</span> <span class="n">π_θ</span><span class="p">(</span><span class="n">token_i</span> <span class="o">|</span> <span class="n">token_</span><span class="o">&lt;</span><span class="n">i</span><span class="p">)</span>  <span class="c1"># 链式法则！</span>
+
+<span class="c1"># 所以梯度：</span>
+<span class="err">∇</span><span class="n">_θ</span> <span class="n">log</span> <span class="n">π_θ</span><span class="p">(</span><span class="n">τ</span><span class="p">)</span> <span class="o">=</span> <span class="n">Σ_i</span> <span class="err">∇</span><span class="n">_θ</span> <span class="n">log</span> <span class="n">π_θ</span><span class="p">(</span><span class="n">token_i</span> <span class="o">|</span> <span class="n">token_</span><span class="o">&lt;</span><span class="n">i</span><span class="p">)</span>
+
+<span class="c1"># 最终的Policy Gradient：</span>
+<span class="err">∇</span><span class="n">_θ</span> <span class="n">J</span><span class="p">(</span><span class="n">θ</span><span class="p">)</span> <span class="o">=</span> <span class="n">E</span><span class="p">[</span><span class="n">R</span><span class="p">(</span><span class="n">τ</span><span class="p">)</span> <span class="err">·</span> <span class="n">Σ_i</span> <span class="err">∇</span><span class="n">_θ</span> <span class="n">log</span> <span class="n">π_θ</span><span class="p">(</span><span class="n">token_i</span> <span class="o">|</span> <span class="n">token_</span><span class="o">&lt;</span><span class="n">i</span><span class="p">)]</span>
+</code></pre></div>
+
+<h3 id="105">10.5 形象比喻</h3>
+<div class="highlight"><pre><span></span><code>概率链式法则 = &quot;计算器&quot;
+- 告诉你如何计算P(整个序列)
+- 数学工具
+
+Policy Gradient = &quot;优化策略&quot;
+- 告诉你如何调整参数让期望回报最大
+- 优化目标
+
+Policy Gradient在计算时使用链式法则
+- 就像用计算器来执行优化策略
+</code></pre></div>
+
+<h3 id="106">10.6 为什么求和不会"牺牲自回归能力"？</h3>
+<p><strong>误解</strong>：求和会让模型失去逐token生成的能力</p>
+<p><strong>正确理解</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># ========== 自回归能力不仅没有损失，反而强化了 ==========</span>
+
+<span class="c1"># 训练前：</span>
+<span class="n">P</span><span class="p">(</span><span class="n">好的回答</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.001</span>  <span class="c1"># log P = -6.9</span>
+<span class="n">P</span><span class="p">(</span><span class="n">差的回答</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.01</span>   <span class="c1"># log P = -4.6</span>
+
+<span class="c1"># RL训练：优化整个序列的概率</span>
+<span class="c1"># → 模型学会：在自回归的每一步，都倾向于选择能导向&quot;好回答&quot;的token</span>
+
+<span class="c1"># 训练后：</span>
+<span class="n">P</span><span class="p">(</span><span class="n">好的回答</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.01</span>   <span class="c1"># log P = -4.6 ✅ 提高了</span>
+<span class="n">P</span><span class="p">(</span><span class="n">差的回答</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.001</span>  <span class="c1"># log P = -6.9 ✅ 降低了</span>
+
+<span class="c1"># 自回归能力没有损失，反而学会了&quot;长期规划&quot;：</span>
+<span class="c1"># - 在生成第1个token时，就考虑整个回答的质量</span>
+<span class="c1"># - 避免生成&quot;局部最优但全局差&quot;的token</span>
+</code></pre></div>
+
+<p><strong>具体例子</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 场景：解数学题</span>
+<span class="n">Question</span><span class="p">:</span> <span class="s2">&quot;5 + 7 = ?&quot;</span>
+
+<span class="c1"># Response 1（推理清晰）：</span>
+<span class="s2">&quot;让我计算一下：5 + 7 = 12&quot;</span>
+<span class="c1"># Reward: 10.0（正确且有推理）</span>
+
+<span class="c1"># Response 2（直接答案）：</span>
+<span class="s2">&quot;12&quot;</span>
+<span class="c1"># Reward: 8.0（正确但无推理）</span>
+
+<span class="c1"># RL训练目标：</span>
+<span class="c1"># 让 Response 1 的整体概率提高</span>
+<span class="c1"># → 模型学会：生成&quot;让&quot;时，要考虑后续能形成完整推理</span>
+<span class="c1"># → 这需要考虑整个序列，而不是单个token</span>
+</code></pre></div>
+
+<hr />
+<h2 id="11-dpo">11. DPO对表达多样性的影响</h2>
+<p><strong>困惑点</strong>：DPO这种训练模式会让LLM失去多样的表达能力吗？</p>
+<h3 id="111">11.1 是的，这是一个真实存在的问题！</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ========== DPO的多样性问题 ==========</span>
+
+<span class="n">Question</span><span class="p">:</span> <span class="s2">&quot;描述一下春天&quot;</span>
+
+<span class="c1"># 训练数据中的 chosen response：</span>
+<span class="n">chosen</span> <span class="o">=</span> <span class="s2">&quot;春天是万物复苏的季节，鸟语花香，生机勃勃。&quot;</span>
+
+<span class="c1"># 其他同样好的表达（但不在训练数据中）：</span>
+<span class="n">alternative_1</span> <span class="o">=</span> <span class="s2">&quot;春暖花开，大地回春，处处洋溢着新生的气息。&quot;</span>
+<span class="n">alternative_2</span> <span class="o">=</span> <span class="s2">&quot;春风拂面，柳绿花红，是一年中最美好的时光。&quot;</span>
+
+<span class="c1"># ========== DPO训练后会发生什么？ ==========</span>
+
+<span class="c1"># 训练前：</span>
+<span class="n">P</span><span class="p">(</span><span class="n">chosen</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.01</span>
+<span class="n">P</span><span class="p">(</span><span class="n">alternative_1</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.01</span>  <span class="c1"># 概率相似</span>
+<span class="n">P</span><span class="p">(</span><span class="n">alternative_2</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.01</span>
+
+<span class="c1"># DPO训练后：</span>
+<span class="n">P</span><span class="p">(</span><span class="n">chosen</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.15</span>         <span class="c1"># ✅ 显著提高</span>
+<span class="n">P</span><span class="p">(</span><span class="n">alternative_1</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.005</span> <span class="c1"># ❌ 可能降低！</span>
+<span class="n">P</span><span class="p">(</span><span class="n">alternative_2</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.004</span> <span class="c1"># ❌ 可能降低！</span>
+
+<span class="c1"># 问题：虽然chosen的质量提高了，但多样性丧失了</span>
+</code></pre></div>
+
+<h3 id="112">11.2 为什么会这样？</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ========== DPO优化的目标 ==========</span>
+
+<span class="c1"># DPO鼓励：</span>
+<span class="c1"># 1. 提高 chosen 的概率 ↑↑  (直接优化)</span>
+<span class="c1"># 2. 降低 rejected 的概率 ↓↓ (直接优化)</span>
+
+<span class="c1"># 但没有机制鼓励：</span>
+<span class="c1"># 3. 保持 alternatives 的概率</span>
+
+<span class="c1"># 结果（概率归一化）：</span>
+<span class="c1"># - chosen ↑↑</span>
+<span class="c1"># - rejected ↓↓</span>
+<span class="c1"># - alternatives ↓ (间接受影响)</span>
+</code></pre></div>
+
+<h3 id="113">11.3 实际例子：多样性崩溃</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ========== 训练进展 ==========</span>
+
+<span class="c1"># Epoch 0 (初始SFT模型)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">generate</span><span class="p">(</span><span class="s2">&quot;推荐一本书&quot;</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="p">[</span>
+    <span class="s2">&quot;推荐《三体》，这是刘慈欣的科幻巨著...&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;我建议你读一读《百年孤独》...&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;《人类简史》是一本很好的历史书...&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;如果喜欢推理，可以试试《白夜行》...&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;《活着》是余华的代表作，非常感人...&quot;</span>
+<span class="p">]</span>
+<span class="c1"># → 5个不同的回答 ✅</span>
+
+<span class="c1"># Epoch 5 (DPO训练后)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">generate</span><span class="p">(</span><span class="s2">&quot;推荐一本书&quot;</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="p">[</span>
+    <span class="s2">&quot;推荐《三体》，这是刘慈欣的科幻巨著...&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;推荐《三体》，这是刘慈欣的科幻巨著...&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;推荐《三体》，刘慈欣的科幻小说...&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;推荐《三体》，这是刘慈欣的科幻巨著...&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;我推荐《三体》，这是刘慈欣的...&quot;</span>
+<span class="p">]</span>
+<span class="c1"># → 都是三体！模式崩溃 ❌</span>
+</code></pre></div>
+
+<h3 id="114">11.4 缓解机制（部分有效）</h3>
+<h4 id="1reference-modelkl">机制1：Reference Model的KL约束</h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># KL散度的作用：</span>
+<span class="n">KL</span><span class="p">(</span><span class="n">π_policy</span> <span class="o">||</span> <span class="n">π_ref</span><span class="p">)</span> <span class="o">=</span> <span class="n">E</span><span class="p">[</span><span class="n">log</span><span class="p">(</span><span class="n">π_policy</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">/</span><span class="n">π_ref</span><span class="p">(</span><span class="n">y</span><span class="p">))]</span>
+
+<span class="c1"># 如果 π_policy 过度拟合某个回答：</span>
+<span class="c1"># π_policy(&quot;三体...&quot;) = 0.9</span>
+<span class="c1"># π_ref(&quot;三体...&quot;) = 0.01</span>
+<span class="c1"># → KL = log(0.9/0.01) = 4.5  # 非常大！</span>
+
+<span class="c1"># DPO loss 会惩罚这种过度集中</span>
+<span class="c1"># → 一定程度上保持多样性</span>
+
+<span class="c1"># 但为什么不完美？</span>
+<span class="c1"># 因为KL约束是&quot;全局&quot;的，不是&quot;针对alternative&quot;的</span>
+</code></pre></div>
+
+<h4 id="2trade-off">机制2：β参数的trade-off</h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># β = 0.01 (小β)：</span>
+<span class="c1"># → 对齐效果好，但多样性丧失严重</span>
+
+<span class="c1"># β = 1.0 (大β)：</span>
+<span class="c1"># → 保持多样性好，但对齐效果差</span>
+
+<span class="c1"># 实践中的选择：β ≈ 0.1 ~ 0.5</span>
+<span class="c1"># → 在对齐和多样性之间平衡</span>
+</code></pre></div>
+
+<h3 id="115">11.5 工业界的解决方案</h3>
+<h4 id="1_3">方案1：高质量、多样化的偏好数据</h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># ❌ 差的偏好数据：</span>
+<span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;prompt&quot;</span><span class="p">:</span> <span class="s2">&quot;推荐书&quot;</span><span class="p">,</span> <span class="s2">&quot;chosen&quot;</span><span class="p">:</span> <span class="s2">&quot;推荐《三体》...&quot;</span><span class="p">,</span> <span class="s2">&quot;rejected&quot;</span><span class="p">:</span> <span class="s2">&quot;随便看看&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;prompt&quot;</span><span class="p">:</span> <span class="s2">&quot;推荐书&quot;</span><span class="p">,</span> <span class="s2">&quot;chosen&quot;</span><span class="p">:</span> <span class="s2">&quot;推荐《三体》...&quot;</span><span class="p">,</span> <span class="s2">&quot;rejected&quot;</span><span class="p">:</span> <span class="s2">&quot;不知道&quot;</span><span class="p">},</span>
+<span class="p">]</span>
+<span class="c1"># → 所有chosen都是三体</span>
+
+<span class="c1"># ✅ 好的偏好数据：</span>
+<span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;prompt&quot;</span><span class="p">:</span> <span class="s2">&quot;推荐书&quot;</span><span class="p">,</span> <span class="s2">&quot;chosen&quot;</span><span class="p">:</span> <span class="s2">&quot;推荐《三体》...&quot;</span><span class="p">,</span> <span class="s2">&quot;rejected&quot;</span><span class="p">:</span> <span class="s2">&quot;随便看看&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;prompt&quot;</span><span class="p">:</span> <span class="s2">&quot;推荐书&quot;</span><span class="p">,</span> <span class="s2">&quot;chosen&quot;</span><span class="p">:</span> <span class="s2">&quot;推荐《百年孤独》...&quot;</span><span class="p">,</span> <span class="s2">&quot;rejected&quot;</span><span class="p">:</span> <span class="s2">&quot;不知道&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;prompt&quot;</span><span class="p">:</span> <span class="s2">&quot;推荐书&quot;</span><span class="p">,</span> <span class="s2">&quot;chosen&quot;</span><span class="p">:</span> <span class="s2">&quot;推荐《人类简史》...&quot;</span><span class="p">,</span> <span class="s2">&quot;rejected&quot;</span><span class="p">:</span> <span class="s2">&quot;我不确定&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;prompt&quot;</span><span class="p">:</span> <span class="s2">&quot;推荐科幻书&quot;</span><span class="p">,</span> <span class="s2">&quot;chosen&quot;</span><span class="p">:</span> <span class="s2">&quot;推荐《三体》...&quot;</span><span class="p">,</span> <span class="s2">&quot;rejected&quot;</span><span class="p">:</span> <span class="s2">&quot;随便&quot;</span><span class="p">},</span>
+<span class="p">]</span>
+<span class="c1"># → 多样的chosen，模型学会&quot;根据情况选择&quot;</span>
+</code></pre></div>
+
+<h4 id="2_2">方案2：混合训练目标</h4>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mixed_loss</span><span class="p">(</span><span class="n">policy_model</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+    <span class="c1"># DPO损失（对齐）</span>
+    <span class="n">dpo_loss</span> <span class="o">=</span> <span class="n">compute_dpo_loss</span><span class="p">(</span><span class="n">policy_model</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span>
+
+    <span class="c1"># SFT损失（保持多样性）</span>
+    <span class="n">sft_loss</span> <span class="o">=</span> <span class="n">compute_sft_loss</span><span class="p">(</span><span class="n">policy_model</span><span class="p">,</span> <span class="n">diverse_responses</span><span class="p">)</span>
+
+    <span class="c1"># 组合</span>
+    <span class="n">total_loss</span> <span class="o">=</span> <span class="n">dpo_loss</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">sft_loss</span>
+
+    <span class="k">return</span> <span class="n">total_loss</span>
+</code></pre></div>
+
+<h4 id="3grpo">方案3：GRPO的优势</h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># DPO：只比较1对(chosen, rejected)</span>
+<span class="c1"># → 容易过拟合chosen</span>
+
+<span class="c1"># GRPO：比较一组responses</span>
+<span class="n">responses</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;推荐《三体》，科幻巨著...&quot;</span><span class="p">,</span>     <span class="c1"># reward: 9.0</span>
+    <span class="s2">&quot;推荐《百年孤独》，文学经典...&quot;</span><span class="p">,</span> <span class="c1"># reward: 8.5</span>
+    <span class="s2">&quot;推荐《人类简史》，历史佳作...&quot;</span><span class="p">,</span> <span class="c1"># reward: 8.0</span>
+    <span class="s2">&quot;随便看看&quot;</span><span class="p">,</span>                       <span class="c1"># reward: 2.0</span>
+<span class="p">]</span>
+
+<span class="c1"># GRPO优势：根据相对质量调整，保持多样性</span>
+<span class="n">advantages</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">rewards</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">Σ</span> <span class="n">advantages</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">log</span> <span class="n">P</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+</code></pre></div>
+
+<h3 id="116-vs">11.6 代码 vs 自然语言的差异</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ========== 代码生成：DPO效果好 ✅ ==========</span>
+<span class="n">Question</span><span class="p">:</span> <span class="s2">&quot;写一个快速排序&quot;</span>
+<span class="c1"># 正确的实现就那么几种，多样性不重要</span>
+<span class="c1"># → DPO效果excellent!</span>
+
+<span class="c1"># ========== 自然语言：DPO可能受限 ⚠️ ==========</span>
+<span class="n">Question</span><span class="p">:</span> <span class="s2">&quot;描述春天&quot;</span>
+<span class="c1"># 有无数种优美的表达</span>
+<span class="c1"># → DPO可能过度拟合一种表达</span>
+
+<span class="c1"># ========== 解决方案 ==========</span>
+<span class="c1"># 对于代码/JSON：aggressive DPO</span>
+<span class="n">beta_code</span> <span class="o">=</span> <span class="mf">0.1</span>  <span class="c1"># 小β，强对齐</span>
+
+<span class="c1"># 对于创意写作：保守DPO或其他方法</span>
+<span class="n">beta_creative</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># 大β，保持多样性</span>
+</code></pre></div>
+
+<hr />
+<h2 id="12_1">12. 工业界应用案例</h2>
+<p><strong>关键问题</strong>：工业界是否有通过RL在特定领域超越顶级闭源模型的案例？</p>
+<h3 id="121-1openai-o1o3">12.1 案例1：OpenAI o1/o3系列</h3>
+<h4 id="_2">数学领域的突破</h4>
+<table>
+<thead>
+<tr>
+<th>Benchmark</th>
+<th>传统GPT-4</th>
+<th>o3 (RL训练)</th>
+<th>提升</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AIME 2024（数学竞赛）</td>
+<td>~50%</td>
+<td>96.7%</td>
+<td><strong>接近2倍</strong></td>
+</tr>
+<tr>
+<td>MATH</td>
+<td>~52%</td>
+<td>显著提升</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Frontier Math</td>
+<td>2%</td>
+<td>25%</td>
+<td><strong>12.5倍</strong></td>
+</tr>
+</tbody>
+</table>
+<h4 id="_3">编程领域的突破</h4>
+<table>
+<thead>
+<tr>
+<th>Benchmark</th>
+<th>GPT-4o</th>
+<th>o3 (RL训练)</th>
+<th>提升</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Codeforces评分</td>
+<td>808 ELO</td>
+<td>2727 ELO</td>
+<td><strong>超过3倍</strong></td>
+</tr>
+<tr>
+<td>SWE-bench Verified</td>
+<td>o1: 48.9%</td>
+<td>71.7%</td>
+<td><strong>46%提升</strong></td>
+</tr>
+<tr>
+<td>IOI 2024</td>
+<td>-</td>
+<td>第49百分位</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_4">科学推理</h4>
+<ul>
+<li><strong>GPQA Diamond</strong>（博士级科学问题）：o1超越人类博士专家</li>
+<li><strong>o3</strong>: 87.7%准确率</li>
+</ul>
+<h4 id="_5">关键技术</h4>
+<blockquote>
+<p>"OpenAI发现在强化学习训练期间增加计算预算能够提高模型性能，类似于监督预训练中的规模化行为，但这次是通过最大化强化学习奖励来优化。"</p>
+</blockquote>
+<h3 id="122-2deepseek-mathr1">12.2 案例2：DeepSeek-Math/R1（开源挑战闭源）</h3>
+<h4 id="deepseek-math">DeepSeek-Math的成就</h4>
+<ul>
+<li><strong>MATH benchmark</strong>: 51.7%（7B模型，接近GPT-4/Gemini-Ultra）</li>
+<li><strong>通过GRPO强化学习的提升</strong>：</li>
+<li>GSM8K：82.9% → 88.2%</li>
+<li>MATH：46.8% → 51.7%</li>
+<li>CMATH（中文）：84.6% → 88.8%</li>
+</ul>
+<h4 id="deepseek-r1">DeepSeek-R1的突破</h4>
+<ul>
+<li><strong>性能对标OpenAI o1-1217</strong></li>
+<li><strong>MATH-500</strong>: 97.3% Pass@1（与OpenAI o1相当）</li>
+<li><strong>关键创新</strong>：<blockquote>
+<p>"DeepSeek-R1通过纯强化学习展示了语言模型的推理能力可以被激励，无需人类标注的推理轨迹。"</p>
+</blockquote>
+</li>
+</ul>
+<h4 id="_6">自然涌现的能力</h4>
+<p>DeepSeek-R1-Zero（纯RL训练）自然学会了：
+- 长推理链生成
+- 自我验证（cross-check答案）
+- 自我纠错
+- 动态策略适应</p>
+<h3 id="123-rl">12.3 为什么RL能在特定领域超越？</h3>
+<h4 id="1_4">原因1：可验证的奖励信号</h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># 数学题：答案是对还是错 → 完美的reward</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">math_reward</span><span class="p">(</span><span class="n">answer</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="n">answer</span> <span class="o">==</span> <span class="n">ground_truth</span> <span class="k">else</span> <span class="mf">0.0</span>
+
+<span class="c1"># 编程题：代码能否通过测试用例 → 明确的reward</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">code_reward</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">test_cases</span><span class="p">):</span>
+    <span class="n">passed</span> <span class="o">=</span> <span class="n">run_tests</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">test_cases</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">passed</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_cases</span><span class="p">)</span>
+</code></pre></div>
+
+<h4 id="2_3">原因2：超越人类思维的限制</h4>
+<div class="highlight"><pre><span></span><code>传统SFT：只能学到人类的思考方式（天花板）
+RL：可以探索出人类不会用的解题方法
+</code></pre></div>
+
+<h4 id="3">原因3：持续自我进化</h4>
+<div class="highlight"><pre><span></span><code>RL框架促进了高级推理模式的自然涌现：
+- 自我反思
+- 验证
+- 动态策略适应
+</code></pre></div>
+
+<h3 id="124">12.4 实际应用场景</h3>
+<ol>
+<li><strong>数学教育辅导</strong></li>
+<li>能给出step-by-step的解题过程</li>
+<li>
+<p>超过普通教师的覆盖范围</p>
+</li>
+<li>
+<p><strong>代码助手</strong></p>
+</li>
+<li>GitHub Copilot、Cursor等</li>
+<li>
+<p>能解决LeetCode Hard级别问题</p>
+</li>
+<li>
+<p><strong>科研辅助</strong></p>
+</li>
+<li>博士级别的科学问题解答</li>
+<li>
+<p>辅助论文写作和实验设计</p>
+</li>
+<li>
+<p><strong>竞赛级编程</strong></p>
+</li>
+<li>IOI、Codeforces等竞赛</li>
+<li>达到人类程序员前50%水平</li>
+</ol>
+<h3 id="125">12.5 局限性</h3>
+<h4 id="_7">仅限可验证任务</h4>
+<ul>
+<li>✅ 适用：数学、编程、棋类、游戏</li>
+<li>❌ 不适用：创意写作、开放性问答、主观评价</li>
+</ul>
+<h4 id="_8">计算成本极高</h4>
+<ul>
+<li>o3训练：需要数千块GPU，数周时间</li>
+<li>o3推理：据传每个任务高达$30,000（最高配置）</li>
+</ul>
+<h4 id="_9">过度优化问题</h4>
+<blockquote>
+<p>"虽然模型在完成任务方面极其有效，但还没有可扩展的方法来修复模型的奇怪语言表达。"</p>
+</blockquote>
+<hr />
+<h2 id="13">13. 实践建议</h2>
+<h3 id="131">13.1 选择合适的算法</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 决策树：</span>
+<span class="k">if</span> <span class="n">任务有明确的对错标准</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">资源充足</span><span class="p">:</span>
+        <span class="n">使用PPO</span><span class="o">/</span><span class="n">GRPO</span><span class="err">（</span><span class="n">可能效果略好</span><span class="err">）</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">使用DPO</span><span class="err">（</span><span class="n">更简单稳定</span><span class="err">）</span>
+<span class="k">elif</span> <span class="n">任务需要主观评价</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">有大量偏好数据</span><span class="p">:</span>
+        <span class="n">使用DPO</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">使用LLM</span><span class="o">-</span><span class="k">as</span><span class="o">-</span><span class="n">a</span><span class="o">-</span><span class="n">Judge</span> <span class="o">+</span> <span class="n">GRPO</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">继续SFT</span><span class="err">，</span><span class="n">慎用RL</span>
+</code></pre></div>
+
+<h3 id="132">13.2 数据质量至关重要</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ✅ 高质量偏好数据的特征：</span>
+<span class="mf">1.</span> <span class="n">多样性</span><span class="err">：</span><span class="n">chosen</span> <span class="n">response要覆盖不同风格</span>
+<span class="mf">2.</span> <span class="n">明确性</span><span class="err">：</span><span class="n">chosen和rejected的差异要明显</span>
+<span class="mf">3.</span> <span class="n">一致性</span><span class="err">：</span><span class="n">相似问题的偏好要一致</span>
+<span class="mf">4.</span> <span class="n">数量</span><span class="err">：</span><span class="n">足够的数据量</span><span class="err">（</span><span class="n">建议</span><span class="o">&gt;</span><span class="mi">10</span><span class="n">k对</span><span class="err">）</span>
+
+<span class="c1"># ❌ 避免：</span>
+<span class="mf">1.</span> <span class="n">所有chosen都是同一个答案</span>
+<span class="mf">2.</span> <span class="n">chosen和rejected差异不明显</span>
+<span class="mf">3.</span> <span class="n">偏好标准不一致</span>
+</code></pre></div>
+
+<h3 id="133">13.3 训练技巧</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. 超参数设置</span>
+<span class="n">beta</span> <span class="o">=</span> <span class="mf">0.1</span>  <span class="c1"># DPO: 代码任务可以更小(0.05)，创意任务更大(0.5)</span>
+<span class="n">learning_rate</span> <span class="o">=</span> <span class="mf">2e-4</span>  <span class="c1"># LoRA可以更大，全参数更小(1e-6)</span>
+
+<span class="c1"># 2. 监控指标</span>
+<span class="o">-</span> <span class="n">KL散度</span><span class="err">：</span><span class="n">不要超过5</span><span class="mf">.0</span>
+<span class="o">-</span> <span class="n">Reward平均值</span><span class="err">：</span><span class="n">应该持续增加</span>
+<span class="o">-</span> <span class="n">生成多样性</span><span class="err">：</span><span class="n">定期采样检查</span>
+
+<span class="c1"># 3. 早停策略</span>
+<span class="k">if</span> <span class="n">validation_reward下降</span> <span class="ow">or</span> <span class="n">KL过大</span><span class="p">:</span>
+    <span class="n">停止训练</span><span class="err">，</span><span class="n">使用前一个checkpoint</span>
+</code></pre></div>
+
+<h3 id="134">13.4 避免常见错误</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ❌ 错误1：Reference model也在更新</span>
+<span class="c1"># ✅ 正确：Reference model保持固定</span>
+
+<span class="c1"># ❌ 错误2：只用一对偏好数据训练</span>
+<span class="c1"># ✅ 正确：使用多样化的大规模数据</span>
+
+<span class="c1"># ❌ 错误3：β设置过小导致模式崩溃</span>
+<span class="c1"># ✅ 正确：从较大的β开始，逐渐调小</span>
+
+<span class="c1"># ❌ 错误4：忽略KL散度监控</span>
+<span class="c1"># ✅ 正确：实时监控KL，设置阈值</span>
+</code></pre></div>
+
+<h3 id="135-grpo">13.5 你的GRPO代码改进建议</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 当前代码的问题：</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_grpo_loss_simple</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">experience</span><span class="p">):</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">])</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">loss</span>  <span class="c1"># ⚠️ 这是SFT的loss</span>
+    <span class="n">weighted_loss</span> <span class="o">=</span> <span class="n">loss</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">reward</span> <span class="o">/</span> <span class="mf">10.0</span><span class="p">)</span>  <span class="c1"># ⚠️ 不够准确</span>
+
+<span class="c1"># 改进建议：</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_grpo_loss_proper</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">experience</span><span class="p">):</span>
+    <span class="c1"># 1. 手动计算log概率（不用labels）</span>
+    <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span><span class="o">.</span><span class="n">logits</span>
+    <span class="n">log_probs</span> <span class="o">=</span> <span class="n">compute_sequence_log_prob</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">completion_tokens</span><span class="p">)</span>
+
+    <span class="c1"># 2. 计算group相对advantage</span>
+    <span class="n">advantages</span> <span class="o">=</span> <span class="p">(</span><span class="n">rewards</span> <span class="o">-</span> <span class="n">rewards</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">rewards</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span>
+
+    <span class="c1"># 3. GRPO损失</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">log_probs</span> <span class="o">*</span> <span class="n">advantages</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">loss</span>
+</code></pre></div>
+
+<hr />
+<h2 id="14">14. 关键洞察总结</h2>
+<h3 id="141">14.1 概念层面</h3>
+<ol>
+<li><strong>RLHF是框架，PPO/DPO是实现</strong></li>
+<li>
+<p>不要混淆层次关系</p>
+</li>
+<li>
+<p><strong>DPO是PPO的简化，但不是完全替代</strong></p>
+</li>
+<li>
+<p>各有优劣，根据场景选择</p>
+</li>
+<li>
+<p><strong>Reference Model是"锚点"，不是"老师"</strong></p>
+</li>
+<li>防止分布偏移，不是提供知识</li>
+</ol>
+<h3 id="142">14.2 数学层面</h3>
+<ol>
+<li><strong>求和是概率论的必然，不是工程选择</strong></li>
+<li>
+<p>log P(sequence) = Σ log P(token)</p>
+</li>
+<li>
+<p><strong>Policy Gradient ≠ 概率链式法则</strong></p>
+</li>
+<li>
+<p>一个是优化方法，一个是计算工具</p>
+</li>
+<li>
+<p><strong>DPO不用label，用的是相对概率</strong></p>
+</li>
+<li>核心是让chosen的相对概率更高</li>
+</ol>
+<h3 id="143">14.3 实践层面</h3>
+<ol>
+<li><strong>数据质量 &gt; 算法选择</strong></li>
+<li>
+<p>多样化、高质量的偏好数据是关键</p>
+</li>
+<li>
+<p><strong>监控KL散度，防止崩溃</strong></p>
+</li>
+<li>
+<p>KL &gt; 5.0 要警惕</p>
+</li>
+<li>
+<p><strong>不同任务需要不同策略</strong></p>
+</li>
+<li>代码：aggressive DPO</li>
+<li>
+<p>创意：conservative或混合方法</p>
+</li>
+<li>
+<p><strong>RL适合可验证任务</strong></p>
+</li>
+<li>数学、编程效果显著</li>
+<li>开放性任务要谨慎</li>
+</ol>
+<hr />
+<h2 id="15">15. 进一步学习资源</h2>
+<h3 id="_10">论文</h3>
+<ol>
+<li><strong>PPO</strong>: <a href="https://arxiv.org/abs/1707.06347">Proximal Policy Optimization Algorithms</a></li>
+<li><strong>DPO</strong>: <a href="https://arxiv.org/abs/2305.18290">Direct Preference Optimization</a></li>
+<li><strong>GRPO</strong>: <a href="https://arxiv.org/abs/2402.03300">DeepSeekMath: Pushing the Limits</a></li>
+<li><strong>DeepSeek-R1</strong>: <a href="https://arxiv.org/abs/2501.12948">Incentivizing Reasoning Capability</a></li>
+</ol>
+<h3 id="_11">实现参考</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># DPO实现：</span>
+<span class="c1"># https://github.com/huggingface/trl</span>
+
+<span class="c1"># GRPO实现：</span>
+<span class="c1"># https://github.com/deepseek-ai/DeepSeek-Math</span>
+
+<span class="c1"># OpenAI的RLHF论文：</span>
+<span class="c1"># InstructGPT: Training language models to follow instructions</span>
+</code></pre></div>
+
+<h3 id="_12">工具</h3>
+<ul>
+<li><strong>Hugging Face TRL</strong>: 提供DPO、PPO实现</li>
+<li><strong>Unsloth</strong>: 高效的LoRA训练</li>
+<li><strong>vLLM</strong>: 高效的推理引擎</li>
+</ul>
+<hr />
+<h2 id="_13">附录：代码模板</h2>
+<h3 id="dpo">DPO训练模板</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoModelForCausalLM</span><span class="p">,</span> <span class="n">AutoTokenizer</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_dpo_loss</span><span class="p">(</span><span class="n">policy_model</span><span class="p">,</span> <span class="n">reference_model</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;完整的DPO损失计算&quot;&quot;&quot;</span>
+
+    <span class="c1"># 准备输入</span>
+    <span class="n">prompt</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s1">&#39;prompt&#39;</span><span class="p">]</span>
+    <span class="n">chosen</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s1">&#39;chosen&#39;</span><span class="p">]</span>
+    <span class="n">rejected</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s1">&#39;rejected&#39;</span><span class="p">]</span>
+
+    <span class="n">chosen_input</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span><span class="n">prompt</span> <span class="o">+</span> <span class="n">chosen</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span><span class="p">)</span>
+    <span class="n">rejected_input</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span><span class="n">prompt</span> <span class="o">+</span> <span class="n">rejected</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Policy model log概率</span>
+    <span class="n">policy_chosen_logprob</span> <span class="o">=</span> <span class="n">compute_log_prob</span><span class="p">(</span>
+        <span class="n">policy_model</span><span class="p">,</span> <span class="n">chosen_input</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">(</span><span class="n">prompt</span><span class="p">)[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">policy_rejected_logprob</span> <span class="o">=</span> <span class="n">compute_log_prob</span><span class="p">(</span>
+        <span class="n">policy_model</span><span class="p">,</span> <span class="n">rejected_input</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">(</span><span class="n">prompt</span><span class="p">)[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">])</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Reference model log概率</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="n">ref_chosen_logprob</span> <span class="o">=</span> <span class="n">compute_log_prob</span><span class="p">(</span>
+            <span class="n">reference_model</span><span class="p">,</span> <span class="n">chosen_input</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">(</span><span class="n">prompt</span><span class="p">)[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">])</span>
+        <span class="p">)</span>
+        <span class="n">ref_rejected_logprob</span> <span class="o">=</span> <span class="n">compute_log_prob</span><span class="p">(</span>
+            <span class="n">reference_model</span><span class="p">,</span> <span class="n">rejected_input</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">(</span><span class="n">prompt</span><span class="p">)[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">])</span>
+        <span class="p">)</span>
+
+    <span class="c1"># DPO损失</span>
+    <span class="n">policy_logratios</span> <span class="o">=</span> <span class="n">policy_chosen_logprob</span> <span class="o">-</span> <span class="n">policy_rejected_logprob</span>
+    <span class="n">ref_logratios</span> <span class="o">=</span> <span class="n">ref_chosen_logprob</span> <span class="o">-</span> <span class="n">ref_rejected_logprob</span>
+
+    <span class="n">logits</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">*</span> <span class="p">(</span><span class="n">policy_logratios</span> <span class="o">-</span> <span class="n">ref_logratios</span><span class="p">)</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">F</span><span class="o">.</span><span class="n">logsigmoid</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">loss</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_log_prob</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">input_ids</span><span class="p">,</span> <span class="n">prompt_length</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;计算序列的log概率&quot;&quot;&quot;</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">input_ids</span><span class="p">[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">])</span>
+    <span class="n">logits</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">logits</span>
+
+    <span class="c1"># 只关注response部分</span>
+    <span class="n">response_logits</span> <span class="o">=</span> <span class="n">logits</span><span class="p">[:,</span> <span class="n">prompt_length</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">response_labels</span> <span class="o">=</span> <span class="n">input_ids</span><span class="p">[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">][:,</span> <span class="n">prompt_length</span><span class="p">:]</span>
+
+    <span class="c1"># 计算log概率</span>
+    <span class="n">log_probs</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">response_logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">token_log_probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+        <span class="n">log_probs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">response_labels</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">token_log_probs</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+
+<h3 id="grpo">GRPO训练模板</h3>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">compute_grpo_loss</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">experience</span><span class="p">,</span> <span class="n">reference_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;GRPO损失计算&quot;&quot;&quot;</span>
+
+    <span class="n">prompts</span> <span class="o">=</span> <span class="n">experience</span><span class="p">[</span><span class="s1">&#39;prompts&#39;</span><span class="p">]</span>
+    <span class="n">completions</span> <span class="o">=</span> <span class="n">experience</span><span class="p">[</span><span class="s1">&#39;completions&#39;</span><span class="p">]</span>
+    <span class="n">rewards</span> <span class="o">=</span> <span class="n">experience</span><span class="p">[</span><span class="s1">&#39;rewards&#39;</span><span class="p">]</span>
+
+    <span class="n">total_loss</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">prompt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">prompts</span><span class="p">):</span>
+        <span class="n">log_probs</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># 计算每个completion的log概率</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">completion</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">completions</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+            <span class="n">full_text</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
+                <span class="n">prompt</span> <span class="o">+</span> <span class="n">completion</span><span class="p">,</span> <span class="n">tokenize</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+            <span class="n">inputs</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span><span class="n">full_text</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span><span class="p">)</span>
+
+            <span class="n">log_prob</span> <span class="o">=</span> <span class="n">compute_log_prob</span><span class="p">(</span>
+                <span class="n">model</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">(</span><span class="n">prompt</span><span class="p">)[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">])</span>
+            <span class="p">)</span>
+            <span class="n">log_probs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">log_prob</span><span class="p">)</span>
+
+        <span class="n">log_probs_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">log_probs</span><span class="p">)</span>
+        <span class="n">rewards_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">rewards</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="c1"># Group相对advantage</span>
+        <span class="n">advantages</span> <span class="o">=</span> <span class="p">(</span><span class="n">rewards_tensor</span> <span class="o">-</span> <span class="n">rewards_tensor</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> \
+                     <span class="p">(</span><span class="n">rewards_tensor</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span>
+
+        <span class="c1"># GRPO损失</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">log_probs_tensor</span> <span class="o">*</span> <span class="n">advantages</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+        <span class="c1"># 可选：添加KL惩罚</span>
+        <span class="k">if</span> <span class="n">reference_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+                <span class="n">ref_log_probs</span> <span class="o">=</span> <span class="p">[</span><span class="n">compute_log_prob</span><span class="p">(</span>
+                    <span class="n">reference_model</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">prompt_len</span>
+                <span class="p">)</span> <span class="k">for</span> <span class="n">inputs</span> <span class="ow">in</span> <span class="n">all_inputs</span><span class="p">]</span>
+            <span class="n">kl</span> <span class="o">=</span> <span class="p">(</span><span class="n">log_probs_tensor</span> <span class="o">-</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">ref_log_probs</span><span class="p">))</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">loss</span> <span class="o">+=</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">kl</span>
+
+        <span class="n">total_loss</span> <span class="o">+=</span> <span class="n">loss</span>
+
+    <span class="k">return</span> <span class="n">total_loss</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">prompts</span><span class="p">)</span>
+</code></pre></div>
+
+<hr />
+<h2 id="_14">结语</h2>
+<p>从PPO到DPO，从困惑到理解，这份笔记记录了强化学习在大语言模型训练中的核心原理。关键要点：</p>
+<ol>
+<li><strong>理解概念层次</strong>：框架vs算法vs方法</li>
+<li><strong>掌握数学原理</strong>：概率链式法则、Policy Gradient、DPO损失</li>
+<li><strong>把握实践技巧</strong>：数据质量、超参数、监控指标</li>
+<li><strong>认识应用场景</strong>：可验证任务效果显著，开放性任务需谨慎</li>
+</ol>
+<p>希望这份笔记能帮助你在LLM强化学习的道路上走得更远！🚀</p>
+<hr />
+<p><strong>最后更新</strong>: 2025-01-09
+<strong>相关代码</strong>: 见附录代码模板</p></article>
+            <div class="contact-card">
+                <h3><i class="fas fa-heart"></i> Thanks for Reading</h3>
+                <p>If this article was helpful to you, feel free to connect with me!</p>
+                <div class="contact-links">
+                    <a href="https://github.com/HaxxorCialtion" class="contact-link" target="_blank"><i class="fab fa-github"></i>GitHub</a>
+                    <a href="mailto:cialtion737410@sjtu.edu.cn" class="contact-link"><i class="fas fa-envelope"></i>Email</a>
+                </div>
+            </div>
+        </main>
+    </div>
+    <a href="#" class="back-button" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script>
+        hljs.highlightAll();
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+            });
+        });
+        function highlightCurrentSection() {
+            const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+            const tocLinks = document.querySelectorAll('.toc a');
+            let current = '';
+            headings.forEach(heading => {
+                const rect = heading.getBoundingClientRect();
+                if (rect.top <= 100) { current = heading.id; }
+            });
+            tocLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) { link.classList.add('active'); }
+            });
+        }
+        window.addEventListener('scroll', highlightCurrentSection);
+        document.addEventListener('DOMContentLoaded', highlightCurrentSection);
+    </script>
+</body>
+</html>
