@@ -95,7 +95,7 @@
 <li><a href="#1-tokenization">1. 分词 (Tokenization)</a></li>
 <li><a href="#2-token-id">2. Token ID转换</a></li>
 <li><a href="#3">3. 长度标准化</a></li>
-<li><a href="#4-embedding">4. 嵌入层 (Embedding)</a></li>
+<li><a href="#4-embedding">4. 嵌入 (Embedding)</a></li>
 </ul>
 </li>
 <li><a href="#transformer">第二阶段：Transformer块处理</a><ul>
@@ -134,7 +134,7 @@
         </div></aside>
         <main class="article-main">
             <header class="article-header">
-                <img src="../images/arknights_mizuki_0.jpg" alt="Large Language Model(LLM) Basic introduction" class="article-cover" onerror="this.style.display='none'">
+                <img src="../images/bronya_mp.jpg" alt="Large Language Model(LLM) Basic introduction" class="article-cover" onerror="this.style.display='none'">
                 <h1 class="article-title">Large Language Model(LLM) Basic introduction</h1>
                 <div class="article-meta">
                     <div class="meta-item"><i class="fas fa-calendar-alt"></i>Published: 2025-10-01</div>
@@ -173,7 +173,7 @@
 - <strong>截断 (Truncation)</strong>: 长度超出时，丢弃超出部分（或使用滑动窗口）</p>
 <p><strong>示例</strong>: <code>[5091, 101, 8224, 102]</code> → <code>[5091, 101, 8224, 102, 0, 0, ..., 0]</code></p>
 <p><strong>形状变化</strong>: <code>List[int]</code> (长度=4) → <code>Tensor</code> <strong>(1, 128)</strong></p>
-<h3 id="4-embedding">4. 嵌入层 (Embedding)</h3>
+<h3 id="4-embedding">4. 嵌入 (Embedding)</h3>
 <p>将整数ID转换为稠密的浮点向量，这是从"符号"到"语义"的关键转换。</p>
 <p><strong>a. 词嵌入 (Token Embedding)</strong>
 - <strong>权重矩阵</strong>: <code>(V, D_model)</code> = <code>(10000, 512)</code>

@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoPE and LLM - Cialtion's Tech Blog</title>
+    <meta name="description" content="关键洞察链条： 为什么敢冒险替换？ 1. 理论保证：数学上等价于学习相对位置 2. 实验验证：小模型上先验证，效果超过baseline 3. 工业推动：BERT后需要更长上下文，RoPE正好解决 4. 开源文化：苏剑林博客详细讲解，降低采用门槛 绝对位置编码的致命缺陷： RoPE的优雅解决方案： -...">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-color: #2c3e50; --secondary-color: #3498db; --accent-color: #e74c3c;
+            --background-color: #f8fafc; --card-background: #ffffff; --text-primary: #2d3748;
+            --text-secondary: #718096; --border-color: #e2e8f0; --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1); --border-radius: 12px; --transition: all 0.3s ease;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: var(--background-color); color: var(--text-primary); line-height: 1.7; }
+        .navbar { background: var(--card-background); box-shadow: var(--shadow-light); padding: 1rem 0; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border-color); }
+        .nav-container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .nav-brand { display: flex; align-items: center; text-decoration: none; color: var(--primary-color); font-weight: 600; font-size: 1.2rem; }
+        .nav-brand i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-link { color: var(--text-secondary); text-decoration: none; transition: var(--transition); padding: 0.5rem 1rem; border-radius: 8px; }
+        .nav-link:hover { color: var(--secondary-color); background-color: rgba(52, 152, 219, 0.1); }
+        .main-container { display: flex; max-width: 1400px; margin: 0 auto; gap: 2rem; padding: 2rem; }
+        .toc-sidebar { width: 250px; flex-shrink: 0; position: sticky; top: 6rem; height: fit-content; max-height: calc(100vh - 8rem); overflow-y: auto; }
+        .toc-container { background: var(--card-background); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1.5rem; }
+        .toc-title { font-size: 1.1rem; font-weight: 600; color: var(--primary-color); margin-bottom: 1rem; display: flex; align-items: center; }
+        .toc-title i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .toc ul { list-style: none; padding-left: 0; }
+        .toc ul ul { padding-left: 1rem; margin-top: 0.3rem; }
+        .toc li { margin: 0.3rem 0; }
+        .toc a { color: var(--text-secondary); text-decoration: none; transition: var(--transition); display: block; padding: 0.3rem 0.5rem; border-radius: 4px; font-size: 0.9rem; line-height: 1.4; }
+        .toc a:hover, .toc a.active { color: var(--secondary-color); background-color: rgba(52, 152, 219, 0.1); }
+        .article-main { flex: 1; min-width: 0; }
+        .article-header { background: var(--card-background); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; box-shadow: var(--shadow-light); border: 1px solid var(--border-color); position: relative; overflow: hidden; }
+        .article-cover { width: 100%; height: 350px; object-fit: cover; border-radius: var(--border-radius); margin-bottom: 1.5rem; box-shadow: var(--shadow-medium); transition: var(--transition); }
+        .article-cover:hover { transform: scale(1.02); }
+        .article-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, var(--secondary-color), var(--accent-color)); }
+        .article-title { font-size: 2.5rem; font-weight: 700; color: var(--primary-color); margin-bottom: 1rem; line-height: 1.3; }
+        .article-meta { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.95rem; }
+        .meta-item { display: flex; align-items: center; background: var(--background-color); padding: 0.5rem 1rem; border-radius: 20px; }
+        .meta-item i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .article-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+        .tag { background: linear-gradient(135deg, var(--secondary-color), #2980b9); color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 500; box-shadow: var(--shadow-light); }
+        .article-description { color: var(--text-secondary); font-size: 1.1rem; line-height: 1.6; font-style: italic; background: var(--background-color); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--secondary-color); }
+        .article-content { background: var(--card-background); border-radius: var(--border-radius); padding: 2.5rem; box-shadow: var(--shadow-light); border: 1px solid var(--border-color); }
+        .article-content h1, .article-content h2, .article-content h3, .article-content h4, .article-content h5, .article-content h6 { color: var(--primary-color); margin: 2rem 0 1rem 0; font-weight: 600; line-height: 1.4; }
+        .article-content h1 { font-size: 2.2rem; border-bottom: 3px solid var(--secondary-color); padding-bottom: 0.5rem; }
+        .article-content h2 { font-size: 1.8rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.3rem; }
+        .article-content p { margin: 1rem 0; line-height: 1.8; }
+        .article-content img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: var(--shadow-light); margin: 1.5rem 0; }
+        .article-content blockquote { border-left: 4px solid var(--secondary-color); margin: 1.5rem 0; padding: 1rem 1.5rem; background: var(--background-color); border-radius: 0 8px 8px 0; font-style: italic; }
+        .article-content pre { background: #f6f8fa; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; overflow-x: auto; margin: 1.5rem 0; }
+        .article-content code { background: #f6f8fa; border: 1px solid var(--border-color); border-radius: 4px; padding: 0.2rem 0.4rem; font-family: 'Monaco', 'Consolas', monospace; font-size: 0.9em; }
+        .article-content pre code { background: none; border: none; padding: 0; }
+        .article-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-light); }
+        .article-content th, .article-content td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .article-content th { background: var(--background-color); font-weight: 600; color: var(--primary-color); }
+        .contact-card { background: linear-gradient(135deg, var(--primary-color), #34495e); color: white; border-radius: var(--border-radius); padding: 2rem; margin: 2rem 0; text-align: center; }
+        .contact-card h3 { margin-bottom: 1rem; color: white; }
+        .contact-links { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+        .contact-link { display: inline-flex; align-items: center; padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.1); border-radius: 25px; color: white; text-decoration: none; transition: var(--transition); }
+        .contact-link:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-1px); }
+        .contact-link i { margin-right: 0.5rem; }
+        .back-button { position: fixed; bottom: 2rem; right: 2rem; background: var(--secondary-color); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-medium); transition: var(--transition); text-decoration: none; }
+        .back-button:hover { background: #2980b9; transform: translateY(-2px); }
+        @media (max-width: 1024px) { .main-container { flex-direction: column; padding: 1rem; } .toc-sidebar { width: 100%; position: static; order: 2; margin-top: 2rem; } .article-main { order: 1; } }
+        @media (max-width: 768px) { .nav-container { padding: 0 1rem; flex-direction: column; gap: 1rem; } .article-header, .article-content { padding: 1.5rem; } .article-title { font-size: 2rem; } .back-button { bottom: 1rem; right: 1rem; width: 50px; height: 50px; } .article-cover { height: 250px; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-brand">
+                <i class="fas fa-home"></i>Cialtion's Tech Blog
+            </a>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link"><i class="fas fa-arrow-left"></i>Back to Home</a>
+                <a href="mailto:cialtion737410@sjtu.edu.cn" class="nav-link"><i class="fas fa-envelope"></i>Contact Me</a>
+            </div>
+        </div>
+    </nav>
+    <div class="main-container">
+        <aside class="toc-sidebar"><div class="toc-container">
+            <div class="toc-title">
+                <i class="fas fa-list"></i>
+                Table of Contents
+            </div>
+            <div class="toc"><div class="toc"><span class="toctitle">Table of Contents</span><ul>
+<li><a href="#ropellm">RoPE位置编码与现代LLM架构精讲</a><ul>
+<li><a href="#1">1. 位置编码的演进史</a><ul>
+<li><a href="#_1">历史脉络</a></li>
+<li><a href="#_2">学术界的探索历程</a></li>
+<li><a href="#rope">为什么需要RoPE？</a></li>
+</ul>
+</li>
+<li><a href="#2-rope">2. RoPE核心原理</a><ul>
+<li><a href="#_3">核心思想：旋转即编码</a></li>
+<li><a href="#_4">详细机制</a><ul>
+<li><a href="#step-1">Step 1: 频率设计 (多尺度编码)</a></li>
+<li><a href="#step-2">Step 2: 位置旋转</a></li>
+<li><a href="#step-3">Step 3: 实现技巧</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-llmqwen3">3. 现代LLM架构：以Qwen3为例</a><ul>
+<li><a href="#_5">整体架构</a></li>
+<li><a href="#transformer-block">Transformer Block详解</a></li>
+</ul>
+</li>
+<li><a href="#4">4. 关键技术点对比</a><ul>
+<li><a href="#rope-vs">RoPE vs 传统位置编码</a></li>
+<li><a href="#gqa-grouped-query-attention">GQA (Grouped Query Attention)</a></li>
+</ul>
+</li>
+<li><a href="#5">5. 实战要点</a><ul>
+<li><a href="#rope_1">RoPE的预计算</a></li>
+<li><a href="#_6">维度对应关系</a></li>
+</ul>
+</li>
+<li><a href="#6">6. 核心要点总结</a><ul>
+<li><a href="#rope_2">RoPE的三大优势</a></li>
+<li><a href="#llm">现代LLM的标配组合</a></li>
+<li><a href="#_7">记忆口诀</a></li>
+</ul>
+</li>
+<li><a href="#_8">参考资料</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+        </div></aside>
+        <main class="article-main">
+            <header class="article-header">
+                <img src="../images/bronya_1.jpg" alt="RoPE and LLM" class="article-cover" onerror="this.style.display='none'">
+                <h1 class="article-title">RoPE and LLM</h1>
+                <div class="article-meta">
+                    <div class="meta-item"><i class="fas fa-calendar-alt"></i>Published: 2025-10-11</div>
+                    <div class="meta-item"><i class="fas fa-user"></i>Author: Cialtion</div>
+                </div>
+                <div class="article-tags"><span class="tag">LLM</span><span class="tag">RoPE</span><span class="tag">Position Encoder</span></div>
+                <div class="article-description">关键洞察链条： 为什么敢冒险替换？ 1. 理论保证：数学上等价于学习相对位置 2. 实验验证：小模型上先验证，效果超过baseline 3. 工业推动：BERT后需要更长上下文，RoPE正好解决 4. 开源文化：苏剑林博客详细讲解，降低采用门槛 绝对位置编码的致命缺陷： RoPE的优雅解决方案： -...</div>
+            </header>
+            <article class="article-content"><h1 id="ropellm">RoPE位置编码与现代LLM架构精讲</h1>
+<h2 id="1">1. 位置编码的演进史</h2>
+<h3 id="_1">历史脉络</h3>
+<div class="highlight"><pre><span></span><code><span class="mf">2017</span><span class="w">  </span><span class="n">绝对位置编码</span><span class="w"> </span><span class="p">(</span><span class="n">Transformer原论文</span><span class="p">)</span>
+<span class="w">      </span><span class="err">↓</span><span class="w"> </span><span class="n">问题</span><span class="err">：</span><span class="n">外推性差</span><span class="err">，</span><span class="n">训练长度</span><span class="o">=</span><span class="n">推理上限</span>
+
+<span class="mf">2019</span><span class="w">  </span><span class="n">相对位置编码的探索</span>
+<span class="w">      </span><span class="err">•</span><span class="w"> </span><span class="n">T5</span><span class="p">:</span><span class="w"> </span><span class="n">相对位置偏置</span>
+<span class="w">      </span><span class="err">•</span><span class="w"> </span><span class="n">Transformer</span><span class="o">-</span><span class="n">XL</span><span class="p">:</span><span class="w"> </span><span class="n">相对位置编码</span>
+<span class="w">      </span><span class="err">↓</span><span class="w"> </span><span class="n">改进</span><span class="err">：</span><span class="n">一定程度支持外推</span>
+
+<span class="mf">2021</span><span class="w">  </span><span class="n">RoPE</span><span class="w"> </span><span class="p">(</span><span class="n">苏剑林团队</span><span class="p">)</span>
+<span class="w">      </span><span class="err">•</span><span class="w"> </span><span class="n">论文</span><span class="p">:</span><span class="w"> </span><span class="n">RoFormer</span>
+<span class="w">      </span><span class="err">•</span><span class="w"> </span><span class="n">特点</span><span class="p">:</span><span class="w"> </span><span class="n">旋转矩阵编码相对位置</span>
+<span class="w">      </span><span class="err">↓</span><span class="w"> </span><span class="n">突破</span><span class="err">：</span><span class="n">完美外推</span><span class="err">，</span><span class="n">零参数开销</span>
+
+<span class="mf">2023</span><span class="o">+</span><span class="w"> </span><span class="n">现代LLM标配</span>
+<span class="w">      </span><span class="n">LLaMA</span><span class="p">,</span><span class="w"> </span><span class="n">GPT</span><span class="o">-</span><span class="mf">4</span><span class="p">,</span><span class="w"> </span><span class="n">Qwen</span><span class="p">,</span><span class="w"> </span><span class="n">GLM等全部采用</span>
+</code></pre></div>
+
+<h3 id="_2">学术界的探索历程</h3>
+<p><strong>关键洞察链条：</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nx">观察1</span><span class="w"> </span><span class="p">(</span><span class="mi">2018</span><span class="o">-</span><span class="mi">2019</span><span class="p">):</span><span class="w"> </span>
+<span class="w">  </span><span class="s">&quot;Attention机制本质是内积，内积可以表示相似度和角度&quot;</span>
+<span class="w">  </span><span class="err">→</span><span class="w"> </span><span class="k">Self</span><span class="o">-</span><span class="nx">Attention</span><span class="w"> </span><span class="nx">Transformer</span><span class="p">,</span><span class="w"> </span><span class="nx">Shaw</span><span class="w"> </span><span class="nx">et</span><span class="w"> </span><span class="nx">al</span><span class="p">.</span>
+
+<span class="nx">观察2</span><span class="w"> </span><span class="p">(</span><span class="mi">2019</span><span class="o">-</span><span class="mi">2020</span><span class="p">):</span>
+<span class="w">  </span><span class="s">&quot;相对位置比绝对位置更重要&quot;</span>
+<span class="w">  </span><span class="err">→</span><span class="w"> </span><span class="nx">Transformer</span><span class="o">-</span><span class="nx">XL</span><span class="p">,</span><span class="w"> </span><span class="nx">T5的相对位置编码</span>
+
+<span class="nx">观察3</span><span class="w"> </span><span class="p">(</span><span class="mi">2020</span><span class="p">):</span>
+<span class="w">  </span><span class="s">&quot;复数域的旋转是最自然的相对变换&quot;</span>
+<span class="w">  </span><span class="err">→</span><span class="w"> </span><span class="nx">苏剑林</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;能否用复数旋转编码位置？&quot;</span>
+
+<span class="nx">突破</span><span class="w"> </span><span class="p">(</span><span class="mi">2021</span><span class="p">):</span>
+<span class="w">  </span><span class="s">&quot;将旋转矩阵直接应用到QK内积中！&quot;</span>
+<span class="w">  </span><span class="err">→</span><span class="w"> </span><span class="nx">RoFormer论文发表</span>
+<span class="w">  </span><span class="err">→</span><span class="w"> </span><span class="nx">Q_m</span><span class="w"> </span><span class="err">·</span><span class="w"> </span><span class="nx">K_n</span><span class="o">^</span><span class="nx">T</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">f</span><span class="p">(</span><span class="nx">m</span><span class="o">-</span><span class="nx">n</span><span class="p">)</span><span class="w">  </span><span class="nx">完美的相对位置依赖</span>
+
+<span class="nx">核心insight</span><span class="p">:</span>
+<span class="nx">旋转具有天然的群结构</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">R</span><span class="p">(</span><span class="nx">α</span><span class="p">)</span><span class="err">·</span><span class="nx">R</span><span class="p">(</span><span class="nx">β</span><span class="p">)</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">R</span><span class="p">(</span><span class="nx">α</span><span class="o">+</span><span class="nx">β</span><span class="p">)</span>
+<span class="nx">这恰好对应位置的相对关系</span><span class="p">!</span>
+</code></pre></div>
+
+<p><strong>为什么敢冒险替换？</strong>
+1. 理论保证：数学上等价于学习相对位置
+2. 实验验证：小模型上先验证，效果超过baseline
+3. 工业推动：BERT后需要更长上下文，RoPE正好解决
+4. 开源文化：苏剑林博客详细讲解，降低采用门槛</p>
+<h3 id="rope">为什么需要RoPE？</h3>
+<p><strong>绝对位置编码的致命缺陷：</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 绝对位置编码 (Transformer原始方案)</span>
+<span class="n">pos_emb</span> <span class="o">=</span> <span class="n">SinusoidalPosEmb</span><span class="p">(</span><span class="n">max_len</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">token_emb</span> <span class="o">+</span> <span class="n">pos_emb</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span>
+
+<span class="n">问题1</span><span class="p">:</span> <span class="n">外推灾难</span>
+<span class="o">-</span> <span class="n">训练时最大长度512</span><span class="err">，</span><span class="n">推理时输入1000</span> <span class="err">→</span> <span class="n">崩溃</span>
+<span class="o">-</span> <span class="n">位置1000从未见过</span><span class="err">，</span><span class="n">模型不知道如何处理</span>
+
+<span class="n">问题2</span><span class="p">:</span> <span class="n">相对位置不明确</span>  
+<span class="o">-</span> <span class="n">位置5的token和位置100的token</span>
+<span class="o">-</span> <span class="n">模型只知道它们的绝对位置</span><span class="err">，</span><span class="n">不知道相距95</span>
+<span class="o">-</span> <span class="n">需要通过Attention隐式学习</span><span class="err">，</span><span class="n">效率低</span>
+</code></pre></div>
+
+<p><strong>RoPE的优雅解决方案：</strong>
+- ✅ 直接在Attention计算中编码相对位置
+- ✅ 理论上支持无限长度外推
+- ✅ 零可训练参数
+- ✅ 性能优于所有前代方法</p>
+<hr />
+<h2 id="2-rope">2. RoPE核心原理</h2>
+<h3 id="_3">核心思想：旋转即编码</h3>
+<div class="highlight"><pre><span></span><code>位置信息 = 旋转角度
+
+在高维空间中，将每对维度看作2D平面
+不同位置 → 旋转不同角度
+相对位置 → 旋转角度差
+
+数学美妙之处：
+Q_m · K_n^T = f(Q_m, K_n, m-n)
+              └─────────┘
+           只依赖相对位置差！
+</code></pre></div>
+
+<h3 id="_4">详细机制</h3>
+<h4 id="step-1">Step 1: 频率设计 (多尺度编码)</h4>
+<div class="highlight"><pre><span></span><code><span class="n">θ_i</span> <span class="o">=</span> <span class="mi">10000</span><span class="o">^</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="n">i</span><span class="o">/</span><span class="n">d</span><span class="p">)</span>  <span class="c1"># i = 0,1,2,...,d/2-1</span>
+
+<span class="c1"># 以head_dim=128为例 (Qwen3实际参数)</span>
+<span class="n">θ_0</span>  <span class="o">=</span> <span class="mf">1.0</span>      <span class="c1"># 高频 → 相邻token差异大</span>
+<span class="n">θ_1</span>  <span class="o">=</span> <span class="mf">0.851</span>    
+<span class="n">θ_2</span>  <span class="o">=</span> <span class="mf">0.724</span>
+<span class="o">...</span>
+<span class="n">θ_31</span> <span class="o">=</span> <span class="mf">0.095</span>
+<span class="n">θ_63</span> <span class="o">=</span> <span class="mf">0.008</span>    <span class="c1"># 低频 → 远距离token才有区分</span>
+
+<span class="n">类比</span><span class="err">：</span>
+<span class="o">-</span> <span class="n">秒针</span> <span class="p">(</span><span class="n">高频</span><span class="p">):</span> <span class="n">捕获短期变化</span>
+<span class="o">-</span> <span class="n">时针</span> <span class="p">(</span><span class="n">低频</span><span class="p">):</span> <span class="n">捕获长期趋势</span>
+</code></pre></div>
+
+<h4 id="step-2">Step 2: 位置旋转</h4>
+<div class="highlight"><pre><span></span><code>对于位置m的token，head中的128维向量：
+[q_0, q_1, q_2, q_3, ..., q_126, q_127]
+ └─对0─┘ └─对1─┘  ...   └─对63──┘
+
+每对维度在2D平面旋转 m·θ_i 角度：
+┌      ┐   ┌               ┐ ┌      ┐
+│ q_2i&#39;│ = │ cos(mθ_i)  -sin│ │ q_2i │
+│q_2i+1│   │ sin(mθ_i)   cos│ │q_2i+1│
+└      ┘   └               ┘ └      ┘
+</code></pre></div>
+
+<h4 id="step-3">Step 3: 实现技巧</h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># 预计算缓存 (模型初始化时)</span>
+<span class="n">max_seq_len</span> <span class="o">=</span> <span class="mi">4096</span>  <span class="c1"># 或更大</span>
+<span class="n">positions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">max_seq_len</span><span class="p">)</span>
+<span class="n">freqs</span> <span class="o">=</span> <span class="n">outer</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">θ</span><span class="p">)</span>  <span class="c1"># (4096, 64)</span>
+<span class="n">cos_cached</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span><span class="o">.</span><span class="n">repeat_interleave</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># (4096, 128)</span>
+<span class="n">sin_cached</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span><span class="o">.</span><span class="n">repeat_interleave</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># (4096, 128)</span>
+
+<span class="c1"># 运行时应用 (向量化实现)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_rope</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">seq_len</span><span class="p">):</span>
+    <span class="n">cos</span> <span class="o">=</span> <span class="n">cos_cached</span><span class="p">[:</span><span class="n">seq_len</span><span class="p">]</span>  <span class="c1"># 取实际长度</span>
+    <span class="n">sin</span> <span class="o">=</span> <span class="n">sin_cached</span><span class="p">[:</span><span class="n">seq_len</span><span class="p">]</span>
+
+    <span class="c1"># 旋转公式: q*cos + rotate_half(q)*sin</span>
+    <span class="n">q_rot</span> <span class="o">=</span> <span class="n">q</span> <span class="o">*</span> <span class="n">cos</span> <span class="o">+</span> <span class="n">rotate_half</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span>
+    <span class="n">k_rot</span> <span class="o">=</span> <span class="n">k</span> <span class="o">*</span> <span class="n">cos</span> <span class="o">+</span> <span class="n">rotate_half</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span>
+    <span class="k">return</span> <span class="n">q_rot</span><span class="p">,</span> <span class="n">k_rot</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">rotate_half</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="o">-</span><span class="n">x2</span><span class="p">,</span> <span class="n">x1</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+
+<hr />
+<h2 id="3-llmqwen3">3. 现代LLM架构：以Qwen3为例</h2>
+<h3 id="_5">整体架构</h3>
+<div class="highlight"><pre><span></span><code>Qwen3-4B 关键参数:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Vocab: 151,936
+• d_model: 2560
+• Layers: 28 (从参数表推断)
+• head_dim: 128
+
+Attention架构: GQA (Grouped Query Attention)
+• Q heads: 32个
+• K/V heads: 8个  
+• 比例: 4:1
+• 优势: KV cache减少75%!
+
+FFN架构: SwiGLU变体
+• 扩展比例: 3.8x (2560 → 9728)
+</code></pre></div>
+
+<h3 id="transformer-block">Transformer Block详解</h3>
+<div class="highlight"><pre><span></span><code><span class="err">输入</span><span class="o">:</span><span class="w"> </span><span class="n">x</span>
+<span class="o">(</span><span class="n">batch</span><span class="o">,</span><span class="w"> </span><span class="n">seq_len</span><span class="o">,</span><span class="w"> </span><span class="mi">2560</span><span class="o">)</span>
+<span class="w">       </span><span class="err">│</span>
+<span class="w">       </span><span class="err">├───────────────────</span><span class="w"> </span><span class="n">residual</span><span class="w"> </span><span class="err">─────────┐</span>
+<span class="w">       </span><span class="err">│</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">       </span><span class="err">↓</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">  </span><span class="err">┌─────────┐</span><span class="w">                                </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="n">LayerNorm</span><span class="err">│</span><span class="w">  </span><span class="o">(</span><span class="mi">2560</span><span class="o">,)</span><span class="w">                        </span><span class="err">│</span>
+<span class="w">  </span><span class="err">└─────────┘</span><span class="w">                                </span><span class="err">│</span>
+<span class="w">       </span><span class="err">│</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">       </span><span class="err">↓</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">  </span><span class="err">┌────────────────────────────────────┐</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">        </span><span class="n">QKV</span><span class="w"> </span><span class="n">Projection</span><span class="w">              </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">•</span><span class="w"> </span><span class="n">Q</span><span class="o">:</span><span class="w"> </span><span class="n">Linear</span><span class="o">(</span><span class="mi">2560</span><span class="o">,</span><span class="w"> </span><span class="mi">4096</span><span class="o">)</span><span class="w">           </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">•</span><span class="w"> </span><span class="n">K</span><span class="o">:</span><span class="w"> </span><span class="n">Linear</span><span class="o">(</span><span class="mi">2560</span><span class="o">,</span><span class="w"> </span><span class="mi">1024</span><span class="o">)</span><span class="w">  </span><span class="err">←</span><span class="w"> </span><span class="n">GQA</span><span class="o">!</span><span class="w">   </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">•</span><span class="w"> </span><span class="n">V</span><span class="o">:</span><span class="w"> </span><span class="n">Linear</span><span class="o">(</span><span class="mi">2560</span><span class="o">,</span><span class="w"> </span><span class="mi">1024</span><span class="o">)</span><span class="w">           </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">└────────────────────────────────────┘</span><span class="w">     </span><span class="err">│</span>
+<span class="w">       </span><span class="err">│</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">       </span><span class="err">↓</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">  </span><span class="err">┌────────────────────────────────────┐</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">      </span><span class="n">Reshape</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">Multi</span><span class="o">-</span><span class="n">Head</span><span class="w">         </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="n">Q</span><span class="o">:</span><span class="w"> </span><span class="o">(</span><span class="n">batch</span><span class="o">,</span><span class="w"> </span><span class="n">seq</span><span class="o">,</span><span class="w"> </span><span class="mi">32</span><span class="o">,</span><span class="w"> </span><span class="mi">128</span><span class="o">)</span><span class="w">          </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="n">K</span><span class="o">:</span><span class="w"> </span><span class="o">(</span><span class="n">batch</span><span class="o">,</span><span class="w"> </span><span class="n">seq</span><span class="o">,</span><span class="w"> </span><span class="mi">8</span><span class="o">,</span><span class="w"> </span><span class="mi">128</span><span class="o">)</span><span class="w">           </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="n">V</span><span class="o">:</span><span class="w"> </span><span class="o">(</span><span class="n">batch</span><span class="o">,</span><span class="w"> </span><span class="n">seq</span><span class="o">,</span><span class="w"> </span><span class="mi">8</span><span class="o">,</span><span class="w"> </span><span class="mi">128</span><span class="o">)</span><span class="w">           </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">└────────────────────────────────────┘</span><span class="w">     </span><span class="err">│</span>
+<span class="w">       </span><span class="err">│</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">       </span><span class="err">↓</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">  </span><span class="err">┌────────────────────────────────────┐</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="n">RMSNorm</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">Q</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">K</span><span class="w"> </span><span class="n">heads</span><span class="w">        </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="o">(</span><span class="mi">128</span><span class="o">,)</span><span class="w"> </span><span class="err">每个</span><span class="n">head一个norm</span><span class="w">          </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">└────────────────────────────────────┘</span><span class="w">     </span><span class="err">│</span>
+<span class="w">       </span><span class="err">│</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">       </span><span class="err">↓</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">  </span><span class="err">┌────────────────────────────────────┐</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="err">🔥</span><span class="w"> </span><span class="n">RoPE</span><span class="w"> </span><span class="o">(</span><span class="err">关键步骤</span><span class="o">)</span><span class="w">               </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="n">Q</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">Q_rot</span><span class="o">,</span><span class="w"> </span><span class="n">K</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">K_rot</span><span class="w">            </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="n">V</span><span class="w"> </span><span class="err">不变</span><span class="w">                          </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="err">零参数！</span><span class="w">                         </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">└────────────────────────────────────┘</span><span class="w">     </span><span class="err">│</span>
+<span class="w">       </span><span class="err">│</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">       </span><span class="err">↓</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">  </span><span class="err">┌────────────────────────────────────┐</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="n">Grouped</span><span class="w"> </span><span class="n">Query</span><span class="w"> </span><span class="n">Attention</span><span class="w">         </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="err">每</span><span class="mi">4</span><span class="err">个</span><span class="n">Q</span><span class="w"> </span><span class="n">heads共享1个K</span><span class="o">/</span><span class="n">V</span><span class="w"> </span><span class="n">head</span><span class="w">      </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="err">输出</span><span class="o">:</span><span class="w"> </span><span class="o">(</span><span class="n">batch</span><span class="o">,</span><span class="w"> </span><span class="n">seq</span><span class="o">,</span><span class="w"> </span><span class="mi">4096</span><span class="o">)</span><span class="w">        </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">└────────────────────────────────────┘</span><span class="w">     </span><span class="err">│</span>
+<span class="w">       </span><span class="err">│</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">       </span><span class="err">↓</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">  </span><span class="err">┌────────────────────────────────────┐</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="n">Output</span><span class="w"> </span><span class="n">Projection</span><span class="w">               </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="n">o_proj</span><span class="o">:</span><span class="w"> </span><span class="n">Linear</span><span class="o">(</span><span class="mi">4096</span><span class="o">,</span><span class="w"> </span><span class="mi">2560</span><span class="o">)</span><span class="w">      </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">└────────────────────────────────────┘</span><span class="w">     </span><span class="err">│</span>
+<span class="w">       </span><span class="err">│</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">       </span><span class="err">↓</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">       </span><span class="o">+</span><span class="w"> </span><span class="err">←──────────────────────────────────┘</span>
+<span class="w">       </span><span class="err">│</span>
+<span class="w">       </span><span class="err">├───────────────────</span><span class="w"> </span><span class="n">residual</span><span class="w"> </span><span class="err">─────────┐</span>
+<span class="w">       </span><span class="err">│</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">       </span><span class="err">↓</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">  </span><span class="err">┌─────────┐</span><span class="w">                                </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="n">LayerNorm</span><span class="err">│</span><span class="w">  </span><span class="o">(</span><span class="mi">2560</span><span class="o">,)</span><span class="w">                        </span><span class="err">│</span>
+<span class="w">  </span><span class="err">└─────────┘</span><span class="w">                                </span><span class="err">│</span>
+<span class="w">       </span><span class="err">│</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">       </span><span class="err">↓</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">  </span><span class="err">┌────────────────────────────────────┐</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">          </span><span class="n">SwiGLU</span><span class="w"> </span><span class="n">FFN</span><span class="w">                </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">•</span><span class="w"> </span><span class="n">gate</span><span class="o">:</span><span class="w"> </span><span class="n">Linear</span><span class="o">(</span><span class="mi">2560</span><span class="o">,</span><span class="w"> </span><span class="mi">9728</span><span class="o">)</span><span class="w">        </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">•</span><span class="w"> </span><span class="n">up</span><span class="o">:</span><span class="w">   </span><span class="n">Linear</span><span class="o">(</span><span class="mi">2560</span><span class="o">,</span><span class="w"> </span><span class="mi">9728</span><span class="o">)</span><span class="w">        </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">•</span><span class="w"> </span><span class="err">激活</span><span class="o">:</span><span class="w"> </span><span class="n">gate</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="err">σ</span><span class="o">(</span><span class="n">up</span><span class="o">)</span><span class="w">              </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">•</span><span class="w"> </span><span class="n">down</span><span class="o">:</span><span class="w"> </span><span class="n">Linear</span><span class="o">(</span><span class="mi">9728</span><span class="o">,</span><span class="w"> </span><span class="mi">2560</span><span class="o">)</span><span class="w">        </span><span class="err">│</span><span class="w">     </span><span class="err">│</span>
+<span class="w">  </span><span class="err">└────────────────────────────────────┘</span><span class="w">     </span><span class="err">│</span>
+<span class="w">       </span><span class="err">│</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">       </span><span class="err">↓</span><span class="w">                                      </span><span class="err">│</span>
+<span class="w">       </span><span class="o">+</span><span class="w"> </span><span class="err">←──────────────────────────────────┘</span>
+<span class="w">       </span><span class="err">│</span>
+<span class="w">     </span><span class="n">Output</span>
+<span class="o">(</span><span class="n">batch</span><span class="o">,</span><span class="w"> </span><span class="n">seq_len</span><span class="o">,</span><span class="w"> </span><span class="mi">2560</span><span class="o">)</span>
+</code></pre></div>
+
+<hr />
+<h2 id="4">4. 关键技术点对比</h2>
+<h3 id="rope-vs">RoPE vs 传统位置编码</h3>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>绝对位置编码</th>
+<th>RoPE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>参数量</td>
+<td>d_model × max_len</td>
+<td><strong>0</strong></td>
+</tr>
+<tr>
+<td>外推能力</td>
+<td>❌ 崩溃</td>
+<td>✅ 完美</td>
+</tr>
+<tr>
+<td>相对位置</td>
+<td>❌ 隐式</td>
+<td>✅ 显式</td>
+</tr>
+<tr>
+<td>实现复杂度</td>
+<td>简单</td>
+<td>中等</td>
+</tr>
+<tr>
+<td>现代LLM采用率</td>
+<td>~0%</td>
+<td>~100%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="gqa-grouped-query-attention">GQA (Grouped Query Attention)</h3>
+<div class="highlight"><pre><span></span><code><span class="err">传统</span><span class="n">MHA</span><span class="o">:</span><span class="w"> </span><span class="err">所有</span><span class="n">heads独立</span>
+<span class="err">━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+<span class="mi">32</span><span class="err">个</span><span class="n">Q</span><span class="w"> </span><span class="n">heads</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="mi">32</span><span class="err">个</span><span class="n">K</span><span class="w"> </span><span class="n">heads</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="mi">32</span><span class="err">个</span><span class="n">V</span><span class="w"> </span><span class="n">heads</span>
+<span class="n">KV</span><span class="w"> </span><span class="n">cache</span><span class="o">:</span><span class="w"> </span><span class="mi">32</span><span class="w"> </span><span class="err">×</span><span class="w"> </span><span class="n">seq_len</span><span class="w"> </span><span class="err">×</span><span class="w"> </span><span class="n">head_dim</span>
+
+<span class="n">GQA</span><span class="o">:</span><span class="w"> </span><span class="n">Q</span><span class="w"> </span><span class="n">heads分组共享KV</span>
+<span class="err">━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+<span class="mi">32</span><span class="err">个</span><span class="n">Q</span><span class="w"> </span><span class="n">heads</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="mi">8</span><span class="err">个</span><span class="n">K</span><span class="w"> </span><span class="n">heads</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="mi">8</span><span class="err">个</span><span class="n">V</span><span class="w"> </span><span class="n">heads</span>
+<span class="w">        </span><span class="err">└──</span><span class="mi">4</span><span class="err">个</span><span class="n">Q共享1个KV</span><span class="err">──┘</span>
+<span class="n">KV</span><span class="w"> </span><span class="n">cache</span><span class="o">:</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="err">×</span><span class="w"> </span><span class="n">seq_len</span><span class="w"> </span><span class="err">×</span><span class="w"> </span><span class="n">head_dim</span><span class="w">  </span><span class="o">(</span><span class="err">减少</span><span class="mi">75</span><span class="o">%!)</span>
+
+<span class="err">优势</span><span class="o">:</span>
+<span class="err">•</span><span class="w"> </span><span class="err">推理速度更快</span>
+<span class="err">•</span><span class="w"> </span><span class="err">显存占用更少</span>
+<span class="err">•</span><span class="w"> </span><span class="err">性能几乎不降</span>
+</code></pre></div>
+
+<hr />
+<h2 id="5">5. 实战要点</h2>
+<h3 id="rope_1">RoPE的预计算</h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">RotaryEmbedding</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">max_len</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">10000</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="c1"># 计算频率 θ</span>
+        <span class="n">inv_freq</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">base</span> <span class="o">**</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">dim</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s1">&#39;inv_freq&#39;</span><span class="p">,</span> <span class="n">inv_freq</span><span class="p">)</span>
+
+        <span class="c1"># 预计算cos/sin (可选优化)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">max_len</span><span class="p">)</span>
+        <span class="n">freqs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">inv_freq</span><span class="p">)</span>  <span class="c1"># (max_len, dim/2)</span>
+        <span class="n">emb</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">freqs</span><span class="p">,</span> <span class="n">freqs</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (max_len, dim)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s1">&#39;cos_cached&#39;</span><span class="p">,</span> <span class="n">emb</span><span class="o">.</span><span class="n">cos</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s1">&#39;sin_cached&#39;</span><span class="p">,</span> <span class="n">emb</span><span class="o">.</span><span class="n">sin</span><span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">seq_len</span><span class="p">):</span>
+        <span class="c1"># 取实际需要的长度</span>
+        <span class="n">cos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cos_cached</span><span class="p">[:</span><span class="n">seq_len</span><span class="p">]</span>
+        <span class="n">sin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sin_cached</span><span class="p">[:</span><span class="n">seq_len</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_rotary</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">)</span>
+</code></pre></div>
+
+<h3 id="_6">维度对应关系</h3>
+<div class="highlight"><pre><span></span><code>Qwen3 实例:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+d_model = 2560
+num_q_heads = 32
+num_kv_heads = 8
+head_dim = 128
+
+张量流动:
+(B, L, 2560) 
+  → Q_proj: (B, L, 4096) 
+  → reshape: (B, L, 32, 128)
+  → RoPE: (B, 32, L, 128)  ← head_dim=128
+
+RoPE参数:
+  θ向量长度: 128/2 = 64
+  cos/sin缓存: (max_len, 128)
+  每对维度共享一个θ值
+</code></pre></div>
+
+<hr />
+<h2 id="6">6. 核心要点总结</h2>
+<h3 id="rope_2">RoPE的三大优势</h3>
+<ol>
+<li><strong>零参数开销</strong> - 完全基于数学变换</li>
+<li><strong>完美外推</strong> - 支持任意长度序列</li>
+<li><strong>相对位置显式编码</strong> - Attention天然感知距离</li>
+</ol>
+<h3 id="llm">现代LLM的标配组合</h3>
+<div class="highlight"><pre><span></span><code>Embedding (查找表)
+    ↓
+Transformer Blocks × N
+  • LayerNorm (RMSNorm)
+  • GQA (减少KV cache)
+  • 🔥 RoPE (位置编码)
+  • SwiGLU FFN
+  • Residual连接
+    ↓
+Output Projection
+</code></pre></div>
+
+<h3 id="_7">记忆口诀</h3>
+<ul>
+<li><strong>RoPE不是层</strong>：无参数，纯数学变换</li>
+<li><strong>成对旋转</strong>：每2个维度为一组，共享θ</li>
+<li><strong>多频编码</strong>：高频捕局部，低频看全局</li>
+<li><strong>只旋Q和K</strong>：V不需要位置信息</li>
+<li><strong>插入在Attention前</strong>：QKV投影 → 多头 → RoPE → Attention</li>
+</ul>
+<hr />
+<h2 id="_8">参考资料</h2>
+<ul>
+<li>论文: RoFormer (Su et al., 2021)</li>
+<li>实现: HuggingFace Transformers库</li>
+<li>博客: 苏剑林的《Transformer升级之路》系列</li>
+</ul></article>
+            <div class="contact-card">
+                <h3><i class="fas fa-heart"></i> Thanks for Reading</h3>
+                <p>If this article was helpful to you, feel free to connect with me!</p>
+                <div class="contact-links">
+                    <a href="https://github.com/HaxxorCialtion" class="contact-link" target="_blank"><i class="fab fa-github"></i>GitHub</a>
+                    <a href="mailto:cialtion737410@sjtu.edu.cn" class="contact-link"><i class="fas fa-envelope"></i>Email</a>
+                </div>
+            </div>
+        </main>
+    </div>
+    <a href="#" class="back-button" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script>
+        hljs.highlightAll();
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+            });
+        });
+        function highlightCurrentSection() {
+            const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+            const tocLinks = document.querySelectorAll('.toc a');
+            let current = '';
+            headings.forEach(heading => {
+                const rect = heading.getBoundingClientRect();
+                if (rect.top <= 100) { current = heading.id; }
+            });
+            tocLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) { link.classList.add('active'); }
+            });
+        }
+        window.addEventListener('scroll', highlightCurrentSection);
+        document.addEventListener('DOMContentLoaded', highlightCurrentSection);
+    </script>
+</body>
+</html>

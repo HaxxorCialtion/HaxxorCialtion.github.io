@@ -52,7 +52,7 @@ tags: ["LLM", "Basic", "Full-attention"]
 
 **形状变化**: `List[int]` (长度=4) → `Tensor` **(1, 128)**
 
-### 4. 嵌入层 (Embedding)
+### 4. 嵌入 (Embedding)
 
 将整数ID转换为稠密的浮点向量，这是从"符号"到"语义"的关键转换。
 
