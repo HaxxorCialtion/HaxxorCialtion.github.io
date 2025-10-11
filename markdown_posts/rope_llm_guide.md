@@ -1,8 +1,3 @@
----
-title: "RoPE and LLM"
-date: "2025-10-11"
-tags: ["LLM", "RoPE", "Position Encoder"]
----
 # RoPE位置编码与现代LLM架构精讲
 
 ## 1. 位置编码的演进史
@@ -381,7 +376,96 @@ Output Projection
 
 ---
 
+---
+
+## 附录：不同架构的位置编码对比
+
+### GPT-2 vs CS336 vs 现代LLM
+
+| 特性 | GPT-2 (2019) | CS336 Assignment 1 | 现代LLM (2023+) |
+|------|-------------|-------------------|----------------|
+| **位置编码类型** | Learned Absolute | RoPE | RoPE |
+| **参数量** | ~0.8M (1024×768) | 0 | 0 |
+| **最大长度** | 1024 (硬限制) | 理论无限 | 理论无限 |
+| **外推能力** | ❌ 崩溃 | ✅ 完美 | ✅ 完美 |
+| **LayerNorm** | Post-LN | Pre-LN | Pre-LN |
+| **实现复杂度** | 简单 | 中等 | 中等 |
+| **代表模型** | GPT-2, BERT | - | LLaMA, Qwen, GPT-J |
+
+### 各架构的具体实现
+
+**GPT-2 (2019年标准):**
+```python
+class GPT2PositionEncoding:
+    def __init__(self, max_len=1024, d_model=768):
+        # 可训练的位置查找表
+        self.position_embeddings = nn.Embedding(max_len, d_model)
+        
+    def forward(self, token_ids):
+        # token_ids: (batch, seq_len)
+        seq_len = token_ids.size(1)
+        
+        # 查找表：直接取出位置向量
+        positions = torch.arange(seq_len, device=token_ids.device)
+        pos_emb = self.position_embeddings(positions)  # (seq_len, d_model)
+        
+        # 与token embedding相加
+        token_emb = self.token_embeddings(token_ids)
+        x = token_emb + pos_emb  # 广播相加
+        return x
+
+# 参数：max_len × d_model = 1024 × 768 = 786,432 参数
+```
+
+**CS336 / 现代LLM (2023+标准):**
+```python
+class ModernLLMWithRoPE:
+    def __init__(self, d_model=768, num_heads=12):
+        self.rope = RotaryEmbedding(
+            dim=d_model // num_heads,  # head_dim = 64
+            max_len=4096  # 只是预计算缓存大小
+        )
+        # 注意：没有position_embeddings参数！
+        
+    def forward(self, token_ids):
+        # token_ids: (batch, seq_len)
+        
+        # 只做token embedding，没有位置信息！
+        x = self.token_embeddings(token_ids)  # (batch, seq_len, d_model)
+        
+        # 在Attention层内部应用RoPE
+        for layer in self.layers:
+            x = layer(x)  # RoPE在QK投影后应用
+        
+        return x
+
+# 位置编码参数：0 ！
+```
+
+### 为什么CS336教学选择现代架构？
+
+**教学理念：**
+1. **面向未来** - 教授当前工业界实际使用的技术
+2. **最佳实践** - RoPE已被证明优于绝对位置编码
+3. **理解演进** - 让学生直接学习最新方案
+
+**学习路径建议：**
+```
+如果你的基础学习是GPT-2：
+✓ 优势：简单易懂，历史重要性
+✓ 需要补充：了解RoPE和现代改进
+✓ 过渡方案：先掌握GPT-2，再学RoPE变化
+
+如果你从CS336开始：
+✓ 优势：直接学习最新技术
+✓ 挑战：RoPE理解曲线陡峭
+✓ 建议：对比GPT-2理解"为什么需要RoPE"
+```
+
+---
+
 ## 参考资料
-- 论文: RoFormer (Su et al., 2021)
+- 论文: RoFormer (Su et al., 2021) - 3,167+ citations
 - 实现: HuggingFace Transformers库
 - 博客: 苏剑林的《Transformer升级之路》系列
+- 课程: Stanford CS336 - Language Modeling from Scratch
