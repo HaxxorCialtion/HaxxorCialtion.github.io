@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FunReason - Function Calling via Multiscale Loss - Cialtion's Tech Blog</title>
+    <meta name="description" content="通过多尺度损失函数和自动化数据精炼解决LLM函数调用中推理与执行不平衡问题，7B模型性能超越GPT-4o">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-color: #2c3e50; --secondary-color: #3498db; --accent-color: #e74c3c;
+            --background-color: #f8fafc; --card-background: #ffffff; --text-primary: #2d3748;
+            --text-secondary: #718096; --border-color: #e2e8f0; --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1); --border-radius: 12px; --transition: all 0.3s ease;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: var(--background-color); color: var(--text-primary); line-height: 1.7; }
+        .navbar { background: var(--card-background); box-shadow: var(--shadow-light); padding: 1rem 0; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border-color); }
+        .nav-container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .nav-brand { display: flex; align-items: center; text-decoration: none; color: var(--primary-color); font-weight: 600; font-size: 1.2rem; }
+        .nav-brand i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-link { color: var(--text-secondary); text-decoration: none; transition: var(--transition); padding: 0.5rem 1rem; border-radius: 8px; }
+        .nav-link:hover { color: var(--secondary-color); background-color: rgba(52, 152, 219, 0.1); }
+        .main-container { display: flex; max-width: 1400px; margin: 0 auto; gap: 2rem; padding: 2rem; }
+        .toc-sidebar { width: 250px; flex-shrink: 0; position: sticky; top: 6rem; height: fit-content; max-height: calc(100vh - 8rem); overflow-y: auto; }
+        .toc-container { background: var(--card-background); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1.5rem; }
+        .toc-title { font-size: 1.1rem; font-weight: 600; color: var(--primary-color); margin-bottom: 1rem; display: flex; align-items: center; }
+        .toc-title i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .toc ul { list-style: none; padding-left: 0; }
+        .toc ul ul { padding-left: 1rem; margin-top: 0.3rem; }
+        .toc li { margin: 0.3rem 0; }
+        .toc a { color: var(--text-secondary); text-decoration: none; transition: var(--transition); display: block; padding: 0.3rem 0.5rem; border-radius: 4px; font-size: 0.9rem; line-height: 1.4; }
+        .toc a:hover, .toc a.active { color: var(--secondary-color); background-color: rgba(52, 152, 219, 0.1); }
+        .article-main { flex: 1; min-width: 0; }
+        .article-header { background: var(--card-background); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; box-shadow: var(--shadow-light); border: 1px solid var(--border-color); position: relative; overflow: hidden; }
+        .article-cover { width: 100%; height: 350px; object-fit: cover; border-radius: var(--border-radius); margin-bottom: 1.5rem; box-shadow: var(--shadow-medium); transition: var(--transition); }
+        .article-cover:hover { transform: scale(1.02); }
+        .article-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, var(--secondary-color), var(--accent-color)); }
+        .article-title { font-size: 2.5rem; font-weight: 700; color: var(--primary-color); margin-bottom: 1rem; line-height: 1.3; }
+        .article-meta { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.95rem; }
+        .meta-item { display: flex; align-items: center; background: var(--background-color); padding: 0.5rem 1rem; border-radius: 20px; }
+        .meta-item i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .article-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+        .tag { background: linear-gradient(135deg, var(--secondary-color), #2980b9); color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 500; box-shadow: var(--shadow-light); }
+        .article-description { color: var(--text-secondary); font-size: 1.1rem; line-height: 1.6; font-style: italic; background: var(--background-color); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--secondary-color); }
+        .article-content { background: var(--card-background); border-radius: var(--border-radius); padding: 2.5rem; box-shadow: var(--shadow-light); border: 1px solid var(--border-color); }
+        .article-content h1, .article-content h2, .article-content h3, .article-content h4, .article-content h5, .article-content h6 { color: var(--primary-color); margin: 2rem 0 1rem 0; font-weight: 600; line-height: 1.4; }
+        .article-content h1 { font-size: 2.2rem; border-bottom: 3px solid var(--secondary-color); padding-bottom: 0.5rem; }
+        .article-content h2 { font-size: 1.8rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.3rem; }
+        .article-content p { margin: 1rem 0; line-height: 1.8; }
+        .article-content img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: var(--shadow-light); margin: 1.5rem 0; }
+        .article-content blockquote { border-left: 4px solid var(--secondary-color); margin: 1.5rem 0; padding: 1rem 1.5rem; background: var(--background-color); border-radius: 0 8px 8px 0; font-style: italic; }
+        .article-content pre { background: #f6f8fa; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; overflow-x: auto; margin: 1.5rem 0; }
+        .article-content code { background: #f6f8fa; border: 1px solid var(--border-color); border-radius: 4px; padding: 0.2rem 0.4rem; font-family: 'Monaco', 'Consolas', monospace; font-size: 0.9em; }
+        .article-content pre code { background: none; border: none; padding: 0; }
+        .article-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-light); }
+        .article-content th, .article-content td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .article-content th { background: var(--background-color); font-weight: 600; color: var(--primary-color); }
+        .contact-card { background: linear-gradient(135deg, var(--primary-color), #34495e); color: white; border-radius: var(--border-radius); padding: 2rem; margin: 2rem 0; text-align: center; }
+        .contact-card h3 { margin-bottom: 1rem; color: white; }
+        .contact-links { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+        .contact-link { display: inline-flex; align-items: center; padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.1); border-radius: 25px; color: white; text-decoration: none; transition: var(--transition); }
+        .contact-link:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-1px); }
+        .contact-link i { margin-right: 0.5rem; }
+        .back-button { position: fixed; bottom: 2rem; right: 2rem; background: var(--secondary-color); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-medium); transition: var(--transition); text-decoration: none; }
+        .back-button:hover { background: #2980b9; transform: translateY(-2px); }
+        @media (max-width: 1024px) { .main-container { flex-direction: column; padding: 1rem; } .toc-sidebar { width: 100%; position: static; order: 2; margin-top: 2rem; } .article-main { order: 1; } }
+        @media (max-width: 768px) { .nav-container { padding: 0 1rem; flex-direction: column; gap: 1rem; } .article-header, .article-content { padding: 1.5rem; } .article-title { font-size: 2rem; } .back-button { bottom: 1rem; right: 1rem; width: 50px; height: 50px; } .article-cover { height: 250px; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-brand">
+                <i class="fas fa-home"></i>Cialtion's Tech Blog
+            </a>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link"><i class="fas fa-arrow-left"></i>Back to Home</a>
+                <a href="mailto:cialtion737410@sjtu.edu.cn" class="nav-link"><i class="fas fa-envelope"></i>Contact Me</a>
+            </div>
+        </div>
+    </nav>
+    <div class="main-container">
+        <aside class="toc-sidebar"><div class="toc-container">
+            <div class="toc-title">
+                <i class="fas fa-list"></i>
+                Table of Contents
+            </div>
+            <div class="toc"><div class="toc"><span class="toctitle">Table of Contents</span><ul>
+<li><a href="#_1">📋 核心摘要</a></li>
+<li><a href="#_2">🔧 核心技术栈（重点）</a><ul>
+<li><a href="#1">1. 训练架构</a></li>
+<li><a href="#2">2. 数据流水线</a></li>
+<li><a href="#3-fcdr5">3. FCDR数据清洗5阶段</a></li>
+<li><a href="#4">4. 损失函数设计</a></li>
+<li><a href="#5-self-refinement">5. Self-Refinement循环</a></li>
+</ul>
+</li>
+<li><a href="#_3">📊 关键实验结果</a><ul>
+<li><a href="#bfcl-benchmark-function-calling">BFCL Benchmark (Function Calling)</a></li>
+<li><a href="#_4">灾难性遗忘测试</a></li>
+<li><a href="#cot-vs-cot">自然CoT vs 策略CoT</a></li>
+</ul>
+</li>
+<li><a href="#_5">💡 技术亮点与创新</a><ul>
+<li><a href="#1_1">亮点1：可解释的损失权重</a></li>
+<li><a href="#2_1">亮点2：工业级数据清洗</a></li>
+<li><a href="#3self-refinement">亮点3：Self-Refinement策略</a></li>
+<li><a href="#4_1">亮点4：开源友好</a></li>
+</ul>
+</li>
+<li><a href="#_6">⚠️ 局限性</a><ul>
+<li><a href="#_7">技术层面</a></li>
+<li><a href="#_8">伦理层面</a></li>
+</ul>
+</li>
+<li><a href="#_9">🎯 对研究生的启示</a><ul>
+<li><a href="#_10">可复用的方法论</a></li>
+<li><a href="#_11">可能的研究方向</a></li>
+<li><a href="#_12">数据集价值</a></li>
+</ul>
+</li>
+<li><a href="#_13">📌 核心术语速查</a></li>
+<li><a href="#_14">🔗 相关资源</a></li>
+</ul>
+</div>
+</div>
+        </div></aside>
+        <main class="article-main">
+            <header class="article-header">
+                <img src="../images/arknights_mizuki_0.jpg" alt="FunReason - Function Calling via Multiscale Loss" class="article-cover" onerror="this.style.display='none'">
+                <h1 class="article-title">FunReason - Function Calling via Multiscale Loss</h1>
+                <div class="article-meta">
+                    <div class="meta-item"><i class="fas fa-calendar-alt"></i>Published: 2025-10-15</div>
+                    <div class="meta-item"><i class="fas fa-user"></i>Author: Cialtion</div>
+                </div>
+                <div class="article-tags"><span class="tag">Function Calling</span><span class="tag">LLM Training</span><span class="tag">Loss Function</span><span class="tag">Data Refinement</span></div>
+                <div class="article-description">通过多尺度损失函数和自动化数据精炼解决LLM函数调用中推理与执行不平衡问题，7B模型性能超越GPT-4o</div>
+            </header>
+            <article class="article-content"><h2 id="_1">📋 核心摘要</h2>
+<p><strong>问题</strong>：CoT推理token数(~350) &gt;&gt; 函数调用token数(~31)，导致传统SFT过度优化推理而忽视执行准确性</p>
+<p><strong>解决方案</strong>：
+1. <strong>SRML损失函数</strong>：手动平衡推理(α)和执行(β)的权重
+2. <strong>FCDR数据清洗</strong>：5阶段自动化验证和修复训练数据
+3. <strong>自然CoT生成</strong>：用QwQ-32B自然推理优于人工设计策略</p>
+<p><strong>成果</strong>：Qwen2.5-Coder-7B微调后在BFCL达到83.66%（超GPT-4o），且避免灾难性遗忘</p>
+<hr />
+<h2 id="_2">🔧 核心技术栈（重点）</h2>
+<h3 id="1">1. 训练架构</h3>
+<div class="highlight"><pre><span></span><code>基础模型：Qwen2.5-Coder-7B-Instruct / Llama-3.2-3B-Instruct
+训练框架：LLaMA Factory (QLoRA)
+硬件配置：8×A100 80GB
+训练参数：batch_size=512, lr=4e-5, epochs=3
+</code></pre></div>
+
+<h3 id="2">2. 数据流水线</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 数据生成链路</span>
+<span class="n">xLAM</span><span class="o">-</span><span class="mi">60</span><span class="n">K原始数据</span>
+  <span class="err">↓</span> <span class="n">QwQ</span><span class="o">-</span><span class="mi">32</span><span class="n">B生成CoT</span> <span class="p">(</span><span class="n">temp</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">max_len</span><span class="o">=</span><span class="mi">20480</span><span class="p">)</span>
+<span class="n">xLAM</span><span class="o">-</span><span class="n">cot中间数据</span>
+  <span class="err">↓</span> <span class="n">FCDR</span> <span class="mi">5</span><span class="n">阶段清洗</span>
+<span class="n">FunReason</span><span class="o">-</span><span class="n">FCDR</span><span class="o">-</span><span class="mi">60</span><span class="n">K最终数据</span>
+</code></pre></div>
+
+<h3 id="3-fcdr5">3. FCDR数据清洗5阶段</h3>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>检查内容</th>
+<th>不通过处理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Response Identification</td>
+<td>是function call还是普通回复</td>
+<td>Drop</td>
+</tr>
+<tr>
+<td>2. Query &amp; Tool Identification</td>
+<td>查询能否用工具解决</td>
+<td>Drop</td>
+</tr>
+<tr>
+<td>3. CoT Identification</td>
+<td>推理能否导出答案</td>
+<td>Drop</td>
+</tr>
+<tr>
+<td>4. Function &amp; Parameter</td>
+<td>函数名和参数是否正确</td>
+<td><strong>Regenerate</strong></td>
+</tr>
+<tr>
+<td>5. Format Identification</td>
+<td>JSON格式是否符合规范</td>
+<td><strong>Regenerate</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键实现</strong>：全部用QwQ-32B执行，利用其自我纠错能力</p>
+<h3 id="4">4. 损失函数设计</h3>
+<p><strong>传统SFT问题</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="n">L_total</span> <span class="o">=</span> <span class="p">(</span><span class="n">N_think</span><span class="o">/</span><span class="n">N_all</span><span class="p">)</span><span class="err">·</span><span class="n">L_think</span> <span class="o">+</span> <span class="p">(</span><span class="n">N_result</span><span class="o">/</span><span class="n">N_all</span><span class="p">)</span><span class="err">·</span><span class="n">L_result</span>
+<span class="c1"># N_think ≈ 350, N_result ≈ 31</span>
+<span class="c1"># 导致 α ≈ 0.92, β ≈ 0.08  # 不平衡！</span>
+</code></pre></div>
+
+<p><strong>FunReason改进</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="n">L_MSL</span> <span class="o">=</span> <span class="n">α·L_think</span> <span class="o">+</span> <span class="n">β·L_result</span>
+<span class="c1"># α可调 (最优α=0.5-0.7)</span>
+<span class="c1"># β = 1-α</span>
+</code></pre></div>
+
+<p><strong>消融实验结果</strong>（Live Accuracy）：
+- α=0.1: 67%
+- α=0.3: 69%
+- <strong>α=0.5: 71%</strong> ← 最优
+- α=0.7: 71%
+- α=0.9: 69% (接近传统SFT)</p>
+<h3 id="5-self-refinement">5. Self-Refinement循环</h3>
+<div class="highlight"><pre><span></span><code>xLAM → 模型生成(CoT+FC) → FCDR检查 → 精炼数据 
+  ↑                                           ↓
+  └──────────────── 再训练 ←──────────────────┘
+</code></pre></div>
+
+<hr />
+<h2 id="_3">📊 关键实验结果</h2>
+<h3 id="bfcl-benchmark-function-calling">BFCL Benchmark (Function Calling)</h3>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>Non-Live</th>
+<th>Live</th>
+<th>Overall</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>FunReason-7B</strong></td>
+<td>87.00</td>
+<td><strong>80.31</strong></td>
+<td><strong>83.66</strong> ✅</td>
+</tr>
+<tr>
+<td>GPT-4o</td>
+<td>86.81</td>
+<td>78.85</td>
+<td>82.83</td>
+</tr>
+<tr>
+<td>ToolACE-8B</td>
+<td>87.54</td>
+<td>78.59</td>
+<td>82.57</td>
+</tr>
+<tr>
+<td>Qwen2.5-7B(纯SFT)</td>
+<td>86.27</td>
+<td>77.60</td>
+<td>81.94</td>
+</tr>
+</tbody>
+</table>
+<p><strong>结论</strong>：7B模型超越所有同规模和更大规模模型</p>
+<h3 id="_4">灾难性遗忘测试</h3>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>HumanEval</th>
+<th>MBPP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>原始Qwen2.5-Coder</td>
+<td>0.866</td>
+<td>0.812</td>
+</tr>
+<tr>
+<td><strong>+FunReason</strong></td>
+<td>0.841(-2.9%)</td>
+<td>0.794(-2.2%) ✅</td>
+</tr>
+<tr>
+<td>+纯SFT</td>
+<td>0.470(-45.7%) ❌</td>
+<td>0.690(-15.0%) ❌</td>
+</tr>
+</tbody>
+</table>
+<p><strong>结论</strong>：SRML有效避免遗忘，性能损失&lt;3%</p>
+<h3 id="cot-vs-cot">自然CoT vs 策略CoT</h3>
+<table>
+<thead>
+<tr>
+<th>数据生成方式</th>
+<th>Overall Acc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GPT-4o+预定策略</td>
+<td>76.91%</td>
+</tr>
+<tr>
+<td><strong>QwQ-32B自然推理</strong></td>
+<td><strong>78.70%</strong> ✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>结论</strong>：让模型自然推理比人工设计步骤更好</p>
+<hr />
+<h2 id="_5">💡 技术亮点与创新</h2>
+<h3 id="1_1">亮点1：可解释的损失权重</h3>
+<ul>
+<li>不是"黑盒调参"，而是基于token统计发现问题</li>
+<li>α∈[0.5, 0.7]具有理论支撑和实验验证</li>
+</ul>
+<h3 id="2_1">亮点2：工业级数据清洗</h3>
+<ul>
+<li>完全自动化，无需人工标注</li>
+<li>5阶段流水线可复用到其他任务</li>
+<li>Prompts详细可见附录A</li>
+</ul>
+<h3 id="3self-refinement">亮点3：Self-Refinement策略</h3>
+<ul>
+<li>模型自己生成→自己检查→自己改进</li>
+<li>类似强化学习但不需要reward model</li>
+</ul>
+<h3 id="4_1">亮点4：开源友好</h3>
+<ul>
+<li>代码：github.com/BingguangHao/FunReason</li>
+<li>数据：FunReason-FCDR-60K</li>
+<li>模型：训练checkpoint</li>
+</ul>
+<hr />
+<h2 id="_6">⚠️ 局限性</h2>
+<h3 id="_7">技术层面</h3>
+<ol>
+<li><strong>MSL未完全解决问题</strong>：对极度专业化领域（医疗、金融）可能不够</li>
+<li><strong>单轮评估为主</strong>：多轮对话、错误恢复未充分测试</li>
+<li><strong>推理速度</strong>：7B模型推理仍需优化以满足生产环境</li>
+</ol>
+<h3 id="_8">伦理层面</h3>
+<ol>
+<li><strong>恶意利用风险</strong>：更强的API调用能力可能被滥用</li>
+<li><strong>需要监控机制</strong>：部署时需要访问控制</li>
+</ol>
+<hr />
+<h2 id="_9">🎯 对研究生的启示</h2>
+<h3 id="_10">可复用的方法论</h3>
+<ol>
+<li><strong>Token统计驱动设计</strong>：先统计数据特征，再设计损失函数</li>
+<li><strong>LLM辅助LLM</strong>：用强模型(QwQ-32B)清洗训练数据</li>
+<li><strong>多阶段验证</strong>：不是"一次性对/错"，而是分层检查</li>
+</ol>
+<h3 id="_11">可能的研究方向</h3>
+<ul>
+<li><strong>扩展到多轮对话</strong>：如何在SRML中加入对话状态管理</li>
+<li><strong>动态权重调整</strong>：能否根据训练阶段自动调整α/β</li>
+<li><strong>领域自适应</strong>：医疗/法律等专业领域的损失函数设计</li>
+<li><strong>参数高效方法</strong>：SRML + LoRA的进一步优化</li>
+</ul>
+<h3 id="_12">数据集价值</h3>
+<ul>
+<li>FunReason-FCDR-60K可直接用于训练</li>
+<li>FCDR pipeline可用于清洗自己的数据</li>
+<li>Prompts模板(附录A)可直接复用</li>
+</ul>
+<hr />
+<h2 id="_13">📌 核心术语速查</h2>
+<table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+<th>举例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SRML</strong></td>
+<td>Self-Refinement Multiscale Loss</td>
+<td>α·L_think + β·L_result</td>
+</tr>
+<tr>
+<td><strong>FCDR</strong></td>
+<td>Function Call Data Refinement</td>
+<td>5阶段自动清洗流水线</td>
+</tr>
+<tr>
+<td><strong>CoT</strong></td>
+<td>Chain-of-Thought 思维链</td>
+<td>"一步步推理"的过程</td>
+</tr>
+<tr>
+<td><strong>Catastrophic Forgetting</strong></td>
+<td>灾难性遗忘</td>
+<td>学新任务忘旧任务</td>
+</tr>
+<tr>
+<td><strong>BFCL</strong></td>
+<td>Berkeley Function Calling Leaderboard</td>
+<td>Function calling标准测试</td>
+</tr>
+<tr>
+<td><strong>QLoRA</strong></td>
+<td>Quantized LoRA</td>
+<td>量化的低秩适配微调</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_14">🔗 相关资源</h2>
+<ul>
+<li>论文：arXiv:2505.20192v1</li>
+<li>代码：github.com/BingguangHao/FunReason</li>
+<li>Base数据：xLAM-60K (Salesforce)</li>
+<li>评测：BFCL (Berkeley)</li>
+</ul>
+<hr />
+<p><strong>最后更新</strong>：2025-10-09
+<strong>阅读耗时</strong>：约5分钟快速回顾</p></article>
+            <div class="contact-card">
+                <h3><i class="fas fa-heart"></i> Thanks for Reading</h3>
+                <p>If this article was helpful to you, feel free to connect with me!</p>
+                <div class="contact-links">
+                    <a href="https://github.com/HaxxorCialtion" class="contact-link" target="_blank"><i class="fab fa-github"></i>GitHub</a>
+                    <a href="mailto:cialtion737410@sjtu.edu.cn" class="contact-link"><i class="fas fa-envelope"></i>Email</a>
+                </div>
+            </div>
+        </main>
+    </div>
+    <a href="#" class="back-button" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script>
+        hljs.highlightAll();
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+            });
+        });
+        function highlightCurrentSection() {
+            const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+            const tocLinks = document.querySelectorAll('.toc a');
+            let current = '';
+            headings.forEach(heading => {
+                const rect = heading.getBoundingClientRect();
+                if (rect.top <= 100) { current = heading.id; }
+            });
+            tocLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) { link.classList.add('active'); }
+            });
+        }
+        window.addEventListener('scroll', highlightCurrentSection);
+        document.addEventListener('DOMContentLoaded', highlightCurrentSection);
+    </script>
+</body>
+</html>
