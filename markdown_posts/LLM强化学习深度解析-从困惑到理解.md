@@ -1,6 +1,6 @@
 ---
-title: "LLM强化学习深度解析：从PPO到DPO的完整理解"
-date: "2025-01-09"
+title: "从PPO到DPO的完整理解"
+date: "2025-10-16"
 tags: ["RL", "LLM", "PPO", "DPO", "GRPO", "Deep Dive"]
 description: "深入解析LLM中的强化学习算法，包括PPO、DPO、GRPO的工作原理、数学推导、以及工业界应用案例"
 ---
