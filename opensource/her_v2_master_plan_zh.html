@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Large Scale Knowledge Washing: 大规模语言模型知识清洗 - Cialtion's Tech Blog</title>
-    <meta name="description" content="通过修改Transformer MLP层权重实现大规模敏感知识删除，同时保持模型推理能力">
+    <title>24小时AI伴侣系统大概规划 - Cialtion's Tech Blog</title>
+    <meta name="description" content="Her">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" rel="stylesheet">
     <style>
@@ -104,15 +104,17 @@
                 Table of Contents
             </div>
             <div class="toc"><div class="toc"><span class="toctitle">Table of Contents</span><ul>
-<li><a href="#large-scale-knowledge-washing">Large Scale Knowledge Washing: 大规模语言模型知识清洗</a><ul>
-<li><a href="#_1">核心观点</a></li>
-<li><a href="#_2">技术架构</a></li>
-<li><a href="#_3">实验设置</a></li>
-<li><a href="#_4">关键结果</a></li>
-<li><a href="#_5">技术创新</a></li>
-<li><a href="#_6">应用价值</a></li>
-<li><a href="#_7">技术局限</a></li>
-<li><a href="#_8">未来方向</a></li>
+<li><a href="#her-v2-24ai">Her-v2 进化方案：构建24小时AI伴侣系统</a><ul>
+<li><a href="#asr-llm-ttsasr-agents-tts">从ASR-LLM-TTS到ASR-Agents-TTS的演进之路</a></li>
+<li><a href="#_1">🎯 核心设计哲学</a><ul>
+<li><a href="#_2">拟人化的三个层次</a></li>
+<li><a href="#_3">人机交互的终极目标</a></li>
+</ul>
+</li>
+<li><a href="#_4">📐 系统架构设计</a><ul>
+<li><a href="#asr-agents-tts">整体架构：ASR-Agents-TTS</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -121,77 +123,96 @@
         </div></aside>
         <main class="article-main">
             <header class="article-header">
-                <img src="../images/bronya_mp.jpg" alt="Large Scale Knowledge Washing: 大规模语言模型知识清洗" class="article-cover" onerror="this.style.display='none'">
-                <h1 class="article-title">Large Scale Knowledge Washing: 大规模语言模型知识清洗</h1>
+                <img src="../images/bronya_1.jpg" alt="24小时AI伴侣系统大概规划" class="article-cover" onerror="this.style.display='none'">
+                <h1 class="article-title">24小时AI伴侣系统大概规划</h1>
                 <div class="article-meta">
-                    <div class="meta-item"><i class="fas fa-calendar-alt"></i>Published: 2025-01-15</div>
+                    <div class="meta-item"><i class="fas fa-calendar-alt"></i>Published: 2025-10-22</div>
                     <div class="meta-item"><i class="fas fa-user"></i>Author: Cialtion</div>
                 </div>
-                <div class="article-tags"><span class="tag">LLM</span><span class="tag">知识遗忘</span><span class="tag">模型编辑</span><span class="tag">隐私保护</span><span class="tag">机器学习安全</span><span class="tag">MLP层操作</span></div>
-                <div class="article-description">通过修改Transformer MLP层权重实现大规模敏感知识删除，同时保持模型推理能力</div>
+                <div class="article-tags"><span class="tag">AI</span><span class="tag">OpenSource</span><span class="tag">AI-Companion</span><span class="tag">Alpha</span></div>
+                <div class="article-description">Her</div>
             </header>
             
-            <article class="article-content"><h1 id="large-scale-knowledge-washing">Large Scale Knowledge Washing: 大规模语言模型知识清洗</h1>
-<p><strong>日期：</strong> 2025-1-15<br />
-<strong>链接：</strong> <a href="https://openreview.net/forum?id=LAW2025">ICLR 2025</a><br />
-<strong>标签：</strong> <code>LLM</code> <code>知识遗忘</code> <code>模型编辑</code> <code>隐私保护</code> <code>机器学习安全</code></p>
-<h2 id="_1">核心观点</h2>
-<p>提出LAW方法，通过约束优化直接修改Transformer MLP层权重，实现大规模敏感知识删除的同时保持模型推理能力。核心创新是将知识"清洗"重新定义为扰动目标知识输出而非简单替换。</p>
-<h2 id="_2">技术架构</h2>
-<p><strong>模型操作层面：</strong>
-- 目标：GPT-2/GPT-J的MLP前馈网络层
-- 方法：多层权重联合更新，分散参数变化影响
-- 定位：基于因果跟踪确定关键知识存储层</p>
-<p><strong>优化策略：</strong>
-- 双目标函数：最大化目标知识扰动 + 约束其他能力保持
-- 初始化：使用MEMIT编辑结果作为warm start
-- 渐进消除：多轮迭代中动态排除已删除知识</p>
-<h2 id="_3">实验设置</h2>
-<p><strong>数据集：</strong>
-- zsRE: 19K问答对
-- CounterFactual: 21K反事实知识
-- Wiki-Latest: 332K Wikipedia三元组（自构建）</p>
-<p><strong>基线对比：</strong>
-- 模型编辑：MEMIT, ME-FT
-- 知识遗忘：FT-UL, WOH, SeUL</p>
-<p><strong>评估指标：</strong>
-- 知识遗忘：准确率下降、QA-F1分数
-- 能力保持：Lambda/HellaSwag/ARC推理任务</p>
-<h2 id="_4">关键结果</h2>
-<p><strong>知识清洗效果：</strong>
-- Wiki-Latest数据集：准确率从100%降至19.3%（GPT2-XL）
-- 优于所有基线方法的遗忘彻底性</p>
-<p><strong>推理能力保持：</strong>
-- 推理任务平均准确率仅下降5-10%
-- 显著优于传统微调方法（常导致模型崩溃）</p>
-<p><strong>扩展性验证：</strong>
-- 成功处理30万+规模知识删除
-- 计算效率远超重新训练方案</p>
-<h2 id="_5">技术创新</h2>
-<p><strong>范式转换：</strong>
-- 从确定性替换到随机化扰动
-- 从闭式解到约束优化求解</p>
-<p><strong>工程优化：</strong>
-- MEMIT初始化策略解决局部最优
-- 自适应β参数平衡清洗-保持权衡
-- 渐进式处理提升大规模效率</p>
-<h2 id="_6">应用价值</h2>
-<p><strong>隐私保护：</strong> 移除训练数据中的个人敏感信息
-<strong>版权合规：</strong> 删除受保护的文学作品、新闻内容<br />
-<strong>安全部署：</strong> 清理有害或不当知识内容
-<strong>模型定制：</strong> 为特定场景移除不相关知识</p>
-<h2 id="_7">技术局限</h2>
-<p><strong>适用范围：</strong> 当前仅支持三元组格式的结构化知识
-<strong>模型依赖：</strong> 主要在GPT-2/J上验证，对新架构适应性待确认
-<strong>理论基础：</strong> 知识-推理解耦假设缺乏严格理论证明
-<strong>安全保证：</strong> 清洗完整性难以绝对保证，可能存在间接访问路径</p>
-<h2 id="_8">未来方向</h2>
-<ul>
-<li>扩展至非结构化文本知识处理</li>
-<li>适配更多主流LLM架构（LLaMA等）</li>
-<li>建立更严格的安全性验证框架</li>
-<li>研究知识遗忘的长期稳定性</li>
-</ul></article>
+            <article class="article-content"><h1 id="her-v2-24ai">Her-v2 进化方案：构建24小时AI伴侣系统</h1>
+<h2 id="asr-llm-ttsasr-agents-tts">从ASR-LLM-TTS到ASR-Agents-TTS的演进之路</h2>
+<blockquote>
+<p><strong>项目愿景</strong>：打造一个真正的24小时AI伴侣，不仅能对话，更能理解你的生活、记住你的故事、感知你的情绪、融入你的社交网络。</p>
+</blockquote>
+<hr />
+<h2 id="_1">🎯 核心设计哲学</h2>
+<h3 id="_2">拟人化的三个层次</h3>
+<p><strong>第一层：感知拟人</strong><br />
+不仅听到你说什么，更要理解你"怎么说"——通过多维度VAD和情感识别，感知你的语气、情绪、意图，就像一个真正在倾听的朋友。</p>
+<p><strong>第二层：记忆拟人</strong><br />
+不是机械的数据库检索，而是像人类一样——有些事情记得很清楚，有些会慢慢淡忘，有些会在特定情境下突然想起。通过A-MEM系统构建互联的知识网络。</p>
+<p><strong>第三层：互动拟人</strong><br />
+不是被动响应，而是主动关心——早上的问候、天气变化的提醒、察觉到你情绪低落时的安慰、甚至适时的幽默吐槽，让AI成为生活的一部分而非工具。</p>
+<h3 id="_3">人机交互的终极目标</h3>
+<p><strong>低延迟</strong>：端到端&lt;1.5s，让对话自然流畅<br />
+<strong>高智能</strong>：通过Agents架构实现复杂任务处理<br />
+<strong>强记忆</strong>：构建用户社交网络，理解关系脉络<br />
+<strong>情感共鸣</strong>：识别并响应情绪变化<br />
+<strong>环境感知</strong>：被动监听，智能介入</p>
+<hr />
+<h2 id="_4">📐 系统架构设计</h2>
+<h3 id="asr-agents-tts">整体架构：ASR-Agents-TTS</h3>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────┐
+│                    Android/嵌入式客户端                             │
+│  [后台服务] → [音频流] → [智能VAD] → [触发决策]              │
+└────────────────────────┬────────────────────────────────────┘
+                         │ WebSocket/gRPC
+┌────────────────────────┴────────────────────────────────────┐
+│                     P2P穿透服务端 (个人Server)                         │
+│                                                              │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │              智能VAD决策引擎                          │  │
+│  │  静音检测 + 分贝分析 + 人声判断 + 语义完整性 + 声纹  │  │
+│  └──────────────────┬───────────────────────────────────┘  │
+│                     │                                        │
+│  ┌──────────────────▼───────────────────────────────────┐  │
+│  │                ASR系统                                │  │
+│  │ SenseVoice (多语言+情感+VAD) → 实时转录 → 对话 or 自言自语  │  │
+│  └──────────────────┬───────────────────────────────────┘  │
+│                     │                                        │
+│  ┌──────────────────▼───────────────────────────────────┐  │
+│  │              Master Agent (协调器)                    │  │
+│  │            Qwen2.5-7B / gpt-oss:20b                   │  │
+│  │                                                        │  │
+│  │  ┌─────────────────────────────────────────────────┐ │  │
+│  │  │          Agents生态系统                         │ │  │
+│  │  │                                                 │ │  │
+│  │  │  ┌──────────┐  ┌──────────┐  ┌──────────┐    │ │  │
+│  │  │  │  Memory  │  │ Emotion  │  │ Context  │    │ │  │
+│  │  │  │  Agent   │  │  Agent   │  │  Agent   │    │ │  │
+│  │  │  └────┬─────┘  └────┬─────┘  └────┬─────┘    │ │  │
+│  │  │       │             │             │           │ │  │
+│  │  │  ┌────▼─────┐  ┌────▼─────┐  ┌────▼─────┐    │ │  │
+│  │  │  │  Dialog  │  │   Tool   │  │  Social  │    │ │  │
+│  │  │  │  Agent   │  │  Agent   │  │  Agent   │    │ │  │
+│  │  │  └──────────┘  └──────────┘  └──────────┘    │ │  │
+│  │  │                                                 │ │  │
+│  │  └─────────────────────────────────────────────────┘ │  │
+│  │                     │                                 │  │
+│  │            ┌────────┴────────┐                       │  │
+│  │            │                 │                       │  │
+│  │       [本地决策]        [云端API]                    │  │
+│  │     简单任务快速响应    复杂推理/工具调用             │  │
+│  └─────────────────┬───────────────────────────────────┘  │
+│                    │                                        │
+│  ┌─────────────────▼───────────────────────────────────┐  │
+│  │              记忆人格系统 (核心)                          │  │
+│  │  向量语义匹配-元数据匹配-多模态记忆融合（尝试）                     │  │
+│  │  ChromaDB(向量) + Neo4j(图) + PostgreSQL(结构化)     │  │
+│  └────────────────────────────────────────────────────┘  │
+│                                                              │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │               TTS系统                                 │  │
+│  │  GPT-SoVITS / Index-TTS → 情感化语音合成              │  │
+│  └──────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────┘
+</code></pre></div>
+
+<hr /></article>
             <div class="contact-card">
                 <h3><i class="fas fa-heart"></i> Thanks for Reading</h3>
                 <p>If this article was helpful to you, feel free to connect with me!</p>

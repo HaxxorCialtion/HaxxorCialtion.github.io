@@ -66,6 +66,21 @@
         .contact-link i { margin-right: 0.5rem; }
         .back-button { position: fixed; bottom: 2rem; right: 2rem; background: var(--secondary-color); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-medium); transition: var(--transition); text-decoration: none; }
         .back-button:hover { background: #2980b9; transform: translateY(-2px); }
+        .translation-links { 
+            margin: 1.5rem 0 0.5rem 0; padding: 1rem; background: var(--background-color); 
+            border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.95rem; 
+        }
+        .translation-links span { color: var(--text-secondary); margin-right: 0.5rem; }
+        .translation-links a { 
+            color: var(--secondary-color); text-decoration: none; font-weight: 500; 
+            padding: 0.3rem 0.6rem; border-radius: 6px; transition: var(--transition); 
+            margin: 0 0.25rem;
+        }
+        .translation-links a:hover { background-color: rgba(52, 152, 219, 0.1); }
+        .translation-links a.active { 
+            background-color: var(--secondary-color); color: white; 
+            pointer-events: none; 
+        }
         @media (max-width: 1024px) { .main-container { flex-direction: column; padding: 1rem; } .toc-sidebar { width: 100%; position: static; order: 2; margin-top: 2rem; } .article-main { order: 1; } }
         @media (max-width: 768px) { .nav-container { padding: 0 1rem; flex-direction: column; gap: 1rem; } .article-header, .article-content { padding: 1.5rem; } .article-title { font-size: 2rem; } .back-button { bottom: 1rem; right: 1rem; width: 50px; height: 50px; } .article-cover { height: 250px; } }
     </style>
@@ -119,6 +134,7 @@
                 <div class="article-tags"><span class="tag">LLM</span><span class="tag">Inference Acceleration</span><span class="tag">Speculative Decoding</span><span class="tag">LoRA</span></div>
                 <div class="article-description">一份关于通过掩码标记（Mask Tokens）解锁LLM多词元并行预测潜力的论文笔记，着重分析了其实现机制与关键创新。</div>
             </header>
+            
             <article class="article-content"><h2 id="_1">概括</h2>
 <p>这篇论文提出了一套完整的框架，旨在解决自回归语言模型（LLM）逐词元生成的效率瓶颈。其核心思想非常直观：通过在输入末尾添加<code>[MASK]</code>标记，诱导模型在<strong>一次前向传播</strong>中并行预测多个未来的词元。论文的真正贡献在于，它通过一系列精巧的设计（如门控LoRA、轻量级采样器、二次解码）系统性地解决了这一想法背后潜在的质量下降和序列不连贯等关键挑战，最终在不牺牲模型原有性能的前提下，实现了显著的推理加速（在数学和编程任务上接近5倍）。</p>
 <h2 id="_2">核心问题</h2>

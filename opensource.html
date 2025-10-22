@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paper Reviews - {{BLOG_TITLE}}</title>
-    <meta name="description" content="A collection of Paper Reviews">
+    <title>Open-Source - Cialtion's Tech Blog</title>
+    <meta name="description" content="A collection of Open-Source">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -177,14 +177,14 @@
 </head>
 <body>
     <header class="header">
-        <img src="{{HEADER_IMAGE}}" alt="Paper Reviews Header Background" class="header-bg-image">
+        <img src="images/bronya_1.jpg" alt="Open-Source Header Background" class="header-bg-image">
         <div class="header-content">
-            <h1><i class="fas fa-graduation-cap"></i> Paper Reviews</h1>
-            <p class="subtitle">A collection of Paper Reviews</p>
+            <h1><i class="fas fa-code-branch"></i> Open-Source</h1>
+            <p class="subtitle">A collection of Open-Source</p>
             <nav class="nav-breadcrumb">
                 <a href="index.html"><i class="fas fa-home"></i> Home</a>
                 <i class="fas fa-chevron-right"></i>
-                <span>Paper Reviews</span>
+                <span>Open-Source</span>
             </nav>
         </div>
     </header>
@@ -193,7 +193,7 @@
         <div class="papers-filter">
             <div class="filter-controls">
                 <div class="search-box">
-                    <input type="text" class="search-input" placeholder="Search Paper Reviews by title or tags..." id="searchInput">
+                    <input type="text" class="search-input" placeholder="Search Open-Source by title or tags..." id="searchInput">
                     <i class="fas fa-search search-icon"></i>
                 </div>
             </div>
@@ -202,7 +202,41 @@
         <div class="papers-stats" id="papersStats"></div>
 
         <div class="papers-grid" id="papersContainer">
-            {{PAPERS_HTML}}
+            
+                <div class="paper-card">
+                    <img src="images/bronya_mp.jpg" alt="24-Hour AI Companion System Overview Plan" class="paper-image" onerror="this.style.display='none'">
+                    <div class="paper-content">
+                        <div class="paper-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                2025-10-22
+                            </div>
+                        </div>
+                        <h3 class="paper-title">24-Hour AI Companion System Overview Plan</h3>
+                        <p class="paper-description">Her</p>
+                        <div class="paper-tags"><span class="tag">AI</span> <span class="tag">OpenSource</span> <span class="tag">AI-Companion</span> <span class="tag">Alpha</span></div>
+                        <a href="opensource/her_v2_master_plan_en.html" class="read-more">
+                            Read More <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="paper-card">
+                    <img src="images/bronya_1.jpg" alt="24小时AI伴侣系统大概规划" class="paper-image" onerror="this.style.display='none'">
+                    <div class="paper-content">
+                        <div class="paper-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                2025-10-22
+                            </div>
+                        </div>
+                        <h3 class="paper-title">24小时AI伴侣系统大概规划</h3>
+                        <p class="paper-description">Her</p>
+                        <div class="paper-tags"><span class="tag">AI</span> <span class="tag">OpenSource</span> <span class="tag">AI-Companion</span> <span class="tag">Alpha</span></div>
+                        <a href="opensource/her_v2_master_plan_zh.html" class="read-more">
+                            Read More <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
         </div>
     </main>
 

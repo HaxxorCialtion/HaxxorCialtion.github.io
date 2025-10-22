@@ -21,6 +21,12 @@
   "output_dir": "posts",
   "papers_output_dir": "papers",
   "images_dir": "images",
+  "reviews_dir": "reviews_notes",
+  "reviews_output_dir": "reviews",
+  "opensource_dir": "opensource_notes",
+  "opensource_output_dir": "opensource",
+  "products_dir": "products_notes",
+  "products_output_dir": "products",
   "default_cover": "images/default_cover.jpg",
   "theme": {
     "primary_color": "#2c3e50",

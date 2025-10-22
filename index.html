@@ -65,7 +65,7 @@
         .read-more i { margin-left: 0.5rem; transition: var(--transition); }
         .read-more:hover i { transform: translateX(3px); }
         .mobile-toggle { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 1001; background: var(--primary-color); color: white; border: none; border-radius: 8px; padding: 0.75rem; cursor: pointer; box-shadow: var(--shadow-medium); }
-        
+
         /* Special Paper Review Card */
         .special-card { background: linear-gradient(135deg, var(--primary-color), #34495e); color: white; border: none; position: relative; overflow: hidden; }
         .special-card::before { content: ''; position: absolute; top: -50%; right: -50%; width: 100%; height: 100%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); transform: rotate(45deg); }
@@ -105,7 +105,11 @@
             <p class="tagline">Simple Love</p>
         </div>
         <nav class="nav-menu">
-            <a href="#" class="nav-item active"><i class="fas fa-home"></i>Home</a>
+            <a href="index.html" class="nav-item active"><i class="fas fa-home"></i>Home</a>
+            <a href="papers.html" class="nav-item"><i class="fas fa-graduation-cap"></i>Papers</a>
+            <a href="reviews.html" class="nav-item"><i class="fas fa-search-plus"></i>Reviews</a>
+            <a href="opensource.html" class="nav-item"><i class="fas fa-code-branch"></i>Open-Source</a>
+            <a href="products.html" class="nav-item"><i class="fas fa-box-open"></i>Products</a>
         </nav>
         <div class="contact-info">
             <h4><i class="fas fa-graduation-cap"></i> Academic Info</h4>
@@ -144,33 +148,52 @@
             </div>
             <div class="articles-grid" id="articlesContainer">
         <div class="article-card special-card">
-        <div class="special-icon">
-        <i class="fas fa-graduation-cap"></i>
-        </div>
+        <div class="special-icon"><i class="fas fa-graduation-cap"></i></div>
         <div class="article-content">
-        <div class="article-date">
-        <i class="fas fa-star"></i>
-        Special Section
-        </div>
+        <div class="article-date"><i class="fas fa-star"></i> Special Section</div>
         <h3 class="article-title">Paper Reviews & Analysis</h3>
         <p class="article-description">Academic paper reviews, research notes and insights on LLM, AI and cutting-edge technologies</p>
         <p class="disclaimer"><strong>Disclaimer:</strong> These notes represent personal viewpoints, and most interpretive content is generated with AI assistance (e.g., Claude 4). There may be understanding biases or factual errors. For reference only.</p>
-        <div class="article-tags">
-        <span class="tag">Research</span>
-        <span class="tag">Academic</span>
-        <span class="tag">Papers</span>
+        <div class="article-tags"><span class="tag">Research</span><span class="tag">Papers</span></div>
+        <a href="papers.html" class="read-more">Explore Papers <i class="fas fa-arrow-right"></i></a>
         </div>
-        <a href="papers.html" class="read-more">
-        Explore Papers <i class="fas fa-arrow-right"></i>
-        </a>
+        </div>
+        <div class="article-card special-card">
+        <div class="special-icon"><i class="fas fa-search-plus"></i></div>
+        <div class="article-content">
+        <div class="article-date"><i class="fas fa-star"></i> Special Section</div>
+        <h3 class="article-title">In-Depth Reviews</h3>
+        <p class="article-description">Detailed analysis, benchmarks, and hands-on reviews of the latest AI models, software, and technologies.</p>
+        <div class="article-tags"><span class="tag">Review</span><span class="tag">Benchmark</span><span class="tag">Analysis</span></div>
+        <a href="reviews.html" class="read-more">Explore Reviews <i class="fas fa-arrow-right"></i></a>
+        </div>
+        </div>
+        <div class="article-card special-card">
+        <div class="special-icon"><i class="fas fa-code-branch"></i></div>
+        <div class="article-content">
+        <div class="article-date"><i class="fas fa-star"></i> Special Section</div>
+        <h3 class="article-title">Open-Source Projects</h3>
+        <p class="article-description">My personal open-source contributions, libraries, and tools. Feel free to use, fork, and contribute!</p>
+        <div class="article-tags"><span class="tag">Open-Source</span><span class="tag">Code</span><span class="tag">GitHub</span></div>
+        <a href="opensource.html" class="read-more">Explore Projects <i class="fas fa-arrow-right"></i></a>
+        </div>
+        </div>
+        <div class="article-card special-card">
+        <div class="special-icon"><i class="fas fa-box-open"></i></div>
+        <div class="article-content">
+        <div class="article-date"><i class="fas fa-star"></i> Special Section</div>
+        <h3 class="article-title">Product Showcases</h3>
+        <p class="article-description">Showcasing fun and practical AI-powered applications and products I've built or am working on.</p>
+        <div class="article-tags"><span class="tag">Product</span><span class="tag">Demo</span><span class="tag">Showcase</span></div>
+        <a href="products.html" class="read-more">Explore Products <i class="fas fa-arrow-right"></i></a>
         </div>
         </div>
             <div class="article-card">
-                <img src="images/bronya_1.jpg" alt="Qwen3-8B-Base 性能测试笔记 (完整数据版)" class="article-image" onerror="this.style.display='none'">
+                <img src="images/bronya_mp.jpg" alt="Qwen3-8B-Base 性能测试笔记 (完整数据版)" class="article-image" onerror="this.style.display='none'">
                 <div class="article-content">
                     <div class="article-date">
                         <i class="fas fa-calendar-alt"></i>
-                        2025-10-16
+                        2025-10-22
                     </div>
                     <h3 class="article-title">Qwen3-8B-Base 性能测试笔记 (完整数据版)</h3>
                     <p class="article-description">- 模型: Qwen3-8B-Base - 设备: NVIDIA GeForce RTX 4090 (48G显存版) - 词表大小: 151,643 --- - Prompt 长度: 7 tokens - 生成 Token 数: 287 tokens | 阶段 | 耗时 (ms) | 占比 | 吞吐...</p>
@@ -181,11 +204,11 @@
                 </div>
             </div>
             <div class="article-card">
-                <img src="images/arknights_mizuki_0.jpg" alt="DPO训练流程深度解析 🎓" class="article-image" onerror="this.style.display='none'">
+                <img src="images/bronya_1.jpg" alt="DPO训练流程深度解析 🎓" class="article-image" onerror="this.style.display='none'">
                 <div class="article-content">
                     <div class="article-date">
                         <i class="fas fa-calendar-alt"></i>
-                        2025-10-16
+                        2025-10-22
                     </div>
                     <h3 class="article-title">DPO训练流程深度解析 🎓</h3>
                     <p class="article-description">--- 💡 关键理解： - prompt：给模型的输入，相当于"问题" - chosen：人类认为好的完整回答 - rejected：人类认为差的完整回答 - DPO通过对比学习，让模型偏好chosen，避免rejected --- 💡 为什么要拼接？ - 语言模型是自回归的，需要完整的上下文 - ...</p>
@@ -196,11 +219,11 @@
                 </div>
             </div>
             <div class="article-card">
-                <img src="images/arknights_mizuki_0.jpg" alt="Former Notes" class="article-image" onerror="this.style.display='none'">
+                <img src="images/bronya_1.jpg" alt="Former Notes" class="article-image" onerror="this.style.display='none'">
                 <div class="article-content">
                     <div class="article-date">
                         <i class="fas fa-calendar-alt"></i>
-                        2025-10-16
+                        2025-10-22
                     </div>
                     <h3 class="article-title">Former Notes</h3>
                     <p class="article-description">日期: 2024-09-22 标签: LLM角色扮演, LLM, TTS, ASR 这是一个基于关键词检测、语音识别、语音合成和对话生成的智能语音助手系统。该系统能够通过特定的唤醒词（如"hey bro"）启动与用户的语音对话，并利用先进的自然语言处理技术提供智能回复。 1. 关键词检测： 使用 P...</p>
@@ -211,7 +234,22 @@
                 </div>
             </div>
             <div class="article-card">
-                <img src="images/bronya_mp.jpg" alt="从PPO到DPO的完整理解" class="article-image" onerror="this.style.display='none'">
+                <img src="images/arknights_mizuki_0.jpg" alt="RoPE位置编码与现代LLM架构精讲" class="article-image" onerror="this.style.display='none'">
+                <div class="article-content">
+                    <div class="article-date">
+                        <i class="fas fa-calendar-alt"></i>
+                        2025-10-22
+                    </div>
+                    <h3 class="article-title">RoPE位置编码与现代LLM架构精讲</h3>
+                    <p class="article-description">关键洞察链条： 为什么敢冒险替换？ 1. 理论保证：数学上等价于学习相对位置 2. 实验验证：小模型上先验证，效果超过baseline 3. 工业推动：BERT后需要更长上下文，RoPE正好解决 4. 开源文化：苏剑林博客详细讲解，降低采用门槛 绝对位置编码的致命缺陷： RoPE的优雅解决方案： -...</p>
+                    <div class="article-tags"></div>
+                    <a href="posts/rope_llm_guide.html" class="read-more">
+                        Read More <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="article-card">
+                <img src="images/arknights_mizuki_0.jpg" alt="从PPO到DPO的完整理解" class="article-image" onerror="this.style.display='none'">
                 <div class="article-content">
                     <div class="article-date">
                         <i class="fas fa-calendar-alt"></i>
@@ -226,22 +264,7 @@
                 </div>
             </div>
             <div class="article-card">
-                <img src="images/arknights_mizuki_0.jpg" alt="RoPE位置编码与现代LLM架构精讲" class="article-image" onerror="this.style.display='none'">
-                <div class="article-content">
-                    <div class="article-date">
-                        <i class="fas fa-calendar-alt"></i>
-                        2025-10-16
-                    </div>
-                    <h3 class="article-title">RoPE位置编码与现代LLM架构精讲</h3>
-                    <p class="article-description">关键洞察链条： 为什么敢冒险替换？ 1. 理论保证：数学上等价于学习相对位置 2. 实验验证：小模型上先验证，效果超过baseline 3. 工业推动：BERT后需要更长上下文，RoPE正好解决 4. 开源文化：苏剑林博客详细讲解，降低采用门槛 绝对位置编码的致命缺陷： RoPE的优雅解决方案： -...</p>
-                    <div class="article-tags"></div>
-                    <a href="posts/rope_llm_guide.html" class="read-more">
-                        Read More <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-            <div class="article-card">
-                <img src="images/arknights_mizuki_0.jpg" alt="LLM LM_HEAD解码加速" class="article-image" onerror="this.style.display='none'">
+                <img src="images/bronya_mp.jpg" alt="LLM LM_HEAD解码加速" class="article-image" onerror="this.style.display='none'">
                 <div class="article-content">
                     <div class="article-date">
                         <i class="fas fa-calendar-alt"></i>
@@ -256,7 +279,7 @@
                 </div>
             </div>
             <div class="article-card">
-                <img src="images/bronya_mp.jpg" alt="Large Language Model(LLM) Basic introduction" class="article-image" onerror="this.style.display='none'">
+                <img src="images/arknights_mizuki_0.jpg" alt="Large Language Model(LLM) Basic introduction" class="article-image" onerror="this.style.display='none'">
                 <div class="article-content">
                     <div class="article-date">
                         <i class="fas fa-calendar-alt"></i>
@@ -271,7 +294,7 @@
                 </div>
             </div>
             <div class="article-card">
-                <img src="images/bronya_1.jpg" alt="Qwen3架构深度解析：从Base模型到Instruct模型" class="article-image" onerror="this.style.display='none'">
+                <img src="images/arknights_mizuki_0.jpg" alt="Qwen3架构深度解析：从Base模型到Instruct模型" class="article-image" onerror="this.style.display='none'">
                 <div class="article-content">
                     <div class="article-date">
                         <i class="fas fa-calendar-alt"></i>
