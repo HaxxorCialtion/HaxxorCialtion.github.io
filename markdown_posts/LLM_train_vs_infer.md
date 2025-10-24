@@ -1,9 +1,9 @@
 ---
-title: "LLM框架对比"
-date: "2025-10-01"
-tags: ["LLM", "Qwen3", "Transformer", "Architecture", "Fine-tuning", "SFT", "YaRN", "RoPE"]
+title: "LLM train vs infer"
+date: "2025-10-24"
+tags: ["LLM", "Model Artitecture"]
 author: "Cialtion"
-description: "全面解析Qwen3模型架构、参数配置、动态序列处理和后训练数据格式(no Coder and MoE)"
+description: "A example for LLM train and infer"
 ---
 
 # Transformer块在训练和推理阶段的流程对比
