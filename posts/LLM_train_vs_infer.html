@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM框架对比 - Cialtion's Tech Blog</title>
+    <meta name="description" content="全面解析Qwen3模型架构、参数配置、动态序列处理和后训练数据格式(no Coder and MoE)">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-color: #2c3e50; --secondary-color: #3498db; --accent-color: #e74c3c;
+            --background-color: #f8fafc; --card-background: #ffffff; --text-primary: #2d3748;
+            --text-secondary: #718096; --border-color: #e2e8f0; --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1); --border-radius: 12px; --transition: all 0.3s ease;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: var(--background-color); color: var(--text-primary); line-height: 1.7; }
+        .navbar { background: var(--card-background); box-shadow: var(--shadow-light); padding: 1rem 0; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border-color); }
+        .nav-container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .nav-brand { display: flex; align-items: center; text-decoration: none; color: var(--primary-color); font-weight: 600; font-size: 1.2rem; }
+        .nav-brand i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-link { color: var(--text-secondary); text-decoration: none; transition: var(--transition); padding: 0.5rem 1rem; border-radius: 8px; }
+        .nav-link:hover { color: var(--secondary-color); background-color: rgba(52, 152, 219, 0.1); }
+        .main-container { display: flex; max-width: 1400px; margin: 0 auto; gap: 2rem; padding: 2rem; }
+        .toc-sidebar { width: 250px; flex-shrink: 0; position: sticky; top: 6rem; height: fit-content; max-height: calc(100vh - 8rem); overflow-y: auto; }
+        .toc-container { background: var(--card-background); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1.5rem; }
+        .toc-title { font-size: 1.1rem; font-weight: 600; color: var(--primary-color); margin-bottom: 1rem; display: flex; align-items: center; }
+        .toc-title i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .toc ul { list-style: none; padding-left: 0; }
+        .toc ul ul { padding-left: 1rem; margin-top: 0.3rem; }
+        .toc li { margin: 0.3rem 0; }
+        .toc a { color: var(--text-secondary); text-decoration: none; transition: var(--transition); display: block; padding: 0.3rem 0.5rem; border-radius: 4px; font-size: 0.9rem; line-height: 1.4; }
+        .toc a:hover, .toc a.active { color: var(--secondary-color); background-color: rgba(52, 152, 219, 0.1); }
+        .article-main { flex: 1; min-width: 0; }
+        .article-header { background: var(--card-background); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; box-shadow: var(--shadow-light); border: 1px solid var(--border-color); position: relative; overflow: hidden; }
+        .article-cover { width: 100%; height: 350px; object-fit: cover; border-radius: var(--border-radius); margin-bottom: 1.5rem; box-shadow: var(--shadow-medium); transition: var(--transition); }
+        .article-cover:hover { transform: scale(1.02); }
+        .article-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, var(--secondary-color), var(--accent-color)); }
+        .article-title { font-size: 2.5rem; font-weight: 700; color: var(--primary-color); margin-bottom: 1rem; line-height: 1.3; }
+        .article-meta { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.95rem; }
+        .meta-item { display: flex; align-items: center; background: var(--background-color); padding: 0.5rem 1rem; border-radius: 20px; }
+        .meta-item i { margin-right: 0.5rem; color: var(--secondary-color); }
+        .article-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+        .tag { background: linear-gradient(135deg, var(--secondary-color), #2980b9); color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 500; box-shadow: var(--shadow-light); }
+        .article-description { color: var(--text-secondary); font-size: 1.1rem; line-height: 1.6; font-style: italic; background: var(--background-color); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--secondary-color); }
+        .article-content { background: var(--card-background); border-radius: var(--border-radius); padding: 2.5rem; box-shadow: var(--shadow-light); border: 1px solid var(--border-color); }
+        .article-content h1, .article-content h2, .article-content h3, .article-content h4, .article-content h5, .article-content h6 { color: var(--primary-color); margin: 2rem 0 1rem 0; font-weight: 600; line-height: 1.4; }
+        .article-content h1 { font-size: 2.2rem; border-bottom: 3px solid var(--secondary-color); padding-bottom: 0.5rem; }
+        .article-content h2 { font-size: 1.8rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.3rem; }
+        .article-content p { margin: 1rem 0; line-height: 1.8; }
+        .article-content img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: var(--shadow-light); margin: 1.5rem 0; }
+        .article-content blockquote { border-left: 4px solid var(--secondary-color); margin: 1.5rem 0; padding: 1rem 1.5rem; background: var(--background-color); border-radius: 0 8px 8px 0; font-style: italic; }
+        .article-content pre { background: #f6f8fa; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; overflow-x: auto; margin: 1.5rem 0; }
+        .article-content code { background: #f6f8fa; border: 1px solid var(--border-color); border-radius: 4px; padding: 0.2rem 0.4rem; font-family: 'Monaco', 'Consolas', monospace; font-size: 0.9em; }
+        .article-content pre code { background: none; border: none; padding: 0; }
+        .article-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-light); }
+        .article-content th, .article-content td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .article-content th { background: var(--background-color); font-weight: 600; color: var(--primary-color); }
+        .contact-card { background: linear-gradient(135deg, var(--primary-color), #34495e); color: white; border-radius: var(--border-radius); padding: 2rem; margin: 2rem 0; text-align: center; }
+        .contact-card h3 { margin-bottom: 1rem; color: white; }
+        .contact-links { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+        .contact-link { display: inline-flex; align-items: center; padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.1); border-radius: 25px; color: white; text-decoration: none; transition: var(--transition); }
+        .contact-link:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-1px); }
+        .contact-link i { margin-right: 0.5rem; }
+        .back-button { position: fixed; bottom: 2rem; right: 2rem; background: var(--secondary-color); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-medium); transition: var(--transition); text-decoration: none; }
+        .back-button:hover { background: #2980b9; transform: translateY(-2px); }
+        .translation-links { 
+            margin: 1.5rem 0 0.5rem 0; padding: 1rem; background: var(--background-color); 
+            border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.95rem; 
+        }
+        .translation-links span { color: var(--text-secondary); margin-right: 0.5rem; }
+        .translation-links a { 
+            color: var(--secondary-color); text-decoration: none; font-weight: 500; 
+            padding: 0.3rem 0.6rem; border-radius: 6px; transition: var(--transition); 
+            margin: 0 0.25rem;
+        }
+        .translation-links a:hover { background-color: rgba(52, 152, 219, 0.1); }
+        .translation-links a.active { 
+            background-color: var(--secondary-color); color: white; 
+            pointer-events: none; 
+        }
+        @media (max-width: 1024px) { .main-container { flex-direction: column; padding: 1rem; } .toc-sidebar { width: 100%; position: static; order: 2; margin-top: 2rem; } .article-main { order: 1; } }
+        @media (max-width: 768px) { .nav-container { padding: 0 1rem; flex-direction: column; gap: 1rem; } .article-header, .article-content { padding: 1.5rem; } .article-title { font-size: 2rem; } .back-button { bottom: 1rem; right: 1rem; width: 50px; height: 50px; } .article-cover { height: 250px; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-brand">
+                <i class="fas fa-home"></i>Cialtion's Tech Blog
+            </a>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link"><i class="fas fa-arrow-left"></i>Back to Home</a>
+                <a href="mailto:cialtion737410@sjtu.edu.cn" class="nav-link"><i class="fas fa-envelope"></i>Contact Me</a>
+            </div>
+        </div>
+    </nav>
+    <div class="main-container">
+        <aside class="toc-sidebar"><div class="toc-container">
+            <div class="toc-title">
+                <i class="fas fa-list"></i>
+                Table of Contents
+            </div>
+            <div class="toc"><div class="toc"><span class="toctitle">Table of Contents</span><ul>
+<li><a href="#transformer">Transformer块在训练和推理阶段的流程对比</a><ul>
+<li><a href="#_1">模型配置</a></li>
+<li><a href="#training">一、训练阶段（Training）</a><ul>
+<li><a href="#_2">输入形状</a></li>
+<li><a href="#transformer_1">单层Transformer块的流程</a><ul>
+<li><a href="#1-self-attention">1. 自注意力机制（Self-Attention）</a></li>
+<li><a href="#2-ffn">2. 前馈网络（FFN）</a></li>
+</ul>
+</li>
+<li><a href="#_3">训练阶段的关键特征</a></li>
+</ul>
+</li>
+<li><a href="#inference-">二、推理阶段（Inference）- 自回归生成</a><ul>
+<li><a href="#1prefill-prompt">阶段1：Prefill（预填充）- 处理输入prompt</a></li>
+<li><a href="#2decode-token">阶段2：Decode（解码）- 逐个生成新token</a><ul>
+<li><a href="#token-101">第一步生成（token 101）</a></li>
+<li><a href="#token-102">第二步生成（token 102）</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_4">三、核心差异对比表</a></li>
+<li><a href="#_5">四、内存占用对比</a><ul>
+<li><a href="#kv-cache">KV Cache内存计算（单层）</a><ul>
+<li><a href="#_6">不同序列长度的内存占用</a></li>
+</ul>
+</li>
+<li><a href="#_7">训练阶段内存</a></li>
+</ul>
+</li>
+<li><a href="#_8">五、计算复杂度对比</a><ul>
+<li><a href="#_9">注意力计算复杂度</a><ul>
+<li><a href="#prefill">训练阶段 / Prefill阶段</a></li>
+<li><a href="#decodet">Decode阶段（第t步）</a></li>
+</ul>
+</li>
+<li><a href="#_10">复杂度对比示例</a></li>
+</ul>
+</li>
+<li><a href="#_11">六、关键优化技术</a><ul>
+<li><a href="#_12">推理阶段优化</a></li>
+<li><a href="#_13">训练阶段优化</a></li>
+</ul>
+</li>
+<li><a href="#_14">七、实际应用场景对比</a><ul>
+<li><a href="#_15">训练场景特点</a></li>
+<li><a href="#_16">推理场景特点</a><ul>
+<li><a href="#prefill_1">Prefill阶段</a></li>
+<li><a href="#decode">Decode阶段</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_17">八、关键要点总结</a><ul>
+<li><a href="#_18">最核心的区别</a></li>
+<li><a href="#kv-cache_1">为什么需要KV Cache？</a></li>
+</ul>
+</li>
+<li><a href="#_19">九、可视化对比</a><ul>
+<li><a href="#_20">训练阶段注意力矩阵</a></li>
+<li><a href="#decode101token">Decode阶段注意力向量（第101个token）</a></li>
+</ul>
+</li>
+<li><a href="#_21">参考资料</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+        </div></aside>
+        <main class="article-main">
+            <header class="article-header">
+                <img src="../images/arknights_mizuki_0.jpg" alt="LLM框架对比" class="article-cover" onerror="this.style.display='none'">
+                <h1 class="article-title">LLM框架对比</h1>
+                <div class="article-meta">
+                    <div class="meta-item"><i class="fas fa-calendar-alt"></i>Published: 2025-10-01</div>
+                    <div class="meta-item"><i class="fas fa-user"></i>Author: Cialtion</div>
+                </div>
+                <div class="article-tags"><span class="tag">LLM</span><span class="tag">Qwen3</span><span class="tag">Transformer</span><span class="tag">Architecture</span><span class="tag">Fine-tuning</span><span class="tag">SFT</span><span class="tag">YaRN</span><span class="tag">RoPE</span></div>
+                <div class="article-description">全面解析Qwen3模型架构、参数配置、动态序列处理和后训练数据格式(no Coder and MoE)</div>
+            </header>
+            
+            <article class="article-content"><h1 id="transformer">Transformer块在训练和推理阶段的流程对比</h1>
+<h2 id="_1">模型配置</h2>
+<ul>
+<li><strong>层数 (L)</strong>: 32</li>
+<li><strong>隐藏维度 (H)</strong>: 4096</li>
+<li><strong>注意力头数 (N_heads)</strong>: 32</li>
+<li><strong>每个头的维度 (d_k)</strong>: 128 (H = N_heads × d_k = 32 × 128 = 4096)</li>
+<li><strong>数据类型</strong>: BF16 (2字节)</li>
+<li><strong>批次大小 (B)</strong>: 1</li>
+<li><strong>输入序列长度 (S)</strong>: 100 tokens</li>
+</ul>
+<hr />
+<h2 id="training">一、训练阶段（Training）</h2>
+<h3 id="_2">输入形状</h3>
+<ul>
+<li><strong>输入</strong>: <code>[B, S, H]</code> = <code>[1, 100, 4096]</code></li>
+<li>所有100个token<strong>同时</strong>输入模型</li>
+</ul>
+<h3 id="transformer_1">单层Transformer块的流程</h3>
+<h4 id="1-self-attention">1. 自注意力机制（Self-Attention）</h4>
+<div class="highlight"><pre><span></span><code>输入 X: [1, 100, 4096]
+     ↓
+LayerNorm: [1, 100, 4096]
+     ↓
+线性投影 (Q, K, V)
+├─ Q = X @ W_q: [1, 100, 4096]
+├─ K = X @ W_k: [1, 100, 4096]  
+└─ V = X @ W_v: [1, 100, 4096]
+     ↓
+重塑为多头形式
+├─ Q: [1, 32, 100, 128]  # [B, N_heads, S, d_k]
+├─ K: [1, 32, 100, 128]
+└─ V: [1, 32, 100, 128]
+     ↓
+计算注意力分数
+Scores = Q @ K^T: [1, 32, 100, 100]  # 注意：100×100的注意力矩阵
+     ↓
+应用因果掩码（Causal Mask）
+<span class="gh">#</span> 上三角部分设为-inf，确保token只能看到之前的token
+Masked_Scores: [1, 32, 100, 100]
+     ↓
+Softmax(Scores / √128): [1, 32, 100, 100]
+     ↓
+加权求和
+Attention_output = Softmax @ V: [1, 32, 100, 128]
+     ↓
+重塑回原形状: [1, 100, 4096]
+     ↓
+输出投影 @ W_o: [1, 100, 4096]
+     ↓
+残差连接 + 原始输入
+</code></pre></div>
+
+<h4 id="2-ffn">2. 前馈网络（FFN）</h4>
+<div class="highlight"><pre><span></span><code>     ↓
+LayerNorm: [1, 100, 4096]
+     ↓
+FFN (通常是 4H 的中间维度)
+├─ 线性1: [1, 100, 4096] → [1, 100, 16384]
+├─ 激活函数 (如 GeLU)
+└─ 线性2: [1, 100, 16384] → [1, 100, 4096]
+     ↓
+残差连接
+</code></pre></div>
+
+<h3 id="_3">训练阶段的关键特征</h3>
+<ul>
+<li>✅ <strong>并行计算</strong>：所有100个token同时处理</li>
+<li>✅ <strong>完整注意力矩阵</strong>：[100, 100] 的注意力分数矩阵</li>
+<li>✅ <strong>因果掩码</strong>：通过掩码确保自回归特性（第i个token只能看到前i个token）</li>
+<li>✅ <strong>KV Cache</strong>：<strong>不使用</strong>（因为是一次性前向传播）</li>
+<li>✅ <strong>计算效率</strong>：高度并行化，充分利用GPU</li>
+</ul>
+<hr />
+<h2 id="inference-">二、推理阶段（Inference）- 自回归生成</h2>
+<p>推理阶段分为两个子阶段：<strong>Prefill</strong> 和 <strong>Decode</strong></p>
+<h3 id="1prefill-prompt">阶段1：Prefill（预填充）- 处理输入prompt</h3>
+<div class="highlight"><pre><span></span><code>输入 prompt: [1, 100, 4096]  # 与训练类似
+</code></pre></div>
+
+<p>这一步与训练阶段<strong>几乎相同</strong>：
+- 100个token同时处理
+- 计算完整的 [100, 100] 注意力矩阵
+- <strong>重要</strong>：将所有100个token的 K 和 V 缓存起来</p>
+<div class="highlight"><pre><span></span><code><span class="n">KV</span><span class="w"> </span><span class="n">Cache</span><span class="w"> </span><span class="nl">初始化</span><span class="p">:</span>
+<span class="err">├─</span><span class="w"> </span><span class="n">K_cache</span><span class="o">[</span><span class="n">layer_0</span><span class="o">]</span><span class="err">:</span><span class="w"> </span><span class="o">[</span><span class="n">1, 32, 100, 128</span><span class="o">]</span>
+<span class="err">└─</span><span class="w"> </span><span class="n">V_cache</span><span class="o">[</span><span class="n">layer_0</span><span class="o">]</span><span class="err">:</span><span class="w"> </span><span class="o">[</span><span class="n">1, 32, 100, 128</span><span class="o">]</span>
+<span class="w">    </span><span class="p">...</span><span class="w"> </span><span class="p">(</span><span class="n">对所有32层</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>输出</strong>：第101个token的logits → 采样得到第101个token</p>
+<hr />
+<h3 id="2decode-token">阶段2：Decode（解码）- 逐个生成新token</h3>
+<h4 id="token-101">第一步生成（token 101）</h4>
+<div class="highlight"><pre><span></span><code>输入新token: [1, 1, 4096]  # 只有1个token！
+     ↓
+LayerNorm: [1, 1, 4096]
+     ↓
+线性投影
+├─ Q_new = X @ W_q: [1, 1, 4096] → [1, 32, 1, 128]
+├─ K_new = X @ W_k: [1, 1, 4096] → [1, 32, 1, 128]  
+└─ V_new = X @ W_v: [1, 1, 4096] → [1, 32, 1, 128]
+     ↓
+将新的 K, V 拼接到缓存
+├─ K_cache = concat(K_cache, K_new): [1, 32, 101, 128]
+└─ V_cache = concat(V_cache, V_new): [1, 32, 101, 128]
+     ↓
+计算注意力（关键！）
+Scores = Q_new @ K_cache^T: [1, 32, 1, 101]  # 注意形状！
+     ↓
+Softmax: [1, 32, 1, 101]
+     ↓
+Attention_output = Softmax @ V_cache: [1, 32, 1, 128]
+     ↓
+后续处理同训练
+</code></pre></div>
+
+<h4 id="token-102">第二步生成（token 102）</h4>
+<div class="highlight"><pre><span></span><code>输入: [1, 1, 4096]  # 刚生成的token 101
+K_cache: [1, 32, 102, 128]  # 又增加了1个
+V_cache: [1, 32, 102, 128]
+
+Scores = Q_new @ K_cache^T: [1, 32, 1, 102]
+...
+</code></pre></div>
+
+<p>以此类推，每次生成一个新token，KV Cache长度+1。</p>
+<hr />
+<h2 id="_4">三、核心差异对比表</h2>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>训练阶段</th>
+<th>推理阶段（Prefill）</th>
+<th>推理阶段（Decode）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>输入形状</strong></td>
+<td><code>[1, 100, 4096]</code></td>
+<td><code>[1, 100, 4096]</code></td>
+<td><code>[1, 1, 4096]</code></td>
+</tr>
+<tr>
+<td><strong>Q矩阵形状</strong></td>
+<td><code>[1, 32, 100, 128]</code></td>
+<td><code>[1, 32, 100, 128]</code></td>
+<td><code>[1, 32, 1, 128]</code></td>
+</tr>
+<tr>
+<td><strong>K矩阵形状</strong></td>
+<td><code>[1, 32, 100, 128]</code></td>
+<td><code>[1, 32, 100, 128]</code></td>
+<td><code>[1, 32, seq_len, 128]</code>（累积）</td>
+</tr>
+<tr>
+<td><strong>V矩阵形状</strong></td>
+<td><code>[1, 32, 100, 128]</code></td>
+<td><code>[1, 32, 100, 128]</code></td>
+<td><code>[1, 32, seq_len, 128]</code>（累积）</td>
+</tr>
+<tr>
+<td><strong>注意力分数形状</strong></td>
+<td><code>[1, 32, 100, 100]</code></td>
+<td><code>[1, 32, 100, 100]</code></td>
+<td><code>[1, 32, 1, seq_len]</code></td>
+</tr>
+<tr>
+<td><strong>因果掩码</strong></td>
+<td>✅ 上三角掩码</td>
+<td>✅ 上三角掩码</td>
+<td>❌ 不需要（只看历史）</td>
+</tr>
+<tr>
+<td><strong>KV Cache</strong></td>
+<td>❌ 不使用</td>
+<td>✅ 初始化</td>
+<td>✅ 增量更新</td>
+</tr>
+<tr>
+<td><strong>并行度</strong></td>
+<td>高（所有token并行）</td>
+<td>高（所有token并行）</td>
+<td>低（逐个生成）</td>
+</tr>
+<tr>
+<td><strong>计算模式</strong></td>
+<td>批量并行计算</td>
+<td>批量并行计算</td>
+<td>串行自回归生成</td>
+</tr>
+<tr>
+<td><strong>每步处理token数</strong></td>
+<td>100个</td>
+<td>100个</td>
+<td>1个</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_5">四、内存占用对比</h2>
+<h3 id="kv-cache">KV Cache内存计算（单层）</h3>
+<p>在Decode阶段，每生成到第 <code>t</code> 个token时：</p>
+<div class="highlight"><pre><span></span><code>单层 KV Cache 大小 = 2 × B × N_heads × t × d_k × 2字节
+                    (K和V) × 批次 × 头数 × 序列长度 × 头维度 × BF16
+
+                    = 2 × 1 × 32 × t × 128 × 2
+                    = 16,384 × t 字节
+                    ≈ 16 KB × t
+
+32层总计 = 32 × 16 KB × t = 512 KB × t
+</code></pre></div>
+
+<h4 id="_6">不同序列长度的内存占用</h4>
+<table>
+<thead>
+<tr>
+<th>生成到的位置</th>
+<th>单层KV Cache</th>
+<th>32层总KV Cache</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第100个token（Prefill后）</td>
+<td>~1.6 MB</td>
+<td>~51 MB</td>
+</tr>
+<tr>
+<td>第200个token</td>
+<td>~3.2 MB</td>
+<td>~100 MB</td>
+</tr>
+<tr>
+<td>第500个token</td>
+<td>~8 MB</td>
+<td>~256 MB</td>
+</tr>
+<tr>
+<td>第1000个token</td>
+<td>~16 MB</td>
+<td>~512 MB</td>
+</tr>
+<tr>
+<td>第2048个token</td>
+<td>~32 MB</td>
+<td>~1 GB</td>
+</tr>
+<tr>
+<td>第4096个token</td>
+<td>~64 MB</td>
+<td>~2 GB</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">训练阶段内存</h3>
+<ul>
+<li><strong>不需要KV Cache</strong>，但需要存储中间激活值用于反向传播</li>
+<li><strong>梯度内存</strong>：需要存储所有参数的梯度</li>
+<li><strong>优化器状态</strong>：Adam需要存储momentum和variance（2倍参数量）</li>
+<li><strong>总体内存占用通常远大于推理阶段</strong></li>
+</ul>
+<hr />
+<h2 id="_8">五、计算复杂度对比</h2>
+<h3 id="_9">注意力计算复杂度</h3>
+<h4 id="prefill">训练阶段 / Prefill阶段</h4>
+<ul>
+<li><strong>复杂度</strong>: O(S²·H) = O(100² × 4096)</li>
+<li>需要计算完整的 100×100 注意力矩阵</li>
+<li>所有token的Q与所有token的K进行点积</li>
+<li>高度并行化，但计算量大</li>
+</ul>
+<h4 id="decodet">Decode阶段（第t步）</h4>
+<ul>
+<li><strong>复杂度</strong>: O(t·H)</li>
+<li>只计算 1×t 的注意力分数</li>
+<li>单个新token的Q与历史t个token的K进行点积</li>
+<li>随着生成的进行，t不断增大，计算量线性增长</li>
+</ul>
+<h3 id="_10">复杂度对比示例</h3>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>序列长度</th>
+<th>注意力计算FLOPs（近似）</th>
+<th>相对比例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prefill</td>
+<td>100</td>
+<td>100² × H</td>
+<td>基准</td>
+</tr>
+<tr>
+<td>Decode (第101步)</td>
+<td>101</td>
+<td>101 × H</td>
+<td>~1%</td>
+</tr>
+<tr>
+<td>Decode (第200步)</td>
+<td>200</td>
+<td>200 × H</td>
+<td>~2%</td>
+</tr>
+<tr>
+<td>Decode (第1000步)</td>
+<td>1000</td>
+<td>1000 × H</td>
+<td>~10%</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_11">六、关键优化技术</h2>
+<h3 id="_12">推理阶段优化</h3>
+<ol>
+<li><strong>KV Cache</strong></li>
+<li>避免重复计算历史token的K和V</li>
+<li>时间换空间的经典权衡</li>
+<li>
+<p>是自回归生成的核心优化</p>
+</li>
+<li>
+<p><strong>Flash Attention</strong></p>
+</li>
+<li>优化注意力计算的内存访问模式</li>
+<li>减少HBM访问，提高计算效率</li>
+<li>
+<p>适用于训练和推理</p>
+</li>
+<li>
+<p><strong>Paged Attention</strong>（vLLM）</p>
+</li>
+<li>动态管理KV Cache内存</li>
+<li>类似操作系统的虚拟内存分页</li>
+<li>
+<p>提高内存利用率和批处理效率</p>
+</li>
+<li>
+<p><strong>Continuous Batching</strong></p>
+</li>
+<li>动态批处理不同进度的请求</li>
+<li>提高GPU利用率</li>
+<li>
+<p>减少平均延迟</p>
+</li>
+<li>
+<p><strong>Speculative Decoding</strong></p>
+</li>
+<li>使用小模型预测多个token</li>
+<li>大模型并行验证</li>
+<li>加速生成过程</li>
+</ol>
+<h3 id="_13">训练阶段优化</h3>
+<ol>
+<li><strong>梯度检查点</strong>（Gradient Checkpointing）</li>
+<li>重计算代替存储中间激活值</li>
+<li>显著减少内存占用</li>
+<li>
+<p>增加约20-30%计算时间</p>
+</li>
+<li>
+<p><strong>混合精度训练</strong></p>
+</li>
+<li>BF16/FP16计算 + FP32累加</li>
+<li>减少内存和提高速度</li>
+<li>
+<p>保持训练稳定性</p>
+</li>
+<li>
+<p><strong>ZeRO优化器</strong>（DeepSpeed）</p>
+</li>
+<li>分布式训练内存优化</li>
+<li>分割优化器状态、梯度、参数</li>
+<li>
+<p>可训练更大模型</p>
+</li>
+<li>
+<p><strong>张量并行 / 流水线并行</strong></p>
+</li>
+<li>模型并行策略</li>
+<li>突破单卡内存限制</li>
+<li>提高训练吞吐量</li>
+</ol>
+<hr />
+<h2 id="_14">七、实际应用场景对比</h2>
+<h3 id="_15">训练场景特点</h3>
+<ul>
+<li><strong>目标</strong>: 学习模型参数</li>
+<li><strong>输入</strong>: 固定长度的训练序列</li>
+<li><strong>输出</strong>: 损失函数和梯度</li>
+<li><strong>关注点</strong>: 训练速度、收敛性、模型质量</li>
+<li><strong>成本</strong>: 计算密集型，通常使用A100/H100等高端GPU集群</li>
+</ul>
+<h3 id="_16">推理场景特点</h3>
+<h4 id="prefill_1">Prefill阶段</h4>
+<ul>
+<li><strong>目标</strong>: 理解用户输入prompt</li>
+<li><strong>输入</strong>: 用户的完整问题或上下文</li>
+<li><strong>输出</strong>: 首个生成token</li>
+<li><strong>特点</strong>: 类似训练的并行计算，但只需前向传播</li>
+<li><strong>延迟</strong>: 取决于prompt长度，通常几十到几百毫秒</li>
+</ul>
+<h4 id="decode">Decode阶段</h4>
+<ul>
+<li><strong>目标</strong>: 自回归生成响应</li>
+<li><strong>输入</strong>: 每次一个新生成的token</li>
+<li><strong>输出</strong>: 下一个token</li>
+<li><strong>特点</strong>: 串行生成，受内存带宽限制</li>
+<li><strong>延迟</strong>: 每个token约10-50ms（取决于模型大小和硬件）</li>
+</ul>
+<hr />
+<h2 id="_17">八、关键要点总结</h2>
+<h3 id="_18">最核心的区别</h3>
+<ol>
+<li><strong>输入维度差异</strong></li>
+<li>训练/Prefill: <code>[B, S, H]</code> - 完整序列</li>
+<li>
+<p>Decode: <code>[B, 1, H]</code> - 单个token</p>
+</li>
+<li>
+<p><strong>注意力计算模式</strong></p>
+</li>
+<li>训练/Prefill: 完整的S×S注意力矩阵，需要因果掩码</li>
+<li>
+<p>Decode: 1×seq_len注意力向量，利用KV Cache增量计算</p>
+</li>
+<li>
+<p><strong>内存使用策略</strong></p>
+</li>
+<li>训练: 存储激活值用于反向传播</li>
+<li>
+<p>推理: 存储KV Cache用于加速生成</p>
+</li>
+<li>
+<p><strong>计算瓶颈</strong></p>
+</li>
+<li>训练/Prefill: 计算密集型（Compute-bound）</li>
+<li>Decode: 内存带宽密集型（Memory-bound）</li>
+</ol>
+<h3 id="kv-cache_1">为什么需要KV Cache？</h3>
+<p>如果没有KV Cache，在Decode阶段每生成一个新token，都需要重新计算所有历史token的K和V矩阵，这会导致：</p>
+<ul>
+<li><strong>计算冗余</strong>: 历史token的K和V在每一步都被重复计算</li>
+<li><strong>时间复杂度</strong>: O(t²) 而不是 O(t)</li>
+<li><strong>实际影响</strong>: 生成1000个token可能需要几十秒而不是几秒</li>
+</ul>
+<p>KV Cache通过空间换时间，使得自回归生成变得实用。</p>
+<hr />
+<h2 id="_19">九、可视化对比</h2>
+<h3 id="_20">训练阶段注意力矩阵</h3>
+<div class="highlight"><pre><span></span><code><span class="n">Token</span><span class="o">:</span><span class="w">  </span><span class="mi">1</span><span class="w">   </span><span class="mi">2</span><span class="w">   </span><span class="mi">3</span><span class="w">   </span><span class="mi">4</span><span class="w">   </span><span class="mi">5</span><span class="w">  </span><span class="o">...</span><span class="w">  </span><span class="mi">100</span>
+<span class="w">     </span><span class="err">┌─────────────────────────────┐</span>
+<span class="w">   </span><span class="mi">1</span><span class="w"> </span><span class="err">│</span><span class="w"> </span><span class="err">✓</span><span class="w">   </span><span class="err">✗</span><span class="w">   </span><span class="err">✗</span><span class="w">   </span><span class="err">✗</span><span class="w">   </span><span class="err">✗</span><span class="w">  </span><span class="o">...</span><span class="w">  </span><span class="err">✗</span><span class="w">  </span><span class="err">│</span>
+<span class="w">   </span><span class="mi">2</span><span class="w"> </span><span class="err">│</span><span class="w"> </span><span class="err">✓</span><span class="w">   </span><span class="err">✓</span><span class="w">   </span><span class="err">✗</span><span class="w">   </span><span class="err">✗</span><span class="w">   </span><span class="err">✗</span><span class="w">  </span><span class="o">...</span><span class="w">  </span><span class="err">✗</span><span class="w">  </span><span class="err">│</span>
+<span class="w">   </span><span class="mi">3</span><span class="w"> </span><span class="err">│</span><span class="w"> </span><span class="err">✓</span><span class="w">   </span><span class="err">✓</span><span class="w">   </span><span class="err">✓</span><span class="w">   </span><span class="err">✗</span><span class="w">   </span><span class="err">✗</span><span class="w">  </span><span class="o">...</span><span class="w">  </span><span class="err">✗</span><span class="w">  </span><span class="err">│</span>
+<span class="w">   </span><span class="mi">4</span><span class="w"> </span><span class="err">│</span><span class="w"> </span><span class="err">✓</span><span class="w">   </span><span class="err">✓</span><span class="w">   </span><span class="err">✓</span><span class="w">   </span><span class="err">✓</span><span class="w">   </span><span class="err">✗</span><span class="w">  </span><span class="o">...</span><span class="w">  </span><span class="err">✗</span><span class="w">  </span><span class="err">│</span>
+<span class="w"> </span><span class="o">...</span><span class="w"> </span><span class="err">│</span><span class="w">              </span><span class="o">...</span><span class="w">            </span><span class="err">│</span>
+<span class="w"> </span><span class="mi">100</span><span class="w"> </span><span class="err">│</span><span class="w"> </span><span class="err">✓</span><span class="w">   </span><span class="err">✓</span><span class="w">   </span><span class="err">✓</span><span class="w">   </span><span class="err">✓</span><span class="w">   </span><span class="err">✓</span><span class="w">  </span><span class="o">...</span><span class="w">  </span><span class="err">✓</span><span class="w">  </span><span class="err">│</span>
+<span class="w">     </span><span class="err">└─────────────────────────────┘</span>
+
+<span class="err">✓</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">可见（有效注意力）</span>
+<span class="err">✗</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">被掩码（</span><span class="o">-</span><span class="n">inf</span><span class="err">）</span>
+</code></pre></div>
+
+<h3 id="decode101token">Decode阶段注意力向量（第101个token）</h3>
+<div class="highlight"><pre><span></span><code>新token 101 对历史的注意力:
+
+Token 101: [✓   ✓   ✓   ✓   ✓  ...  ✓  ✓]
+            ↑   ↑   ↑   ↑   ↑       ↑  ↑
+          tok1 tok2 tok3 tok4 tok5 ... tok100
+
+所有历史token都可见，计算1×100的注意力权重
+</code></pre></div>
+
+<hr />
+<h2 id="_21">参考资料</h2>
+<ul>
+<li>Attention Is All You Need (Vaswani et al., 2017)</li>
+<li>Flash Attention (Dao et al., 2022)</li>
+<li>vLLM: Easy, Fast, and Cheap LLM Serving (Kwon et al., 2023)</li>
+<li>Transformer Inference Optimization (多个来源)</li>
+</ul>
+<hr />
+<p><strong>文档版本</strong>: v1.0<br />
+<strong>创建日期</strong>: 2025-10-23<br />
+<strong>适用模型</strong>: GPT系列、LLaMA系列、Claude系列等基于Transformer的大语言模型</p></article>
+            <div class="contact-card">
+                <h3><i class="fas fa-heart"></i> Thanks for Reading</h3>
+                <p>If this article was helpful to you, feel free to connect with me!</p>
+                <div class="contact-links">
+                    <a href="https://github.com/HaxxorCialtion" class="contact-link" target="_blank"><i class="fab fa-github"></i>GitHub</a>
+                    <a href="mailto:cialtion737410@sjtu.edu.cn" class="contact-link"><i class="fas fa-envelope"></i>Email</a>
+                </div>
+            </div>
+        </main>
+    </div>
+    <a href="#" class="back-button" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script>
+        hljs.highlightAll();
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+            });
+        });
+        function highlightCurrentSection() {
+            const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+            const tocLinks = document.querySelectorAll('.toc a');
+            let current = '';
+            headings.forEach(heading => {
+                const rect = heading.getBoundingClientRect();
+                if (rect.top <= 100) { current = heading.id; }
+            });
+            tocLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) { link.classList.add('active'); }
+            });
+        }
+        window.addEventListener('scroll', highlightCurrentSection);
+        document.addEventListener('DOMContentLoaded', highlightCurrentSection);
+    </script>
+</body>
+</html>
