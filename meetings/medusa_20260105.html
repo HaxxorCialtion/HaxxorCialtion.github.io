@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Meeting for January 5, 2026 - Cialtion's Tech Blog</title>
+    <meta name="description" content="MEDUSA">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Source+Code+Pro:wght@400;500&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #fdfbf7;
+            --bg-secondary: #f5f2eb;
+            --bg-card: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #4a4a4a;
+            --text-muted: #6b6b6b;
+            --accent: #8b0000;
+            --accent-light: #a52a2a;
+            --border: #d4d0c8;
+            --border-light: #e8e4dc;
+            --shadow: rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Pro', 'Noto Serif SC', 'Times New Roman', serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.8;
+            font-size: 17px;
+        }
+
+        /* 导航 */
+        .nav-header {
+            background: var(--bg-card);
+            border-bottom: 2px solid var(--accent);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        /* 文章头部 - 学术论文风格 */
+        .article-header {
+            background: var(--bg-secondary);
+            padding: 3rem 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .article-header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .article-category {
+            font-size: 0.85rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .article-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.3;
+            margin-bottom: 1.5rem;
+        }
+
+        .article-meta {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .meta-item i {
+            color: var(--accent);
+        }
+
+        .article-tags {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            padding: 0.3rem 0.8rem;
+            font-size: 0.8rem;
+            border: 1px solid var(--border);
+            font-family: 'Source Code Pro', monospace;
+        }
+
+        /* PDF 操作栏 */
+        .pdf-toolbar {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+        }
+
+        .pdf-toolbar-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pdf-info {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pdf-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .pdf-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+
+        .pdf-btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .pdf-btn-primary:hover {
+            background: var(--accent-light);
+        }
+
+        .pdf-btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .pdf-btn-secondary:hover {
+            background: var(--border-light);
+        }
+
+        /* PDF 嵌入容器 */
+        .pdf-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .pdf-embed {
+            width: 100%;
+            height: 85vh;
+            min-height: 600px;
+            border: 1px solid var(--border);
+            background: white;
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+
+        /* 备用内容区（如果 PDF 无法显示） */
+        .pdf-fallback {
+            display: none;
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .pdf-fallback i {
+            font-size: 4rem;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+        }
+
+        .pdf-fallback h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .pdf-fallback p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        /* 附加内容区（可选的 markdown 内容） */
+        .article-content {
+            max-width: 750px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .article-content h2 {
+            font-size: 1.6rem;
+            margin: 2.5rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent);
+            color: var(--text-primary);
+        }
+
+        .article-content h3 {
+            font-size: 1.3rem;
+            margin: 2rem 0 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .article-content p {
+            margin-bottom: 1.25rem;
+            text-align: justify;
+        }
+
+        .article-content ul, .article-content ol {
+            margin-bottom: 1.25rem;
+            padding-left: 1.5rem;
+        }
+
+        .article-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .article-content code {
+            font-family: 'Source Code Pro', monospace;
+            background: var(--bg-secondary);
+            padding: 0.15rem 0.4rem;
+            font-size: 0.9em;
+            border: 1px solid var(--border-light);
+        }
+
+        .article-content pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.25rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .article-content pre code {
+            background: none;
+            border: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        .article-content blockquote {
+            border-left: 4px solid var(--accent);
+            padding-left: 1.25rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+
+        /* 页脚 */
+        .footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .footer-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+
+        .footer p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .article-title {
+                font-size: 1.6rem;
+            }
+
+            .pdf-toolbar-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .pdf-embed {
+                height: 60vh;
+                min-height: 400px;
+            }
+        }
+
+        /* 打印优化 */
+        @media print {
+            .nav-header, .pdf-toolbar, .footer {
+                display: none;
+            }
+
+            .pdf-container {
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航 -->
+    <nav class="nav-header">
+        <div class="nav-content">
+            <a href="../index.html" class="nav-brand">Cialtion's Tech Blog</a>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="../papers.html">Papers</a>
+                <a href="../meetings.html">Meetings</a>
+                <a href="https://github.com/HaxxorCialtion" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 文章头部 -->
+    <header class="article-header">
+        <div class="article-header-content">
+            <div class="article-category">
+                <i class="fas fa-chalkboard-teacher"></i> Group Meeting Report
+            </div>
+            <h1 class="article-title">Group Meeting for January 5, 2026</h1>
+            <div class="article-meta">
+                <span class="meta-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    2025-01-05
+                </span>
+                <span class="meta-item">
+                    <i class="fas fa-user"></i>
+                    Cialtion
+                </span>
+                <span class="meta-item">
+                    <i class="fas fa-file-pdf"></i>
+                    LaTeX Document
+                </span>
+            </div>
+            <div class="article-tags"><span class="tag">LLM</span><span class="tag">Speculative Decoding</span><span class="tag">Paper</span></div>
+        </div>
+    </header>
+
+    <!-- PDF 工具栏 -->
+    <div class="pdf-toolbar">
+        <div class="pdf-toolbar-content">
+            <div class="pdf-info">
+                <i class="fas fa-info-circle"></i>
+                <span>LaTeX 编译生成的 PDF 文档</span>
+            </div>
+            <div class="pdf-actions">
+                <a href="../meetings_pdf/medusa.pdf" class="pdf-btn pdf-btn-primary" download>
+                    <i class="fas fa-download"></i> 下载 PDF
+                </a>
+                <a href="../meetings_pdf/medusa.pdf" class="pdf-btn pdf-btn-secondary" target="_blank">
+                    <i class="fas fa-external-link-alt"></i> 新窗口打开
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF 嵌入 -->
+    <div class="pdf-container">
+        <iframe 
+            src="../meetings_pdf/medusa.pdf" 
+            class="pdf-embed" 
+            title="Group Meeting for January 5, 2026"
+            onload="this.nextElementSibling.style.display='none';"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        </iframe>
+        <div class="pdf-fallback">
+            <i class="fas fa-file-pdf"></i>
+            <h3>PDF 预览不可用</h3>
+            <p>您的浏览器可能不支持内嵌 PDF 预览，请使用上方按钮下载或在新窗口中打开。</p>
+            <a href="../meetings_pdf/medusa.pdf" class="pdf-btn pdf-btn-primary" download>
+                <i class="fas fa-download"></i> 下载 PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- 附加内容（可选） -->
+    <article class="article-content">
+        <h2 id="_1">汇报摘要</h2>
+<p>本周组会主要讨论了以下内容：</p>
+<ol>
+<li><strong>MEDUSA-1/2</strong> - 训练差异</li>
+<li><strong>Overhead</strong> - 不仅仅是额外参数overhead，还有大batch_size时的严重overhead</li>
+</ol>
+<blockquote>
+<p>💡 完整内容请查看上方嵌入的 PDF 文档，该文档使用 LaTeX 排版。</p>
+</blockquote>
+<h2 id="_2">相关资源</h2>
+<ul>
+<li>论文链接: <a href="https://arxiv.org/abs/2401.10774">Medusa: Simple LLM Inference Acceleration Framework with Multiple Decoding Heads</a></li>
+<li>代码仓库: <a href="https://huggingface.co/FasterDecoding/medusa-1.0-vicuna-13b-v1.5">huggingface</a></li>
+</ul>
+    </article>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="https://github.com/HaxxorCialtion" target="_blank"><i class="fab fa-github"></i></a>
+                <a href="mailto:cialtion737410@sjtu.edu.cn"><i class="fas fa-envelope"></i></a>
+            </div>
+            <p>© 2025 Cialtion · Powered by LaTeX & Python</p>
+        </div>
+    </footer>
+</body>
+</html>

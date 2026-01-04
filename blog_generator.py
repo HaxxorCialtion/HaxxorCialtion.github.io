@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 简化的博客生成器 - 支持多语言切换和多个特殊窗口
+(新增) 支持 LaTeX/PDF 格式的组会汇报记录 (meetings)
 """
 
 import os
@@ -27,6 +28,7 @@ class BlogGenerator:
         self.reviews = []
         self.open_sources = []
         self.products = []
+        self.meetings = []  # (新增) 组会汇报记录
 
         # Pass 1: 存储所有文章的完整信息 (用于 Pass 2)
         self.all_processed_info = []
@@ -36,7 +38,6 @@ class BlogGenerator:
         self.available_images = self.load_available_images()
 
     def load_available_images(self) -> List[str]:
-        # ... (此函数无需修改) ...
         images_dir = Path(self.config['images_dir'])
         if not images_dir.exists():
             print(f"Warning: Images directory '{images_dir}' not found. Creating directory...")
@@ -55,14 +56,12 @@ class BlogGenerator:
         return relative_images
 
     def get_random_image(self) -> str:
-        # ... (此函数无需修改) ...
         if self.available_images:
             return random.choice(self.available_images)
         else:
             return self.config['default_cover']
 
     def load_config(self) -> Dict:
-        # ... (此函数无需修改, 假设你已添加了 reviews_dir 等) ...
         default_config = {
             "blog_title": "Cialtion's Tech Blog",
             "blog_subtitle": "Simple Love",
@@ -91,6 +90,10 @@ class BlogGenerator:
             "opensource_output_dir": "opensource",
             "products_dir": "products_notes",
             "products_output_dir": "products",
+            # (新增) meetings 配置
+            "meetings_dir": "meetings_notes",
+            "meetings_output_dir": "meetings",
+            "meetings_pdf_dir": "meetings_pdf",  # 存放编译好的 PDF
             "images_dir": "images",
             "default_cover": "images/default_cover.jpg"
         }
@@ -104,7 +107,6 @@ class BlogGenerator:
         return default_config
 
     def parse_frontmatter(self, content: str) -> tuple:
-        # ... (此函数无需修改) ...
         if content.startswith('---'):
             try:
                 _, frontmatter, markdown_content = content.split('---', 2)
@@ -115,7 +117,6 @@ class BlogGenerator:
         return {}, content
 
     def extract_summary(self, content: str, max_length: int = 150) -> str:
-        # ... (此函数无需修改) ...
         content = re.sub(r'```.*?```', '', content, flags=re.DOTALL)
         content = re.sub(r'#+\s+.*?\n', '', content)
         content = re.sub(r'\[([^\]]*)\]\([^\)]*\)', r'\1', content)
@@ -125,7 +126,6 @@ class BlogGenerator:
         return content[:max_length] + ('...' if len(content) > max_length else '')
 
     def extract_title_from_content(self, content: str, filename: str) -> str:
-        # ... (此函数无需修改) ...
         lines = content.split('\n')
         for line in lines:
             line = line.strip()
@@ -136,7 +136,6 @@ class BlogGenerator:
     def convert_markdown_to_html(self, markdown_file: str) -> Optional[Dict]:
         """
         转换Markdown为HTML
-        (新) 新增 'lang' 和 'translation_id'
         """
         try:
             with open(markdown_file, 'r', encoding='utf-8') as f:
@@ -169,10 +168,11 @@ class BlogGenerator:
                 'filename': filename,
                 'html_content': article_html,
                 'toc': getattr(md, 'toc', ''),
-
-                # (新) 添加语言和翻译ID
-                'lang': metadata.get('lang', 'zh'),  # (修复) 默认 'zh'
+                'lang': metadata.get('lang', 'zh'),
                 'translation_id': metadata.get('translation_id'),
+                # (新增) 支持 PDF 路径
+                'pdf_path': metadata.get('pdf'),
+                'content_type': metadata.get('type', 'markdown'),  # 'markdown' 或 'pdf'
             }
 
             return result
@@ -183,7 +183,6 @@ class BlogGenerator:
     def generate_article_html(self, article_info: Dict, translations: List[Dict] = None) -> str:
         """
         生成文章HTML
-        (新) 签名增加了 translations，并添加 {{TRANSLATIONS}} 占位符
         """
         try:
             with open('templates/article_template.html', 'r', encoding='utf-8') as f:
@@ -193,7 +192,6 @@ class BlogGenerator:
             print("Please run: python3 template_generator.py")
             return ""
 
-        # (新) 生成翻译链接HTML
         translations_html = self._generate_translations_html(
             translations,
             article_info.get('lang')
@@ -211,7 +209,6 @@ class BlogGenerator:
             '{{CONTENT}}': article_info['html_content'],
             '{{GITHUB_URL}}': self.config['social_links']['github'],
             '{{EMAIL}}': self.config['contact']['email_school'],
-            # (新) 添加翻译占位符
             '{{TRANSLATIONS}}': translations_html,
         }
 
@@ -220,26 +217,57 @@ class BlogGenerator:
 
         return template
 
+    def generate_meeting_html(self, meeting_info: Dict) -> str:
+        """
+        (新增) 生成组会记录的 HTML 页面 - 学术论文风格，嵌入 PDF
+        """
+        try:
+            with open('templates/meeting_article_template.html', 'r', encoding='utf-8') as f:
+                template = f.read()
+        except FileNotFoundError:
+            print("⚠ Template file not found: templates/meeting_article_template.html")
+            print("Please run: python3 template_generator.py")
+            return ""
+
+        pdf_path = meeting_info.get('pdf_path', '')
+        # 确保 PDF 路径正确（相对于输出目录）
+        if pdf_path and not pdf_path.startswith('..'):
+            pdf_path = f"../{pdf_path}"
+
+        replacements = {
+            '{{TITLE}}': meeting_info['title'],
+            '{{BLOG_TITLE}}': self.config['blog_title'],
+            '{{DESCRIPTION}}': meeting_info['description'],
+            '{{DATE}}': meeting_info['date'],
+            '{{AUTHOR}}': self.config['author'],
+            '{{TAGS}}': self._generate_tags_html(meeting_info['tags']),
+            '{{PDF_PATH}}': pdf_path,
+            '{{CONTENT}}': meeting_info.get('html_content', ''),
+            '{{GITHUB_URL}}': self.config['social_links']['github'],
+            '{{EMAIL}}': self.config['contact']['email_school'],
+        }
+
+        for placeholder, value in replacements.items():
+            template = template.replace(placeholder, str(value))
+
+        return template
+
     def _generate_translations_html(self, translations: Optional[List[Dict]], current_lang: str) -> str:
-        """(新) 生成语言切换链接的HTML"""
         if not translations or len(translations) < 2:
-            return ""  # 如果没有翻译或只有自己，不显示
+            return ""
 
         lang_map = {
             'en': 'English',
             'zh': '中文',
-            # 在这里添加更多语言
         }
 
         links_html = ""
-        # 对链接进行排序，确保 'en' 总是在 'zh' 前面
         sorted_translations = sorted(translations, key=lambda x: x.get('lang', ''))
 
         for trans in sorted_translations:
             lang_code = trans.get('lang')
-            lang_name = lang_map.get(lang_code, lang_code)  # 获取友好名称，否则回退到 'en'/'zh'
+            lang_name = lang_map.get(lang_code, lang_code)
             href = trans.get('link', '#')
-            # (新) 相对路径修复，确保从根目录开始
             fixed_href = f"../{href}"
 
             if lang_code == current_lang:
@@ -254,14 +282,12 @@ class BlogGenerator:
         </div>'''
 
     def _generate_tags_html(self, tags: List[str]) -> str:
-        # ... (此函数无需修改) ...
         if not tags:
             return ""
         tags_html = "".join([f'<span class="tag">{tag}</span>' for tag in tags])
         return f'<div class="article-tags">{tags_html}</div>'
 
     def _generate_toc_html(self, toc_content: str) -> str:
-        # ... (此函数无需修改) ...
         if not toc_content:
             return ""
         return f'''<div class="toc-container">
@@ -274,7 +300,7 @@ class BlogGenerator:
 
     def process_markdown_files(self):
         """
-        (重构) Pass 1: 处理所有Markdown文件，仅收集数据。
+        Pass 1: 处理所有Markdown文件，仅收集数据。
         """
         content_types = [
             {'type': 'article', 'list': self.articles, 'src_key': 'markdown_dir', 'out_key': 'output_dir',
@@ -287,6 +313,9 @@ class BlogGenerator:
              'out_key': 'opensource_output_dir', 'default_src': 'opensource_notes', 'default_out': 'opensource'},
             {'type': 'product', 'list': self.products, 'src_key': 'products_dir', 'out_key': 'products_output_dir',
              'default_src': 'products_notes', 'default_out': 'products'},
+            # (新增) meetings
+            {'type': 'meeting', 'list': self.meetings, 'src_key': 'meetings_dir', 'out_key': 'meetings_output_dir',
+             'default_src': 'meetings_notes', 'default_out': 'meetings'},
         ]
 
         for ct in content_types:
@@ -298,7 +327,7 @@ class BlogGenerator:
 
     def _process_files_pass1(self, source_dir: str, output_dir: str, target_list: List[Dict], content_type: str):
         """
-        (重构) 仅执行数据收集
+        仅执行数据收集
         """
         source_path = Path(source_dir)
         output_path = Path(output_dir)
@@ -321,13 +350,11 @@ class BlogGenerator:
             article_info = self.convert_markdown_to_html(str(md_file))
 
             if article_info:
-                # (新) 存储输出路径，以便 Pass 2 使用
                 article_info['output_path'] = output_path / f"{article_info['filename']}.html"
+                article_info['content_type_category'] = content_type  # 标记类型
 
-                # 添加到主列表 (用于 Pass 2)
                 self.all_processed_info.append(article_info)
 
-                # 准备用于索引页的 `item_data`
                 item_data = {
                     'title': article_info['title'],
                     'description': article_info['description'],
@@ -335,26 +362,24 @@ class BlogGenerator:
                     'tags': article_info['tags'],
                     'image': article_info['cover_image'],
                     'link': f"{output_dir}/{article_info['filename']}.html",
-
-                    # (新) 将语言和ID添加到索引数据中
                     'lang': article_info['lang'],
                     'translation_id': article_info['translation_id'],
+                    # (新增) PDF 相关
+                    'pdf_path': article_info.get('pdf_path'),
                 }
 
                 target_list.append(item_data)
 
     def _build_translation_map(self):
-        """(新) Pass 1.5: 构建全局翻译地图"""
         print("--- Pass 1.5: Building translation map ---")
-        all_items = self.articles + self.papers + self.reviews + self.open_sources + self.products
+        all_items = self.articles + self.papers + self.reviews + self.open_sources + self.products + self.meetings
 
         for item in all_items:
             trans_id = item.get('translation_id')
-            if trans_id:  # 仅当 translation_id 存在时
+            if trans_id:
                 if trans_id not in self.translation_map:
                     self.translation_map[trans_id] = []
 
-                # 存储所需信息
                 self.translation_map[trans_id].append({
                     'lang': item.get('lang'),
                     'link': item.get('link')
@@ -362,7 +387,7 @@ class BlogGenerator:
         print(f"Found {len(self.translation_map)} translation groups.")
 
     def _generate_all_html_pass2(self):
-        """(新) Pass 2: 使用翻译地图生成所有 HTML 文件"""
+        """Pass 2: 使用翻译地图生成所有 HTML 文件"""
         print(f"--- Pass 2: Generating {len(self.all_processed_info)} HTML files ---")
 
         for article_info in self.all_processed_info:
@@ -372,8 +397,11 @@ class BlogGenerator:
             if trans_id and trans_id in self.translation_map:
                 translations = self.translation_map[trans_id]
 
-            # (新) 传入翻译数据
-            html_content = self.generate_article_html(article_info, translations)
+            # (新增) 根据类型选择不同的生成器
+            if article_info.get('content_type_category') == 'meeting':
+                html_content = self.generate_meeting_html(article_info)
+            else:
+                html_content = self.generate_article_html(article_info, translations)
 
             if html_content:
                 html_file = article_info['output_path']
@@ -384,7 +412,6 @@ class BlogGenerator:
     def update_main_blog(self):
         """
         更新主页
-        (新) 过滤掉非默认语言的文章，避免重复显示
         """
         try:
             with open('templates/index_template.html', 'r', encoding='utf-8') as f:
@@ -396,18 +423,16 @@ class BlogGenerator:
 
         default_lang = 'zh'
 
-        # (新) 过滤文章列表
         display_articles = [
             article for article in self.articles
             if article.get('lang', default_lang) == default_lang
         ]
 
-        # (修复) 确保这里使用的是过滤后的 display_articles
         sorted_articles = sorted(display_articles, key=lambda x: x['date'], reverse=True)
 
         articles_html = ""
 
-        # --- 特殊卡片区 (无需修改) ---
+        # --- 特殊卡片区 ---
         papers_card = f'''
         <div class="article-card special-card">
         <div class="special-icon"><i class="fas fa-graduation-cap"></i></div>
@@ -420,6 +445,7 @@ class BlogGenerator:
         <a href="papers.html" class="read-more">Explore Papers <i class="fas fa-arrow-right"></i></a>
         </div>
         </div>'''
+
         reviews_card = f'''
         <div class="article-card special-card">
         <div class="special-icon"><i class="fas fa-search-plus"></i></div>
@@ -431,6 +457,7 @@ class BlogGenerator:
         <a href="reviews.html" class="read-more">Explore Reviews <i class="fas fa-arrow-right"></i></a>
         </div>
         </div>'''
+
         opensource_card = f'''
         <div class="article-card special-card">
         <div class="special-icon"><i class="fas fa-code-branch"></i></div>
@@ -442,6 +469,7 @@ class BlogGenerator:
         <a href="opensource.html" class="read-more">Explore Projects <i class="fas fa-arrow-right"></i></a>
         </div>
         </div>'''
+
         products_card = f'''
         <div class="article-card special-card">
         <div class="special-icon"><i class="fas fa-box-open"></i></div>
@@ -454,12 +482,26 @@ class BlogGenerator:
         </div>
         </div>'''
 
+        # (新增) 组会记录卡片
+        meetings_card = f'''
+        <div class="article-card special-card meetings-card">
+        <div class="special-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+        <div class="article-content">
+        <div class="article-date"><i class="fas fa-star"></i> Special Section</div>
+        <h3 class="article-title">Group Meeting Reports</h3>
+        <p class="article-description">组会汇报记录 - LaTeX 排版的学术汇报文档，包含研究进展、论文分享与讨论。</p>
+        <div class="article-tags"><span class="tag">Meeting</span><span class="tag">LaTeX</span><span class="tag">Academic</span></div>
+        <a href="meetings.html" class="read-more">View Reports <i class="fas fa-arrow-right"></i></a>
+        </div>
+        </div>'''
+
         articles_html += papers_card
         articles_html += reviews_card
         articles_html += opensource_card
         articles_html += products_card
+        articles_html += meetings_card  # (新增)
 
-        # --- 普通文章卡片 (使用过滤后的 sorted_articles) ---
+        # --- 普通文章卡片 ---
         for article in sorted_articles:
             tags_html = " ".join([f'<span class="tag">{tag}</span>' for tag in article['tags']])
             articles_html += f'''
@@ -481,7 +523,6 @@ class BlogGenerator:
 
         header_image = self.get_random_image()
 
-        # 替换模板变量 (无需修改)
         replacements = {
             '{{BLOG_TITLE}}': self.config['blog_title'],
             '{{BLOG_SUBTITLE}}': self.config['blog_subtitle'],
@@ -515,7 +556,7 @@ class BlogGenerator:
                                page_title: str,
                                no_items_icon: str = "fas fa-book-open"):
         """
-        (新) 过滤掉非默认语言的项目
+        生成特殊页面
         """
         try:
             with open(template_file, 'r', encoding='utf-8') as f:
@@ -525,7 +566,6 @@ class BlogGenerator:
             print("Please run: python3 template_generator.py")
             return
 
-        # (新) 只选择中文(zh)或没有设置语言(None)的项目显示
         default_lang = 'zh'
         display_items = [
             item for item in items
@@ -540,6 +580,11 @@ class BlogGenerator:
         if sorted_items:
             for item in sorted_items:
                 tags_html = " ".join([f'<span class="tag">{tag}</span>' for tag in item['tags']])
+                # (新增) 如果有 PDF，添加下载按钮
+                pdf_button = ""
+                if item.get('pdf_path'):
+                    pdf_button = f'<a href="{item["pdf_path"]}" class="pdf-download" target="_blank"><i class="fas fa-file-pdf"></i> PDF</a>'
+
                 items_html += f'''
                 <div class="paper-card">
                     <img src="{item['image']}" alt="{item['title']}" class="paper-image" onerror="this.style.display='none'">
@@ -553,9 +598,12 @@ class BlogGenerator:
                         <h3 class="paper-title">{item['title']}</h3>
                         <p class="paper-description">{item['description']}</p>
                         <div class="paper-tags">{tags_html}</div>
-                        <a href="{item['link']}" class="read-more">
-                            Read More <i class="fas fa-arrow-right"></i>
-                        </a>
+                        <div class="paper-actions">
+                            <a href="{item['link']}" class="read-more">
+                                Read More <i class="fas fa-arrow-right"></i>
+                            </a>
+                            {pdf_button}
+                        </div>
                     </div>
                 </div>'''
         else:
@@ -566,7 +614,6 @@ class BlogGenerator:
                 <p>{page_title} 正在准备中，敬请期待...</p>
             </div>'''
 
-        # 替换模板变量 (无需修改)
         replacements = {
             '{{BLOG_TITLE}}': self.config['blog_title'],
             '{{AUTHOR}}': self.config['author'],
@@ -587,7 +634,7 @@ class BlogGenerator:
 
 def main():
     """
-    (重构) 主函数，适配 Pass 1 和 Pass 2 流程
+    主函数
     """
     print("🚀 Starting blog generator...")
 
@@ -636,12 +683,21 @@ def main():
         page_title='Products',
         no_items_icon="fas fa-box-open"
     )
+    # (新增) 生成 meetings 页面
+    generator._generate_special_page(
+        template_file='templates/meetings_template.html',
+        output_file='meetings.html',
+        items=generator.meetings,
+        page_title='Meetings',
+        no_items_icon="fas fa-chalkboard-teacher"
+    )
 
     print(f"✅ Successfully processed {len(generator.articles)} articles, "
           f"{len(generator.papers)} papers, "
           f"{len(generator.reviews)} reviews, "
           f"{len(generator.open_sources)} open-sources, "
-          f"and {len(generator.products)} products.")
+          f"{len(generator.products)} products, "
+          f"and {len(generator.meetings)} meetings.")  # (新增)
 
     print("🎉 Blog generation completed!")
 
