@@ -1,24 +1,19 @@
-// ============================================================
-//  i18n dictionary
-//  默认显示中文(HTML 内嵌),切换时把这里的英文塞进 data-i18n 节点
-// ============================================================
 window.I18N = {
   en: {
-    "nav.brand": "Xiaoxin Shi",
-    "nav.projects": "Projects",
-    "nav.contact": "Contact",
-
     "hero.name": "Xiaoxin Shi",
     "hero.name_en": "石枭昕",
     "hero.tagline": "LLM Post-Training · Inference Acceleration · On-Device Real-Time Agents",
     "hero.affiliation": "Ph.D. Student · Shanghai Institute of Intelligent Science / SJTU · Advisor: Prof. Zengfeng Huang",
     "hero.download_pdf": "Download CV (PDF)",
-    "hero.phone": "+86 173-1671-6363",
-    "hero.edu": "B.S. in Chemistry (Computational) 2021–2025<br>Ph.D. in LLM, Sept. 2025 – Present",
 
-    "highlights.title": "Core Highlights",
+    "edu.title": "Education",
+    "edu.l1.school": "<b>Shanghai Jiao Tong University</b> · B.S. in Chemistry (Computational)",
+    "edu.l2.school": "<b>Shanghai Institute of Intelligent Science / SJTU</b> · Ph.D. Student in LLM",
+    "edu.l2.date": "Sept. 2025 – Present",
+
+    "highlights.title": "Highlights",
     "highlights.h1.tag": "Full-Stack Game / Virtual-Human NPC Pipeline",
-    "highlights.h1.body": "Independently built a complete end-to-end pipeline (Voice Input → ASR → LLM Intent Understanding → NPC Behavioral Decision → Character Animation &amp; Rendering), including <i>Echo Chronicles</i> (pure on-device iOS tower defense) and <i>SimpleLove</i> (VRM virtual human), with native deployment across iOS / Windows / macOS.",
+    "highlights.h1.body": "Independently built a complete end-to-end pipeline (Voice → ASR → LLM Intent → NPC Behavior → Animation &amp; Rendering), including <i>Echo Chronicles</i> (pure on-device iOS tower defense) and <i>SimpleLove</i> (VRM virtual human), with native deployment across iOS / Windows / macOS.",
     "highlights.h2.tag": "ICML 2026 (Accepted, First Author)",
     "highlights.h2.body": "Proposed a multi-head parallel decoding architecture for real-time function calling, achieving end-to-end <b>3–6×</b> speedup (peak 9.6×); Qwen3-4B at <b>61.2 ms / 16 Hz</b> on RTX 4090; <b>528 ms P50</b> on real iPhone 17 Pro Max. Significantly outperforms Google FunctionGemma in both accuracy and speed.",
     "highlights.h3.tag": "Large-Scale Training Practice",
@@ -26,7 +21,7 @@ window.I18N = {
     "highlights.h4.tag": "On-Device Inference Infrastructure",
     "highlights.h4.body": "Customized llama.cpp for cross-platform KV Cache sharing &amp; multi-seq batching tailored for the hybrid SimpleTool model; modified nano-vllm for multi-head parallel decoding; built efficient ONNX-based DiT inference; leveraged AI coding assistants (Claude / Cursor) for solo full-stack module integration.",
 
-    "projects.title": "Project Experience",
+    "projects.title": "Projects",
     "projects.label.background": "Background",
     "projects.label.method": "Methodology",
     "projects.label.contrib": "Contributions",
@@ -53,7 +48,7 @@ window.I18N = {
     "projects.p3.contrib": "Independently developed iOS llama.swiftui + Metal inference integration, PixiJS WebGL rendering layer, five-element tower-defense system, and campaign level design.",
     "projects.p3.result": "Runs entirely locally on iPhone 17 Pro Max with zero cloud dependency, validating the feasibility and latency controllability of the \"LLM as in-game NPC / character controller\" paradigm on edge devices.",
 
-    "skills.title": "Technical Skills",
+    "skills.title": "Skills",
     "skills.s1.k": "Programming",
     "skills.s1.v": "Proficient in Python; adept at C++ / CUDA / Swift application development with AI coding assistants.",
     "skills.s2.k": "Algorithms &amp; Training",
@@ -65,14 +60,10 @@ window.I18N = {
     "skills.s5.k": "Data Synthesis",
     "skills.s5.v": "Multi-agent collaboration pipelines, LLM-as-Judge; produced 2M+ industrial-grade training samples (game NPCs, virtual humans, robotic arms).",
 
-    "summary.title": "Personal Summary",
+    "summary.title": "Summary",
     "summary.body": "My research taste favors industry-oriented R&amp;D — I'm used to reverse-engineering infrastructure and algorithm design from application requirements, firmly believing \"a good idea is one that can be deployed.\" My technical interests focus on LLM post-training, inference acceleration, and on-device real-time agents, with a long-term vision of actualizing embodied intelligence — from virtual digital lives to physical robots. Equipped with full-stack solo-development capabilities for translating ideas into cross-platform native demos.",
 
-    "contact.title": "Contact",
-    "contact.email": "Email",
-    "contact.phone": "Phone",
-
-    "footer.copyright": "© 2026 Xiaoxin Shi · Built with HTML &amp; CSS",
-    "footer.source": "Source"
+    "foot.copy": "© 2026 Xiaoxin Shi",
+    "foot.source": "Source"
   }
 };
