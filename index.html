@@ -1,345 +1,290 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cialtion's Tech Blog</title>
-    <meta name="description" content="Sharing insights on LLM, LLM_Memory, Omni, AI Desktop Robot, AI Companion and Anime">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary-color: #2c3e50; --secondary-color: #3498db; --accent-color: #e74c3c;
-            --background-color: #f8fafc; --card-background: #ffffff; --text-primary: #2d3748;
-            --text-secondary: #718096; --border-color: #e2e8f0; --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.07);
-            --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1); --border-radius: 12px; --transition: all 0.3s ease;
-        }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: var(--background-color); color: var(--text-primary); line-height: 1.6; }
-        .sidebar { position: fixed; left: 0; top: 0; width: 280px; height: 100vh; background: linear-gradient(135deg, var(--primary-color) 0%, #34495e 100%); color: white; overflow-y: auto; z-index: 1000; transition: var(--transition); }
-        .sidebar-header { padding: 2rem 1.5rem; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--secondary-color), var(--accent-color)); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 2rem; font-weight: bold; }
-        .sidebar-header h1 { font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 600; }
-        .sidebar-header .tagline { color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; }
-        .nav-menu { padding: 1rem 0; }
-        .nav-item { display: block; padding: 0.75rem 1.5rem; color: rgba(255, 255, 255, 0.9); text-decoration: none; transition: var(--transition); border-left: 3px solid transparent; }
-        .nav-item:hover, .nav-item.active { background-color: rgba(255, 255, 255, 0.1); border-left-color: var(--secondary-color); color: white; }
-        .nav-item i { width: 20px; margin-right: 0.75rem; }
-        .contact-info { padding: 1rem 1.5rem; background: rgba(0, 0, 0, 0.1); margin: 1rem; border-radius: 8px; }
-        .contact-info h4 { font-size: 0.9rem; margin-bottom: 0.5rem; color: rgba(255, 255, 255, 0.9); }
-        .contact-info p { font-size: 0.8rem; color: rgba(255, 255, 255, 0.7); line-height: 1.4; }
-        .social-links { padding: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.1); }
-        .social-links h3 { font-size: 1rem; margin-bottom: 1rem; color: rgba(255, 255, 255, 0.9); }
-        .social-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
-        .social-link { display: flex; align-items: center; padding: 0.5rem; background: rgba(255, 255, 255, 0.1); border-radius: 8px; color: white; text-decoration: none; transition: var(--transition); font-size: 0.85rem; }
-        .social-link:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-1px); }
-        .social-link i { margin-right: 0.5rem; width: 16px; }
-        .main-content { margin-left: 280px; min-height: 100vh; background-color: var(--background-color); }
-        .header { background: var(--card-background); padding: 1.5rem 2rem; border-bottom: 1px solid var(--border-color); box-shadow: var(--shadow-light); position: sticky; top: 0; z-index: 100; }
-        .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
-        .search-box { position: relative; width: 300px; }
-        .search-input { width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; border: 2px solid var(--border-color); border-radius: 25px; background-color: var(--background-color); font-size: 0.9rem; transition: var(--transition); }
-        .search-input:focus { outline: none; border-color: var(--secondary-color); box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1); }
-        .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary); }
-        .content-area { padding: 2rem; max-width: 1200px; margin: 0 auto; }
-        .hero-section { text-align: center; margin-bottom: 3rem; padding: 4rem 2rem; background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(231, 76, 60, 0.1)); border-radius: var(--border-radius); position: relative; overflow: hidden; }
-        .hero-bg-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.1; z-index: 1; }
-        .hero-content { position: relative; z-index: 2; }
-        .hero-logo { font-size: 3.5rem; font-weight: 700; background: linear-gradient(135deg, var(--secondary-color), var(--accent-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; line-height: 1.2; }
-        .page-title { font-size: 2.5rem; font-weight: 700; color: var(--primary-color); margin-bottom: 0.5rem; }
-        .page-subtitle { color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 2rem; }
-        .articles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
-        .article-card { background: var(--card-background); border-radius: var(--border-radius); overflow: hidden; box-shadow: var(--shadow-light); transition: var(--transition); border: 1px solid var(--border-color); }
-        .article-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-medium); }
-        .article-image { width: 100%; height: 200px; object-fit: cover; background: linear-gradient(135deg, var(--secondary-color), var(--accent-color)); transition: var(--transition); }
-        .article-image:hover { transform: scale(1.05); }
-        .article-content { padding: 1.5rem; }
-        .article-date { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.5rem; display: flex; align-items: center; }
-        .article-date i { margin-right: 0.5rem; }
-        .article-title { font-size: 1.3rem; font-weight: 600; color: var(--primary-color); margin-bottom: 0.75rem; line-height: 1.4; }
-        .article-description { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1rem; }
-        .article-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
-        .tag { display: inline-block; padding: 0.25rem 0.75rem; background: linear-gradient(135deg, var(--secondary-color), #2980b9); color: white; border-radius: 20px; font-size: 0.8rem; font-weight: 500; transition: var(--transition); }
-        .tag:hover { transform: scale(1.05); }
-        .read-more { display: inline-flex; align-items: center; color: var(--secondary-color); text-decoration: none; font-weight: 500; transition: var(--transition); }
-        .read-more:hover { color: var(--accent-color); transform: translateX(3px); }
-        .read-more i { margin-left: 0.5rem; transition: var(--transition); }
-        .read-more:hover i { transform: translateX(3px); }
-        .mobile-toggle { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 1001; background: var(--primary-color); color: white; border: none; border-radius: 8px; padding: 0.75rem; cursor: pointer; box-shadow: var(--shadow-medium); }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1e407c" />
+  <meta name="color-scheme" content="light dark" />
+  <title>石枭昕 / Xiaoxin Shi</title>
+  <meta name="description" content="石枭昕 (Xiaoxin Shi) — LLM post-training, inference acceleration, on-device real-time agents." />
 
-        /* Special Paper Review Card */
-        .special-card { background: linear-gradient(135deg, var(--primary-color), #34495e); color: white; border: none; position: relative; overflow: hidden; }
-        .special-card::before { content: ''; position: absolute; top: -50%; right: -50%; width: 100%; height: 100%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); transform: rotate(45deg); }
-        .special-card .special-icon { position: absolute; top: 1rem; right: 1rem; font-size: 3rem; color: rgba(255, 255, 255, 0.2); z-index: 1; }
-        .special-card .article-content { position: relative; z-index: 2; }
-        .special-card .article-date { color: rgba(255, 255, 255, 0.8); }
-        .special-card .article-title { color: white; font-size: 1.4rem; }
-        .special-card .article-description { color: rgba(255, 255, 255, 0.9); }
-        .special-card .disclaimer { color: rgba(255, 255, 255, 0.7); font-size: 0.8rem; margin: 0.5rem 0; padding: 0.5rem; background: rgba(0, 0, 0, 0.2); border-radius: 6px; }
-        .special-card .tag { background: rgba(255, 255, 255, 0.2); color: white; border: 1px solid rgba(255, 255, 255, 0.3); }
-        .special-card .read-more { color: white; font-weight: 600; background: rgba(255, 255, 255, 0.1); padding: 0.5rem 1rem; border-radius: 25px; border: 1px solid rgba(255, 255, 255, 0.3); transition: var(--transition); }
-        .special-card .read-more:hover { background: rgba(255, 255, 255, 0.2); transform: translateX(5px); }
+  <!-- Open Graph -->
+  <meta property="og:title" content="石枭昕 / Xiaoxin Shi" />
+  <meta property="og:description" content="LLM post-training · Inference acceleration · On-device real-time agents" />
+  <meta property="og:type" content="profile" />
+  <meta property="og:url" content="https://haxxorcialtion.github.io/" />
 
-        @media (max-width: 768px) { 
-            .mobile-toggle { display: block; } 
-            .sidebar { transform: translateX(-100%); } 
-            .sidebar.active { transform: translateX(0); } 
-            .main-content { margin-left: 0; } 
-            .content-area { padding: 1rem; margin-top: 4rem; } 
-            .hero-logo { font-size: 2.5rem; } 
-            .page-title { font-size: 2rem; } 
-            .articles-grid { grid-template-columns: 1fr; gap: 1rem; } 
-        }
-        .sidebar::-webkit-scrollbar { width: 4px; }
-        .sidebar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); }
-        .sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 2px; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .article-card { animation: fadeInUp 0.6s ease-out; }
-    </style>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231e407c'/%3E%3Ctext x='16' y='22' font-family='ui-sans-serif,system-ui' font-size='18' font-weight='700' fill='white' text-anchor='middle'%3EX%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="./assets/style.css" />
 </head>
 <body>
-    <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="avatar">C</div>
-            <h1>Cialtion</h1>
-            <p class="tagline">Simple Love</p>
+  <!-- ============================================================
+       NAV
+  ============================================================ -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="#top">
+        <span class="brand-mark" aria-hidden="true">X</span>
+        <span class="brand-name" data-i18n="nav.brand">石枭昕</span>
+      </a>
+      <div class="nav-actions">
+        <a class="nav-link" href="#projects" data-i18n="nav.projects">项目</a>
+        <a class="nav-link" href="#contact" data-i18n="nav.contact">联系</a>
+        <button id="lang-toggle" class="btn btn-ghost" type="button" aria-label="Toggle language">
+          <span data-lang-label="zh">EN</span>
+          <span data-lang-label="en" hidden>中文</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       HERO
+  ============================================================ -->
+  <header id="top" class="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-text">
+          <h1 class="hero-name">
+            <span data-i18n="hero.name">石枭昕</span>
+            <span class="hero-name-en" data-i18n="hero.name_en">Xiaoxin Shi</span>
+          </h1>
+          <p class="hero-tagline" data-i18n="hero.tagline">
+            LLM 后训练 · 推理加速 · 端侧实时智能体
+          </p>
+          <p class="hero-affiliation" data-i18n="hero.affiliation">
+            上海创智学院 / 上海交通大学 LLM 方向博士在读 · 导师：黄增峰教授
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn btn-primary" id="cv-download" href="./assets/resume_zh.pdf" download>
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v10.59l3.3-3.3a1 1 0 0 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 0 1 1.4-1.42l3.3 3.3V4a1 1 0 0 1 1-1Zm-7 16a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1Z"/></svg>
+              <span data-i18n="hero.download_pdf">下载 PDF 简历</span>
+            </a>
+            <a class="btn btn-ghost" href="https://github.com/HaxxorCialtion" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 .5C5.65.5.5 5.65.5 12.02c0 5.1 3.29 9.42 7.86 10.95.58.11.79-.25.79-.55 0-.27-.01-.99-.02-1.94-3.2.7-3.88-1.54-3.88-1.54-.52-1.34-1.28-1.7-1.28-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.78 1.2 1.78 1.2 1.04 1.78 2.72 1.27 3.38.97.1-.75.4-1.27.74-1.56-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.18 1.18.92-.26 1.91-.39 2.9-.39.98 0 1.97.13 2.9.39 2.21-1.5 3.18-1.18 3.18-1.18.62 1.58.23 2.75.11 3.04.74.81 1.18 1.84 1.18 3.1 0 4.42-2.69 5.39-5.26 5.68.41.36.78 1.08.78 2.18 0 1.57-.01 2.84-.01 3.23 0 .31.21.67.8.55C20.21 21.43 23.5 17.11 23.5 12.02 23.5 5.65 18.35.5 12 .5Z"/></svg>
+              GitHub
+            </a>
+          </div>
+
+          <div class="hero-meta">
+            <a href="mailto:cialtion737410@sjtu.edu.cn" class="meta-item">
+              <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 2v.4l8 5 8-5V6H4Zm16 2.6-7.45 4.66a1 1 0 0 1-1.1 0L4 8.6V18h16V8.6Z"/></svg>
+              cialtion737410@sjtu.edu.cn
+            </a>
+            <span class="meta-item">
+              <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.32.57 3.57.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A18 18 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57.1.32.03.69-.24 1.02l-2.2 2.2Z"/></svg>
+              <span data-i18n="hero.phone">+86 173-1671-6363</span>
+            </span>
+          </div>
         </div>
-        <nav class="nav-menu">
-            <a href="index.html" class="nav-item active"><i class="fas fa-home"></i>Home</a>
-            <a href="papers.html" class="nav-item"><i class="fas fa-graduation-cap"></i>Papers</a>
-            <a href="reviews.html" class="nav-item"><i class="fas fa-search-plus"></i>Reviews</a>
-            <a href="opensource.html" class="nav-item"><i class="fas fa-code-branch"></i>Open-Source</a>
-            <a href="products.html" class="nav-item"><i class="fas fa-box-open"></i>Products</a>
-        </nav>
-        <div class="contact-info">
-            <h4><i class="fas fa-graduation-cap"></i> Academic Info</h4>
-            <p>Graduated from SJTU (chemistry, 2021~2025), pursuing PhD degree in SJTU and Sii(LLM, 2025~)<br>LLM | LLM_Memory | Omni | AI Companion | AI Desktop Robot</p>
+
+        <aside class="hero-side" aria-hidden="false">
+          <div class="affil-row">
+            <div class="affil affil-sjtu" title="Shanghai Jiao Tong University">SJTU</div>
+            <div class="affil affil-sii" title="Shanghai Institute of Intelligent Science">SII</div>
+          </div>
+          <p class="hero-edu" data-i18n="hero.edu">
+            化学(计算化学)本科 2021–2025<br>LLM 方向博士在读 2025.09–
+          </p>
+        </aside>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============================================================
+         CORE HIGHLIGHTS
+    ============================================================ -->
+    <section class="section" id="highlights">
+      <div class="container">
+        <h2 class="section-title">
+          <span class="section-tag" data-i18n="highlights.title">核心亮点</span>
+        </h2>
+        <ul class="highlight-list">
+          <li>
+            <strong class="hl-tag" data-i18n="highlights.h1.tag">游戏 / 数字人 NPC 全栈闭环</strong>
+            <span data-i18n="highlights.h1.body">
+              独立完成"语音输入 → ASR → LLM 意图理解 → NPC 行为决策 → 角色动作与渲染"完整端到端 Demo（Echo Chronicles 纯 iPhone 端侧塔防游戏、SimpleLove VRM 数字人），实现 iOS / Windows / macOS Native 全栈跑通。
+            </span>
+          </li>
+          <li>
+            <strong class="hl-tag" data-i18n="highlights.h2.tag">ICML 2026 (Accept, 一作)</strong>
+            <span data-i18n="highlights.h2.body">
+              提出用于实时函数调用的多头并行解码架构，实现端到端 <b>3–6×</b> 加速（峰值 9.6×）；Qwen3-4B 在 4090 上达到 <b>61.2 ms / 16 Hz</b> 实时控制；iPhone 17 Pro Max 真机 <b>528 ms P50</b>。性能与速度均显著优于 Google FunctionGemma。
+            </span>
+          </li>
+          <li>
+            <strong class="hl-tag" data-i18n="highlights.h3.tag">大规模训练实战</strong>
+            <span data-i18n="highlights.h3.body">
+              具备<b>多节点分布式训练经验（最大规模 48×H200）</b>；掌握 Packing / 长度分桶 / 梯度累积 / FlashAttention-2 / FlexAttention / DDP 等高效训练技巧。
+            </span>
+          </li>
+          <li>
+            <strong class="hl-tag" data-i18n="highlights.h4.tag">端侧推理 Infra</strong>
+            <span data-i18n="highlights.h4.body">
+              为混合 SimpleTool 模型定制 llama.cpp 跨平台 KV Cache 共享与 Multi-seq Batching 改造；实现 nano-vllm 多头并行解码场景特化魔改；基于 ONNX 实现 DiT 框架高效推理；将 AI 协同工具（Claude / Cursor）作为开发加速器，单人闭环多模块整合。
+            </span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         PROJECTS
+    ============================================================ -->
+    <section class="section" id="projects">
+      <div class="container">
+        <h2 class="section-title">
+          <span class="section-tag" data-i18n="projects.title">项目经历</span>
+        </h2>
+
+        <article class="project">
+          <header class="proj-head">
+            <h3 class="proj-name" data-i18n="projects.p1.name">SimpleTool: Parallel Decoding for Real-Time LLM Function Calling (ICML 2026)</h3>
+            <span class="proj-date" data-i18n="projects.p1.date">2025.10 – 至今</span>
+          </header>
+          <dl class="proj-body">
+            <dt data-i18n="projects.label.background">背景</dt>
+            <dd data-i18n="projects.p1.background">LLM 函数调用在端侧场景下延迟过高，难以满足游戏 NPC / 实时数字人 / 机械臂等 10 Hz+ 控制场景。</dd>
+            <dt data-i18n="projects.label.method">方法</dt>
+            <dd data-i18n="projects.p1.method">设计 17 个 Special Token 同时承担"结构 Token 压缩"与"模式选择器"双重角色，将 Function Call 输出空间压缩 <b>4–6×</b>；提出多头并行解码架构，利用 Decoding 阶段闲置算力，让 Function Name 与 Arguments 在不同头上同时解码。</dd>
+            <dt data-i18n="projects.label.contrib">个人工作</dt>
+            <dd data-i18n="projects.p1.contrib">独立完成 Idea → 数据合成 Pipeline → 训练框架 → 推理引擎魔改 → 多平台部署 → 论文撰写/投稿/Rebuttal 全流程闭环。</dd>
+            <dt data-i18n="projects.label.result">结果</dt>
+            <dd data-i18n="projects.p1.result">Qwen3-4B 在 4090 上 <b>61.2 ms P50</b>（16 Hz），并行 8 头平均效率 93%；Mobile Actions Unseen Benchmark 上 RT-Qwen-0.5B 达 <b>86.2%</b>（对比 FunctionGemma-270M 的 85.0%），通用能力完整保留（MMLU −0.29%，IFEval +2.78%）。论文已被 <b>ICML 2026 接收</b>，HuggingFace 与 ModelScope 已上线 7 个尺寸版本（0.5B–30B MoE）。</dd>
+          </dl>
+        </article>
+
+        <article class="project">
+          <header class="proj-head">
+            <h3 class="proj-name" data-i18n="projects.p2.name">SimpleLove / NPC.exe — 端侧实时 AI-Native 数字人 &amp; 游戏 NPC 引擎</h3>
+            <span class="proj-date" data-i18n="projects.p2.date">2026.02 – 至今</span>
+          </header>
+          <dl class="proj-body">
+            <dt data-i18n="projects.label.background">背景</dt>
+            <dd data-i18n="projects.p2.background">现有数字人 / 游戏 NPC 系统普遍依赖云端大模型，延迟高、隐私差，且行为策略与角色身份割裂，体验类似传统云端语音助手。</dd>
+            <dt data-i18n="projects.label.method">方法</dt>
+            <dd data-i18n="projects.p2.method">基于 SimpleTool 构建端到端本地数字人引擎；采用 NPC Policy SFT / RL (Action as Cosplay) 使 LLM 直接生成角色 Actions；Simple-T2M 复用 SimpleTool LLM 中间层 Hidden States 作为 Text Condition，砍掉传统 8B 级独立 Text Encoder。</dd>
+            <dt data-i18n="projects.label.contrib">个人工作</dt>
+            <dd data-i18n="projects.p2.contrib">独立设计架构，训练 NPC Policy 及 50M DiT Flow Matching 动作生成模型，完成跨平台 Native 部署与 VRM 数字人渲染集成。</dd>
+            <dt data-i18n="projects.label.result">结果</dt>
+            <dd data-i18n="projects.p2.result">NPC Policy Eval Acc <b>16.2% → 58.7%</b>（+42.5pp），输出分布 RL-friendly（Top-10 Cov 0.993，可直接接 PPO/GRPO）；Simple-T2M 在 4090 (Q8) 上 <b>~50 ms 出 Motion</b>，整套数字人系统仅占 <b>5 GB 显存</b>；Linux / Windows (DirectML) / 端到端 Native 全部打通，零 Python 依赖（macOS Metal+CoreML 正在制作），可直接嵌入游戏客户端。</dd>
+          </dl>
+        </article>
+
+        <article class="project">
+          <header class="proj-head">
+            <h3 class="proj-name" data-i18n="projects.p3.name">Echo Chronicles / 回声战纪 — 语音驱动塔防游戏</h3>
+            <span class="proj-date" data-i18n="projects.p3.date">2025.12 – 2026.02</span>
+          </header>
+          <dl class="proj-body">
+            <dt data-i18n="projects.p3.label1">完整游戏闭环</dt>
+            <dd data-i18n="projects.p3.body1">玩家语音指令 → 端侧 ASR (Sherpa-onnx Paraformer, 5.9% WER, 115 ms) → SimpleTool 0.5B 意图理解与函数调用 → 游戏内塔防单位行为响应。</dd>
+            <dt data-i18n="projects.label.contrib">个人工作</dt>
+            <dd data-i18n="projects.p3.contrib">独立完成 iOS 端 llama.swiftui + Metal 推理集成、PixiJS WebGL 渲染层、五元素塔防系统与 Campaign 关卡设计。</dd>
+            <dt data-i18n="projects.label.result">结果</dt>
+            <dd data-i18n="projects.p3.result">iPhone 17 Pro Max 真机全程本地运行，无任何云端依赖；有效验证了"LLM 作为游戏内 NPC / 角色控制器"范式在端侧的可行性与延迟可控性。</dd>
+          </dl>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SKILLS
+    ============================================================ -->
+    <section class="section" id="skills">
+      <div class="container">
+        <h2 class="section-title">
+          <span class="section-tag" data-i18n="skills.title">技术栈</span>
+        </h2>
+        <dl class="skill-grid">
+          <dt data-i18n="skills.s1.k">编程语言</dt>
+          <dd data-i18n="skills.s1.v">熟练使用 Python；在 AI 协同下熟练开发 C++ / CUDA / Swift 应用</dd>
+
+          <dt data-i18n="skills.s2.k">算法与训练</dt>
+          <dd data-i18n="skills.s2.v">Transformer、SFT / RL、LoRA、Packing / 长度分桶、Curriculum Learning、多节点 DDP (48 卡训练经验)、FlashAttention-2</dd>
+
+          <dt data-i18n="skills.s3.k">推理与架构</dt>
+          <dd data-i18n="skills.s3.v">PyTorch、vLLM、llama.cpp（含魔改定制）、nano-vllm、ONNX Runtime (CUDA / DirectML)、GGUF 量化 (Q4/Q8)、KV Cache 优化</dd>
+
+          <dt data-i18n="skills.s4.k">端侧部署</dt>
+          <dd data-i18n="skills.s4.v">Linux、Windows (DirectML)、macOS (Metal)、iOS LLM Native 开发（基于 ggml 与 onnx）、ASR 端侧部署</dd>
+
+          <dt data-i18n="skills.s5.k">数据合成</dt>
+          <dd data-i18n="skills.s5.v">多 Agent 协同 Pipeline、LLM-as-Judge；已生产 2M+ 工业级训练样本（覆盖游戏 NPC / 数字人 / 机械臂领域）</dd>
+        </dl>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SUMMARY
+    ============================================================ -->
+    <section class="section" id="summary">
+      <div class="container">
+        <h2 class="section-title">
+          <span class="section-tag" data-i18n="summary.title">个人总结</span>
+        </h2>
+        <p class="summary-text" data-i18n="summary.body">
+          科研 taste 喜欢能工业落地的研发，习惯从应用侧反推 Infra 和算法设计，坚信"能落地的 idea 才是好 idea"。技术兴趣集中在 LLM 后训练、推理加速与端侧实时智能体，长期目标是落地从虚拟数字生命到物理机器人的具身智能。具备从论文 Idea 到跨平台 Native Demo 的全栈单人开发闭环能力。
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         CONTACT
+    ============================================================ -->
+    <section class="section section-contact" id="contact">
+      <div class="container">
+        <h2 class="section-title">
+          <span class="section-tag" data-i18n="contact.title">联系方式</span>
+        </h2>
+        <div class="contact-grid">
+          <a class="contact-card" href="mailto:cialtion737410@sjtu.edu.cn">
+            <span class="cc-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 2v.4l8 5 8-5V6H4Zm16 2.6-7.45 4.66a1 1 0 0 1-1.1 0L4 8.6V18h16V8.6Z"/></svg>
+            </span>
+            <span class="cc-label" data-i18n="contact.email">邮箱</span>
+            <span class="cc-value">cialtion737410@sjtu.edu.cn</span>
+          </a>
+
+          <a class="contact-card" href="https://github.com/HaxxorCialtion" target="_blank" rel="noopener">
+            <span class="cc-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 .5C5.65.5.5 5.65.5 12.02c0 5.1 3.29 9.42 7.86 10.95.58.11.79-.25.79-.55 0-.27-.01-.99-.02-1.94-3.2.7-3.88-1.54-3.88-1.54-.52-1.34-1.28-1.7-1.28-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.78 1.2 1.78 1.2 1.04 1.78 2.72 1.27 3.38.97.1-.75.4-1.27.74-1.56-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.18 1.18.92-.26 1.91-.39 2.9-.39.98 0 1.97.13 2.9.39 2.21-1.5 3.18-1.18 3.18-1.18.62 1.58.23 2.75.11 3.04.74.81 1.18 1.84 1.18 3.1 0 4.42-2.69 5.39-5.26 5.68.41.36.78 1.08.78 2.18 0 1.57-.01 2.84-.01 3.23 0 .31.21.67.8.55C20.21 21.43 23.5 17.11 23.5 12.02 23.5 5.65 18.35.5 12 .5Z"/></svg>
+            </span>
+            <span class="cc-label">GitHub</span>
+            <span class="cc-value">HaxxorCialtion</span>
+          </a>
+
+          <div class="contact-card contact-card-static">
+            <span class="cc-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.32.57 3.57.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A18 18 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57.1.32.03.69-.24 1.02l-2.2 2.2Z"/></svg>
+            </span>
+            <span class="cc-label" data-i18n="contact.phone">电话</span>
+            <span class="cc-value">+86 173-1671-6363</span>
+          </div>
+
+          <!-- 微信二维码槽位:把图片放到 assets/wechat.png 即可显示 -->
+          <div class="contact-card contact-card-static contact-card-qr" id="wechat-card" hidden>
+            <span class="cc-label">WeChat</span>
+            <img src="./assets/wechat.png" alt="WeChat QR" class="qr-img" id="wechat-qr" />
+          </div>
         </div>
-        <div class="social-links">
-            <h3>Contact</h3>
-            <div class="social-grid">
-                <a href="https://github.com/HaxxorCialtion" class="social-link" target="_blank"><i class="fab fa-github"></i>GitHub</a>
-                <a href="mailto:cialtion737410@sjtu.edu.cn" class="social-link"><i class="fas fa-envelope"></i>School Email</a>
-                <a href="mailto:cialtion@outlook.com" class="social-link"><i class="fas fa-envelope-open"></i>Personal Email</a>
-                <a href="https://space.bilibili.com/Cialtion" class="social-link" target="_blank"><i class="fab fa-bilibili"></i>Bilibili</a>
-                <a href="https://www.zhihu.com/people/Cialtion" class="social-link" target="_blank"><i class="fas fa-book"></i>Zhihu</a>
-                <a href="#" class="social-link" target="_blank"><i class="fab fa-twitter"></i>Twitter</a>
-            </div>
-        </div>
-    </aside>
-    <main class="main-content">
-        <header class="header">
-            <div class="header-content">
-                <div><h2>Cialtion's Tech Blog</h2></div>
-                <div class="search-box">
-                    <input type="text" class="search-input" placeholder="Search articles..." id="searchInput">
-                    <i class="fas fa-search search-icon"></i>
-                </div>
-            </div>
-        </header>
-        <div class="content-area">
-            <div class="hero-section">
-                <img src="images/bronya_1.jpg" alt="Hero Background" class="hero-bg-image">
-                <div class="hero-content">
-                    <div class="hero-logo">Love is Simple, Simple is Love</div>
-                    <h1 class="page-title">Welcome to My Tech World</h1>
-                    <p class="page-subtitle">Sharing insights on LLM, LLM_Memory, Omni, AI Desktop Robot, AI Companion and Anime</p>
-                </div>
-            </div>
-            <div class="articles-grid" id="articlesContainer">
-        <div class="article-card special-card">
-        <div class="special-icon"><i class="fas fa-graduation-cap"></i></div>
-        <div class="article-content">
-        <div class="article-date"><i class="fas fa-star"></i> Special Section</div>
-        <h3 class="article-title">Paper Reviews & Analysis</h3>
-        <p class="article-description">Academic paper reviews, research notes and insights on LLM, AI and cutting-edge technologies</p>
-        <p class="disclaimer"><strong>Disclaimer:</strong> These notes represent personal viewpoints, and most interpretive content is generated with AI assistance (e.g., Claude 4). There may be understanding biases or factual errors. For reference only.</p>
-        <div class="article-tags"><span class="tag">Research</span><span class="tag">Papers</span></div>
-        <a href="papers.html" class="read-more">Explore Papers <i class="fas fa-arrow-right"></i></a>
-        </div>
-        </div>
-        <div class="article-card special-card">
-        <div class="special-icon"><i class="fas fa-search-plus"></i></div>
-        <div class="article-content">
-        <div class="article-date"><i class="fas fa-star"></i> Special Section</div>
-        <h3 class="article-title">In-Depth Reviews</h3>
-        <p class="article-description">Detailed analysis, benchmarks, and hands-on reviews of the latest AI models, software, and technologies.</p>
-        <div class="article-tags"><span class="tag">Review</span><span class="tag">Benchmark</span><span class="tag">Analysis</span></div>
-        <a href="reviews.html" class="read-more">Explore Reviews <i class="fas fa-arrow-right"></i></a>
-        </div>
-        </div>
-        <div class="article-card special-card">
-        <div class="special-icon"><i class="fas fa-code-branch"></i></div>
-        <div class="article-content">
-        <div class="article-date"><i class="fas fa-star"></i> Special Section</div>
-        <h3 class="article-title">Open-Source Projects</h3>
-        <p class="article-description">My personal open-source contributions, libraries, and tools. Feel free to use, fork, and contribute!</p>
-        <div class="article-tags"><span class="tag">Open-Source</span><span class="tag">Code</span><span class="tag">GitHub</span></div>
-        <a href="opensource.html" class="read-more">Explore Projects <i class="fas fa-arrow-right"></i></a>
-        </div>
-        </div>
-        <div class="article-card special-card">
-        <div class="special-icon"><i class="fas fa-box-open"></i></div>
-        <div class="article-content">
-        <div class="article-date"><i class="fas fa-star"></i> Special Section</div>
-        <h3 class="article-title">Product Showcases</h3>
-        <p class="article-description">Showcasing fun and practical AI-powered applications and products I've built or am working on.</p>
-        <div class="article-tags"><span class="tag">Product</span><span class="tag">Demo</span><span class="tag">Showcase</span></div>
-        <a href="products.html" class="read-more">Explore Products <i class="fas fa-arrow-right"></i></a>
-        </div>
-        </div>
-        <div class="article-card special-card meetings-card">
-        <div class="special-icon"><i class="fas fa-chalkboard-teacher"></i></div>
-        <div class="article-content">
-        <div class="article-date"><i class="fas fa-star"></i> Special Section</div>
-        <h3 class="article-title">Group Meeting Reports</h3>
-        <p class="article-description">组会汇报记录 - LaTeX 排版的学术汇报文档，包含研究进展、论文分享与讨论。</p>
-        <div class="article-tags"><span class="tag">Meeting</span><span class="tag">LaTeX</span><span class="tag">Academic</span></div>
-        <a href="meetings.html" class="read-more">View Reports <i class="fas fa-arrow-right"></i></a>
-        </div>
-        </div>
-            <div class="article-card">
-                <img src="images/arknights_mizuki_0.jpg" alt="Qwen3-8B-Base 性能测试笔记 (完整数据版)" class="article-image" onerror="this.style.display='none'">
-                <div class="article-content">
-                    <div class="article-date">
-                        <i class="fas fa-calendar-alt"></i>
-                        2026-01-05
-                    </div>
-                    <h3 class="article-title">Qwen3-8B-Base 性能测试笔记 (完整数据版)</h3>
-                    <p class="article-description">- 模型: Qwen3-8B-Base - 设备: NVIDIA GeForce RTX 4090 (48G显存版) - 词表大小: 151,643 --- - Prompt 长度: 7 tokens - 生成 Token 数: 287 tokens | 阶段 | 耗时 (ms) | 占比 | 吞吐...</p>
-                    <div class="article-tags"></div>
-                    <a href="posts/LLM_infer_analysis.html" class="read-more">
-                        Read More <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-            <div class="article-card">
-                <img src="images/bronya_mp.jpg" alt="DPO训练流程深度解析 🎓" class="article-image" onerror="this.style.display='none'">
-                <div class="article-content">
-                    <div class="article-date">
-                        <i class="fas fa-calendar-alt"></i>
-                        2026-01-05
-                    </div>
-                    <h3 class="article-title">DPO训练流程深度解析 🎓</h3>
-                    <p class="article-description">--- 💡 关键理解： - prompt：给模型的输入，相当于"问题" - chosen：人类认为好的完整回答 - rejected：人类认为差的完整回答 - DPO通过对比学习，让模型偏好chosen，避免rejected --- 💡 为什么要拼接？ - 语言模型是自回归的，需要完整的上下文 - ...</p>
-                    <div class="article-tags"></div>
-                    <a href="posts/dpo_logic_guide.html" class="read-more">
-                        Read More <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-            <div class="article-card">
-                <img src="images/bronya_1.jpg" alt="Former Notes" class="article-image" onerror="this.style.display='none'">
-                <div class="article-content">
-                    <div class="article-date">
-                        <i class="fas fa-calendar-alt"></i>
-                        2026-01-05
-                    </div>
-                    <h3 class="article-title">Former Notes</h3>
-                    <p class="article-description">日期: 2024-09-22 标签: LLM角色扮演, LLM, TTS, ASR 这是一个基于关键词检测、语音识别、语音合成和对话生成的智能语音助手系统。该系统能够通过特定的唤醒词（如"hey bro"）启动与用户的语音对话，并利用先进的自然语言处理技术提供智能回复。 1. 关键词检测： 使用 P...</p>
-                    <div class="article-tags"></div>
-                    <a href="posts/former_notes.html" class="read-more">
-                        Read More <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-            <div class="article-card">
-                <img src="images/arknights_mizuki_0.jpg" alt="RoPE位置编码与现代LLM架构精讲" class="article-image" onerror="this.style.display='none'">
-                <div class="article-content">
-                    <div class="article-date">
-                        <i class="fas fa-calendar-alt"></i>
-                        2026-01-05
-                    </div>
-                    <h3 class="article-title">RoPE位置编码与现代LLM架构精讲</h3>
-                    <p class="article-description">关键洞察链条： 为什么敢冒险替换？ 1. 理论保证：数学上等价于学习相对位置 2. 实验验证：小模型上先验证，效果超过baseline 3. 工业推动：BERT后需要更长上下文，RoPE正好解决 4. 开源文化：苏剑林博客详细讲解，降低采用门槛 绝对位置编码的致命缺陷： RoPE的优雅解决方案： -...</p>
-                    <div class="article-tags"></div>
-                    <a href="posts/rope_llm_guide.html" class="read-more">
-                        Read More <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-            <div class="article-card">
-                <img src="images/arknights_mizuki_0.jpg" alt="LLM train vs infer" class="article-image" onerror="this.style.display='none'">
-                <div class="article-content">
-                    <div class="article-date">
-                        <i class="fas fa-calendar-alt"></i>
-                        2025-10-24
-                    </div>
-                    <h3 class="article-title">LLM train vs infer</h3>
-                    <p class="article-description">A example for LLM train and infer</p>
-                    <div class="article-tags"><span class="tag">LLM</span> <span class="tag">Model Artitecture</span></div>
-                    <a href="posts/LLM_train_vs_infer.html" class="read-more">
-                        Read More <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-            <div class="article-card">
-                <img src="images/arknights_mizuki_0.jpg" alt="从PPO到DPO的完整理解" class="article-image" onerror="this.style.display='none'">
-                <div class="article-content">
-                    <div class="article-date">
-                        <i class="fas fa-calendar-alt"></i>
-                        2025-10-16
-                    </div>
-                    <h3 class="article-title">从PPO到DPO的完整理解</h3>
-                    <p class="article-description">深入解析LLM中的强化学习算法，包括PPO、DPO、GRPO的工作原理、数学推导、以及工业界应用案例</p>
-                    <div class="article-tags"><span class="tag">RL</span> <span class="tag">LLM</span> <span class="tag">PPO</span> <span class="tag">DPO</span> <span class="tag">GRPO</span> <span class="tag">Deep Dive</span></div>
-                    <a href="posts/LLM强化学习深度解析-从困惑到理解.html" class="read-more">
-                        Read More <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-            <div class="article-card">
-                <img src="images/bronya_mp.jpg" alt="Large Language Model(LLM) Basic introduction" class="article-image" onerror="this.style.display='none'">
-                <div class="article-content">
-                    <div class="article-date">
-                        <i class="fas fa-calendar-alt"></i>
-                        2025-10-01
-                    </div>
-                    <h3 class="article-title">Large Language Model(LLM) Basic introduction</h3>
-                    <p class="article-description">本教程通过追踪张量的形状变化，完整解析大语言模型从用户输入到生成输出的全过程。 - Batch Size (B): 32 - Sequence Length (T): 128 - Embedding Dimension (Dmodel): 512 - Number of Heads (H): 8 -...</p>
-                    <div class="article-tags"><span class="tag">LLM</span> <span class="tag">Basic</span> <span class="tag">Full-attention</span></div>
-                    <a href="posts/LLM_Basic_introduction.html" class="read-more">
-                        Read More <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-            <div class="article-card">
-                <img src="images/arknights_mizuki_0.jpg" alt="Qwen3架构深度解析：从Base模型到Instruct模型" class="article-image" onerror="this.style.display='none'">
-                <div class="article-content">
-                    <div class="article-date">
-                        <i class="fas fa-calendar-alt"></i>
-                        2025-10-01
-                    </div>
-                    <h3 class="article-title">Qwen3架构深度解析：从Base模型到Instruct模型</h3>
-                    <p class="article-description">全面解析Qwen3模型架构、参数配置、动态序列处理和后训练数据格式(no Coder and MoE)</p>
-                    <div class="article-tags"><span class="tag">LLM</span> <span class="tag">Qwen3</span> <span class="tag">Transformer</span> <span class="tag">Architecture</span> <span class="tag">Fine-tuning</span> <span class="tag">SFT</span> <span class="tag">YaRN</span> <span class="tag">RoPE</span></div>
-                    <a href="posts/qwen3_deep_analysis.html" class="read-more">
-                        Read More <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div></div>
-        </div>
-    </main>
-    <script>
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            const query = e.target.value.toLowerCase();
-            const articles = document.querySelectorAll('.article-card:not(.special-card)');
-            articles.forEach(article => {
-                const title = article.querySelector('.article-title').textContent.toLowerCase();
-                const description = article.querySelector('.article-description').textContent.toLowerCase();
-                const tags = Array.from(article.querySelectorAll('.tag')).map(tag => tag.textContent.toLowerCase());
-                const matches = title.includes(query) || description.includes(query) || tags.some(tag => tag.includes(query));
-                article.style.display = matches ? 'block' : 'none';
-            });
-        });
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768) {
-                const sidebar = document.getElementById('sidebar');
-                const toggle = document.querySelector('.mobile-toggle');
-                if (!sidebar.contains(e.target) && !toggle.contains(e.target)) { sidebar.classList.remove('active'); }
-            }
-        });
-    </script>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span data-i18n="footer.copyright">© 2026 石枭昕 · Built with HTML &amp; CSS</span>
+      <a href="https://github.com/HaxxorCialtion/HaxxorCialtion.github.io" target="_blank" rel="noopener" data-i18n="footer.source">站点源码</a>
+    </div>
+  </footer>
+
+  <script src="./assets/i18n.js"></script>
+  <script src="./assets/app.js"></script>
 </body>
 </html>
