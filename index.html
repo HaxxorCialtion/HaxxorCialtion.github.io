@@ -3,194 +3,147 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="color-scheme" content="light dark" />
   <title>石枭昕 / Xiaoxin Shi</title>
-  <meta name="description" content="石枭昕 (Xiaoxin Shi) — LLM post-training, inference acceleration, on-device real-time agents." />
-
+  <meta name="description" content="石枭昕，上海创智学院与上海交通大学博士生，研究实时智能、并行解码、具身智能体与端侧交互 AI。" />
   <meta property="og:title" content="石枭昕 / Xiaoxin Shi" />
-  <meta property="og:description" content="LLM post-training · Inference acceleration · On-device real-time agents" />
+  <meta property="og:description" content="Real-time intelligence, embodied agents, and on-device interactive AI." />
   <meta property="og:type" content="profile" />
   <meta property="og:url" content="https://haxxorcialtion.github.io/" />
-
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='22' font-family='ui-sans-serif,system-ui' font-size='20' font-weight='600' fill='%23111' text-anchor='middle'%3EX%3C/text%3E%3C/svg%3E" />
+  <link rel="canonical" href="https://haxxorcialtion.github.io/" />
+  <link rel="alternate" hreflang="en" href="https://haxxorcialtion.github.io/en/" />
   <link rel="stylesheet" href="./assets/style.css" />
 </head>
 <body>
   <main class="page">
-
-    <!-- ========================================================
-         HEADER
-    ======================================================== -->
-      <header class="head">
-      <div class="head-top">
-        <div class="logos">
-          <img src="./assets/sjtu.png" alt="SJTU" />
-          <img src="./assets/sii.png"  alt="SII" />
+    <header class="hero">
+      <nav class="topbar" aria-label="页面导航">
+        <div class="institution-marks">
+          <img src="./assets/sjtu.png" alt="上海交通大学" />
+          <img src="./assets/sii.png" alt="上海创智学院" />
         </div>
-        <button id="lang-toggle" class="lang-btn" type="button" aria-label="Toggle language">
-          <span data-lang-label="zh">EN</span>
-          <span data-lang-label="en" hidden>中文</span>
-        </button>
+        <a class="language-link" href="./en/" lang="en">English</a>
+      </nav>
+
+      <p class="eyebrow">Real-time intelligence · Embodied agents · Interactive AI</p>
+      <h1>石枭昕 <span>Xiaoxin Shi</span></h1>
+      <p class="lead">
+        我研究如何让大模型从文本生成走向有物理时限的实时交互：更快的结构化决策、
+        可组合的具身动作接口，以及真正运行在个人设备上的 AI-native 应用。
+      </p>
+      <p class="current">
+        上海创智学院 / 上海交通大学博士生，导师黄增峰教授。2026 年 6 月起在米哈游实习。
+      </p>
+      <div class="link-row" aria-label="个人链接">
+        <a href="mailto:cialtion737410@sjtu.edu.cn">Email</a>
+        <a href="https://github.com/HaxxorCialtion" target="_blank" rel="me noopener">GitHub</a>
+        <a href="./assets/resume_zh.pdf">学术简历</a>
+        <a class="startup-link" href="https://simplelove.fun/" target="_blank" rel="noopener">SimpleLove ↗</a>
       </div>
-      <h1 class="name">
-        <span data-i18n="hero.name">石枭昕</span>
-        <span class="name-en" data-i18n="hero.name_en">Xiaoxin Shi</span>
-      </h1>
-
-      <p class="tagline" data-i18n="hero.tagline">
-        LLM 后训练 · 推理加速 · 端侧实时智能体
-      </p>
-      <p class="affiliation" data-i18n="hero.affiliation">
-        上海创智学院 / 上海交通大学 LLM 方向博士在读 · 导师：黄增峰教授
-      </p>
-
-      <p class="meta">
-        <a href="mailto:cialtion737410@sjtu.edu.cn">cialtion737410@sjtu.edu.cn</a>
-        <span class="sep">·</span>
-        <a href="https://github.com/HaxxorCialtion" target="_blank" rel="noopener">GitHub</a>
-        <span class="sep">·</span>
-        <a id="cv-download" href="./assets/resume_zh.pdf" download data-i18n="hero.download_pdf">下载 PDF 简历</a>
-      </p>
     </header>
 
-    <!-- ========================================================
-         EDUCATION
-    ======================================================== -->
-    <section>
-      <h2 data-i18n="edu.title">教育背景</h2>
-      <div class="edu-row">
-        <span data-i18n="edu.l1.school"><b>上海交通大学</b> · 化学（计算化学）本科</span>
-        <span class="date">2021 – 2025</span>
-      </div>
-      <div class="edu-row">
-        <span data-i18n="edu.l2.school"><b>上海创智学院 / 上海交通大学</b> · LLM 方向博士在读</span>
-        <span class="date" data-i18n="edu.l2.date">2025.09 – 至今</span>
-      </div>
-    </section>
-
-    <!-- ========================================================
-         CORE HIGHLIGHTS
-    ======================================================== -->
-    <section>
-      <h2 data-i18n="highlights.title">核心亮点</h2>
-      <ul class="bullets">
-        <li>
-          <strong data-i18n="highlights.h1.tag">游戏 / 数字人 NPC 全栈闭环</strong>
-          <span data-i18n="highlights.h1.body">独立完成"语音输入 → ASR → LLM 意图理解 → NPC 行为决策 → 角色动作与渲染"完整端到端 Demo（Echo Chronicles 纯 iPhone 端侧塔防游戏、SimpleLove VRM 数字人），实现 iOS / Windows / macOS Native 全栈跑通。</span>
-        </li>
-        <li>
-          <strong data-i18n="highlights.h2.tag">ICML 2026 (Accept, 一作)</strong>
-          <span data-i18n="highlights.h2.body">提出用于实时函数调用的多头并行解码架构，实现端到端 <b>3–6×</b> 加速（峰值 9.6×）；Qwen3-4B 在 4090 上达到 <b>61.2 ms / 16 Hz</b> 实时控制；iPhone 17 Pro Max 真机 <b>528 ms P50</b>。性能与速度均显著优于 Google FunctionGemma。</span>
-        </li>
-        <li>
-          <strong data-i18n="highlights.h3.tag">大规模训练实战</strong>
-          <span data-i18n="highlights.h3.body">具备<b>多节点分布式训练经验（最大规模 48×H200）</b>；掌握 Packing / 长度分桶 / 梯度累积 / FlashAttention-2 / FlexAttention / DDP 等高效训练技巧。</span>
-        </li>
-        <li>
-          <strong data-i18n="highlights.h4.tag">端侧推理 Infra</strong>
-          <span data-i18n="highlights.h4.body">为混合 SimpleTool 模型定制 llama.cpp 跨平台 KV Cache 共享与 Multi-seq Batching 改造；实现 nano-vllm 多头并行解码场景特化魔改；基于 ONNX 实现 DiT 框架高效推理；将 AI 协同工具（Claude / Cursor）作为开发加速器，单人闭环多模块整合。</span>
-        </li>
-      </ul>
-    </section>
-
-    <!-- ========================================================
-         PROJECTS
-    ======================================================== -->
-    <section>
-      <h2 data-i18n="projects.title">项目经历</h2>
-
-      <article class="project">
-        <div class="proj-head">
-          <h3 data-i18n="projects.p1.name">SimpleTool: Parallel Decoding for Real-Time LLM Function Calling (ICML 2026)</h3>
-          <span class="date" data-i18n="projects.p1.date">2025.10 – 至今</span>
-        </div>
-        <dl>
-          <dt data-i18n="projects.label.background">背景</dt>
-          <dd data-i18n="projects.p1.background">LLM 函数调用在端侧场景下延迟过高，难以满足游戏 NPC / 实时数字人 / 机械臂等 10 Hz+ 控制场景。</dd>
-          <dt data-i18n="projects.label.method">方法</dt>
-          <dd data-i18n="projects.p1.method">设计 17 个 Special Token 同时承担"结构 Token 压缩"与"模式选择器"双重角色，将 Function Call 输出空间压缩 <b>4–6×</b>；提出多头并行解码架构，利用 Decoding 阶段闲置算力，让 Function Name 与 Arguments 在不同头上同时解码。</dd>
-          <dt data-i18n="projects.label.contrib">个人工作</dt>
-          <dd data-i18n="projects.p1.contrib">独立完成 Idea → 数据合成 Pipeline → 训练框架 → 推理引擎魔改 → 多平台部署 → 论文撰写/投稿/Rebuttal 全流程闭环。</dd>
-          <dt data-i18n="projects.label.result">结果</dt>
-          <dd data-i18n="projects.p1.result">Qwen3-4B 在 4090 上 <b>61.2 ms P50</b>（16 Hz），并行 8 头平均效率 93%；Mobile Actions Unseen Benchmark 上 RT-Qwen-0.5B 达 <b>86.2%</b>（对比 FunctionGemma-270M 的 85.0%），通用能力完整保留（MMLU −0.29%，IFEval +2.78%）。论文已被 <b>ICML 2026 接收</b>，HuggingFace 与 ModelScope 已上线 7 个尺寸版本（0.5B–30B MoE）。</dd>
-        </dl>
-      </article>
-
-      <article class="project">
-        <div class="proj-head">
-          <h3 data-i18n="projects.p2.name">SimpleLove / NPC.exe — 端侧实时 AI-Native 数字人 &amp; 游戏 NPC 引擎</h3>
-          <span class="date" data-i18n="projects.p2.date">2026.02 – 至今</span>
-        </div>
-        <dl>
-          <dt data-i18n="projects.label.background">背景</dt>
-          <dd data-i18n="projects.p2.background">现有数字人 / 游戏 NPC 系统普遍依赖云端大模型，延迟高、隐私差，且行为策略与角色身份割裂，体验类似传统云端语音助手。</dd>
-          <dt data-i18n="projects.label.method">方法</dt>
-          <dd data-i18n="projects.p2.method">基于 SimpleTool 构建端到端本地数字人引擎；采用 NPC Policy SFT / RL (Action as Cosplay) 使 LLM 直接生成角色 Actions；Simple-T2M 复用 SimpleTool LLM 中间层 Hidden States 作为 Text Condition，砍掉传统 8B 级独立 Text Encoder。</dd>
-          <dt data-i18n="projects.label.contrib">个人工作</dt>
-          <dd data-i18n="projects.p2.contrib">独立设计架构，训练 NPC Policy 及 50M DiT Flow Matching 动作生成模型，完成跨平台 Native 部署与 VRM 数字人渲染集成。</dd>
-          <dt data-i18n="projects.label.result">结果</dt>
-          <dd data-i18n="projects.p2.result">NPC Policy Eval Acc <b>16.2% → 58.7%</b>（+42.5pp），输出分布 RL-friendly（Top-10 Cov 0.993，可直接接 PPO/GRPO）；Simple-T2M 在 4090 (Q8) 上 <b>~50 ms 出 Motion</b>，整套数字人系统仅占 <b>5 GB 显存</b>；Linux / Windows (DirectML) / 端到端 Native 全部打通，零 Python 依赖（macOS Metal+CoreML 正在制作），可直接嵌入游戏客户端。</dd>
-        </dl>
-      </article>
-
-      <article class="project">
-        <div class="proj-head">
-          <h3 data-i18n="projects.p3.name">Echo Chronicles / 回声战纪 — 语音驱动塔防游戏</h3>
-          <span class="date" data-i18n="projects.p3.date">2025.12 – 2026.02</span>
-        </div>
-        <dl>
-          <dt data-i18n="projects.p3.label1">完整游戏闭环</dt>
-          <dd data-i18n="projects.p3.body1">玩家语音指令 → 端侧 ASR (Sherpa-onnx Paraformer, 5.9% WER, 115 ms) → SimpleTool 0.5B 意图理解与函数调用 → 游戏内塔防单位行为响应。</dd>
-          <dt data-i18n="projects.label.contrib">个人工作</dt>
-          <dd data-i18n="projects.p3.contrib">独立完成 iOS 端 llama.swiftui + Metal 推理集成、PixiJS WebGL 渲染层、五元素塔防系统与 Campaign 关卡设计。</dd>
-          <dt data-i18n="projects.label.result">结果</dt>
-          <dd data-i18n="projects.p3.result">iPhone 17 Pro Max 真机全程本地运行，无任何云端依赖；有效验证了"LLM 作为游戏内 NPC / 角色控制器"范式在端侧的可行性与延迟可控性。</dd>
-        </dl>
-      </article>
-    </section>
-
-    <!-- ========================================================
-         SKILLS
-    ======================================================== -->
-    <section>
-      <h2 data-i18n="skills.title">技术栈</h2>
-      <dl class="skills">
-        <dt data-i18n="skills.s1.k">编程语言</dt>
-        <dd data-i18n="skills.s1.v">熟练使用 Python；在 AI 协同下熟练开发 C++ / CUDA / Swift 应用</dd>
-
-        <dt data-i18n="skills.s2.k">算法与训练</dt>
-        <dd data-i18n="skills.s2.v">Transformer、SFT / RL、LoRA、Packing / 长度分桶、Curriculum Learning、多节点 DDP (48 卡训练经验)、FlashAttention-2</dd>
-
-        <dt data-i18n="skills.s3.k">推理与架构</dt>
-        <dd data-i18n="skills.s3.v">PyTorch、vLLM、llama.cpp（含魔改定制）、nano-vllm、ONNX Runtime (CUDA / DirectML)、GGUF 量化 (Q4/Q8)、KV Cache 优化</dd>
-
-        <dt data-i18n="skills.s4.k">端侧部署</dt>
-        <dd data-i18n="skills.s4.v">Linux、Windows (DirectML)、macOS (Metal)、iOS LLM Native 开发（基于 ggml 与 onnx）、ASR 端侧部署</dd>
-
-        <dt data-i18n="skills.s5.k">数据合成</dt>
-        <dd data-i18n="skills.s5.v">多 Agent 协同 Pipeline、LLM-as-Judge；已生产 2M+ 工业级训练样本（覆盖游戏 NPC / 数字人 / 机械臂领域）</dd>
-      </dl>
-    </section>
-
-    <!-- ========================================================
-         SUMMARY
-    ======================================================== -->
-    <section>
-      <h2 data-i18n="summary.title">个人总结</h2>
-      <p data-i18n="summary.body">
-        科研 taste 喜欢能工业落地的研发，习惯从应用侧反推 Infra 和算法设计，坚信"能落地的 idea 才是好 idea"。技术兴趣集中在 LLM 后训练、推理加速与端侧实时智能体，长期目标是落地从虚拟数字生命到物理机器人的具身智能。具备从论文 Idea 到跨平台 Native Demo 的全栈单人开发闭环能力。
+    <section class="intro" aria-labelledby="research-title">
+      <h2 id="research-title">研究方向</h2>
+      <p>
+        我的工作横跨 LLM 后训练、推理系统与端侧产品。核心问题始终相同：
+        当智能模型需要在几十毫秒内理解状态、作出决策并影响真实界面或身体时，
+        模型、动作空间与执行系统应如何共同设计？
       </p>
     </section>
 
-    <footer class="foot">
-      <span data-i18n="foot.copy">© 2026 石枭昕</span>
-      <span class="sep">·</span>
-      <a href="https://github.com/HaxxorCialtion/HaxxorCialtion.github.io" target="_blank" rel="noopener" data-i18n="foot.source">站点源码</a>
+    <section aria-labelledby="projects-title">
+      <div class="section-heading">
+        <h2 id="projects-title">代表项目</h2>
+        <p>Research, systems, and product</p>
+      </div>
+
+      <article class="project project-with-figure">
+        <div class="project-copy">
+          <p class="project-type">ICML 2026 · 第一作者</p>
+          <h3>SimpleTool / RealtimeTool</h3>
+          <p class="project-subtitle">Parallel Decoding for Real-Time LLM Function Calling</p>
+          <p>
+            一次共享 prefill 后，让函数名与参数在多个 head 中并行生成，突破实时智能体中
+            “理解 → 结构化决策”的串行延迟。典型端到端加速 3–6×，最高 9.6×；
+            RT-Qwen3-4B 在 RTX 4090 上达到 61.2 ms P50。
+          </p>
+          <div class="project-links">
+            <a href="https://icml.cc/virtual/2026/poster/62617" target="_blank" rel="noopener">ICML 论文页</a>
+            <a href="https://arxiv.org/abs/2603.00030" target="_blank" rel="noopener">arXiv</a>
+            <a href="https://github.com/HaxxorCialtion/SimpleTool" target="_blank" rel="noopener">代码</a>
+            <a href="https://github.com/HaxxorCialtion/SimpleTool/blob/main/assets/realtimetool_icml2026_poster.pdf" target="_blank" rel="noopener">海报</a>
+          </div>
+        </div>
+        <figure>
+          <img src="./assets/project-simpletool.png" alt="SimpleTool 多头并行函数调用架构" />
+          <figcaption>Shared prefix / KV，function 与 arguments 并行解码。</figcaption>
+        </figure>
+      </article>
+
+      <article class="project project-vla">
+        <div class="project-copy">
+          <p class="project-type">在研 · Embodied Agent-as-Policy</p>
+          <h3>SimpleToolVLA</h3>
+          <p class="project-subtitle">Typed tool calls as a scalable embodied action space</p>
+          <p>
+            将 tool calling 定义为 LLM / VLM 与 controller、VLA skill 或 world-action model
+            之间的高层动作接口，以动态 schema 描述可验证、可组合的语义动作。
+            当前研究聚焦两项可证伪问题：仿真与合成 tool trajectories 能否随规模提升迁移能力，
+            以及端侧闭环能否稳定满足物理 deadline。
+          </p>
+          <div class="research-flow" aria-label="SimpleToolVLA 研究路径">
+            <span>Multimodal context</span><b>→</b><span>tool(args)</span><b>→</b><span>Embodiment adapter</span><b>→</b><span>Physical loop</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="project project-with-figure simplelove-project">
+        <div class="project-copy">
+          <p class="project-type">创业项目 · AI-OC-native interactive content</p>
+          <h3>SimpleLove</h3>
+          <p class="project-subtitle">Personal OC for the Interactive Internet</p>
+          <p>
+            SimpleLove 探索持续 AI-OC 身份、跨场景记忆与一句话生成互动内容。
+            一侧是由 OC、记忆和偏好驱动的内容消费；另一侧是支持 Agent 修改、测试与 Remix 的创作平台。
+            长期目标是让同一个 OC 从互动内容中的角色，成长为用户设备上的个人智能体。
+          </p>
+          <div class="project-links">
+            <a href="https://simplelove.fun/" target="_blank" rel="noopener">访问官网</a>
+            <a href="https://github.com/SimpleLoveAI/SimpleLove" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </div>
+        <figure>
+          <img src="./assets/project-simplelove.png" alt="SimpleLove AI Coding Studio 产品界面" />
+          <figcaption>Prompt-to-content、AI Remix 与可运行互动内容。</figcaption>
+        </figure>
+      </article>
+    </section>
+
+    <section class="timeline-section" aria-labelledby="background-title">
+      <h2 id="background-title">经历与教育</h2>
+      <div class="timeline">
+        <div><time>2026.06 – 至今</time><p><strong>米哈游</strong><span>实习</span></p></div>
+        <div><time>2025.09 – 至今</time><p><strong>上海创智学院 / 上海交通大学</strong><span>博士生 · LLM 与实时智能体方向 · 导师：黄增峰教授</span></p></div>
+        <div><time>2021 – 2025</time><p><strong>上海交通大学</strong><span>化学学士 · 计算化学方向</span></p></div>
+      </div>
+    </section>
+
+    <section class="join" aria-labelledby="join-title">
+      <p class="project-type">Open invitation</p>
+      <h2 id="join-title">一起构建下一代互动智能</h2>
+      <p>
+        SimpleLove 正在寻找理解端侧智能、AI 原生互动内容与角色智能长期价值的同行者。
+        欢迎 VC、创业伙伴、研究者、工程师与创作者联系我，讨论投资、合作与加入团队。
+      </p>
+      <div class="link-row">
+        <a class="startup-link" href="https://simplelove.fun/" target="_blank" rel="noopener">simplelove.fun ↗</a>
+        <a href="mailto:cialtion737410@sjtu.edu.cn?subject=SimpleLove%20Collaboration">联系我</a>
+      </div>
+    </section>
+
+    <footer>
+      <span>© 2026 石枭昕</span>
+      <a href="https://github.com/HaxxorCialtion/HaxxorCialtion.github.io" target="_blank" rel="noopener">Source</a>
     </footer>
-
   </main>
-
-  <script src="./assets/i18n.js"></script>
-  <script src="./assets/app.js"></script>
 </body>
 </html>

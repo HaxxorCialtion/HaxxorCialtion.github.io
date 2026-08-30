@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Xiaoxin Shi / 石枭昕</title>
+  <meta name="description" content="Xiaoxin Shi is a Ph.D. student working on real-time intelligence, parallel decoding, embodied agents, and on-device interactive AI." />
+  <meta property="og:title" content="Xiaoxin Shi / 石枭昕" />
+  <meta property="og:description" content="Real-time intelligence, embodied agents, and on-device interactive AI." />
+  <meta property="og:type" content="profile" />
+  <meta property="og:url" content="https://haxxorcialtion.github.io/en/" />
+  <link rel="canonical" href="https://haxxorcialtion.github.io/en/" />
+  <link rel="alternate" hreflang="zh-CN" href="https://haxxorcialtion.github.io/" />
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <nav class="topbar" aria-label="Page navigation">
+        <div class="institution-marks">
+          <img src="../assets/sjtu.png" alt="Shanghai Jiao Tong University" />
+          <img src="../assets/sii.png" alt="Shanghai Innovation Institute" />
+        </div>
+        <a class="language-link" href="../" lang="zh-CN">中文</a>
+      </nav>
+
+      <p class="eyebrow">Real-time intelligence · Embodied agents · Interactive AI</p>
+      <h1>Xiaoxin Shi <span>石枭昕</span></h1>
+      <p class="lead">
+        I study how language models can move beyond text generation into hard-deadline interaction:
+        faster structured decisions, composable interfaces for embodied action, and AI-native applications
+        that run on personal devices.
+      </p>
+      <p class="current">
+        Ph.D. student at Shanghai Innovation Institute / Shanghai Jiao Tong University, advised by Prof. Zengfeng Huang.
+        Intern at miHoYo since June 2026.
+      </p>
+      <div class="link-row" aria-label="Profile links">
+        <a href="mailto:cialtion737410@sjtu.edu.cn">Email</a>
+        <a href="https://github.com/HaxxorCialtion" target="_blank" rel="me noopener">GitHub</a>
+        <a href="../assets/resume_en.pdf">CV</a>
+        <a class="startup-link" href="https://simplelove.fun/" target="_blank" rel="noopener">SimpleLove ↗</a>
+      </div>
+    </header>
+
+    <section class="intro" aria-labelledby="research-title">
+      <h2 id="research-title">Research</h2>
+      <p>
+        My work spans LLM post-training, inference systems, and on-device products. The recurring question is:
+        when an intelligent model must perceive state, decide, and affect an interface or physical system within
+        tens of milliseconds, how should the model, action space, and execution stack be designed together?
+      </p>
+    </section>
+
+    <section aria-labelledby="projects-title">
+      <div class="section-heading">
+        <h2 id="projects-title">Selected projects</h2>
+        <p>Research, systems, and product</p>
+      </div>
+
+      <article class="project project-with-figure">
+        <div class="project-copy">
+          <p class="project-type">ICML 2026 · First author</p>
+          <h3>SimpleTool / RealtimeTool</h3>
+          <p class="project-subtitle">Parallel Decoding for Real-Time LLM Function Calling</p>
+          <p>
+            After one shared prefill, function names and arguments are generated concurrently across parallel heads,
+            removing the serial structured-decision bottleneck in real-time agents. It delivers 3–6× typical
+            end-to-end speedup and up to 9.6×, with RT-Qwen3-4B reaching 61.2 ms P50 on an RTX 4090.
+          </p>
+          <div class="project-links">
+            <a href="https://icml.cc/virtual/2026/poster/62617" target="_blank" rel="noopener">ICML page</a>
+            <a href="https://arxiv.org/abs/2603.00030" target="_blank" rel="noopener">arXiv</a>
+            <a href="https://github.com/HaxxorCialtion/SimpleTool" target="_blank" rel="noopener">Code</a>
+            <a href="https://github.com/HaxxorCialtion/SimpleTool/blob/main/assets/realtimetool_icml2026_poster.pdf" target="_blank" rel="noopener">Poster</a>
+          </div>
+        </div>
+        <figure>
+          <img src="../assets/project-simpletool.png" alt="SimpleTool multi-head parallel function-calling architecture" />
+          <figcaption>Shared prefix / KV with parallel decoding of function and arguments.</figcaption>
+        </figure>
+      </article>
+
+      <article class="project project-vla">
+        <div class="project-copy">
+          <p class="project-type">Ongoing research · Embodied Agent-as-Policy</p>
+          <h3>SimpleToolVLA</h3>
+          <p class="project-subtitle">Typed tool calls as a scalable embodied action space</p>
+          <p>
+            SimpleToolVLA treats tool calling as the high-level interface between an LLM / VLM and controllers,
+            VLA skills, or world-action models. Dynamic schemas define typed, composable, and verifiable semantic actions.
+            The current work tests two falsifiable hypotheses: whether simulation and synthetic tool trajectories scale
+            transferable policies, and whether the resulting edge loop can reliably meet physical deadlines.
+          </p>
+          <div class="research-flow" aria-label="SimpleToolVLA research path">
+            <span>Multimodal context</span><b>→</b><span>tool(args)</span><b>→</b><span>Embodiment adapter</span><b>→</b><span>Physical loop</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="project project-with-figure simplelove-project">
+        <div class="project-copy">
+          <p class="project-type">Startup · AI-OC-native interactive content</p>
+          <h3>SimpleLove</h3>
+          <p class="project-subtitle">Personal OC for the Interactive Internet</p>
+          <p>
+            SimpleLove explores persistent AI-OC identity, cross-experience memory, and prompt-to-interactive-content.
+            One side is a content experience shaped by an OC, memory, and preference; the other is a creation platform
+            where agents help modify, test, and remix runnable experiences. The long-term goal is for the same OC to
+            grow from a character inside content into a personal agent on the user's devices.
+          </p>
+          <div class="project-links">
+            <a href="https://simplelove.fun/" target="_blank" rel="noopener">Visit website</a>
+            <a href="https://github.com/SimpleLoveAI/SimpleLove" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </div>
+        <figure>
+          <img src="../assets/project-simplelove.png" alt="SimpleLove AI Coding Studio product interface" />
+          <figcaption>Prompt-to-content, AI remix, and runnable interactive experiences.</figcaption>
+        </figure>
+      </article>
+    </section>
+
+    <section class="timeline-section" aria-labelledby="background-title">
+      <h2 id="background-title">Experience &amp; education</h2>
+      <div class="timeline">
+        <div><time>Jun. 2026 – Present</time><p><strong>miHoYo</strong><span>Intern</span></p></div>
+        <div><time>Sept. 2025 – Present</time><p><strong>Shanghai Innovation Institute / Shanghai Jiao Tong University</strong><span>Ph.D. student · LLMs and real-time agents · Advisor: Prof. Zengfeng Huang</span></p></div>
+        <div><time>2021 – 2025</time><p><strong>Shanghai Jiao Tong University</strong><span>B.S. in Chemistry · Computational chemistry</span></p></div>
+      </div>
+    </section>
+
+    <section class="join" aria-labelledby="join-title">
+      <p class="project-type">Open invitation</p>
+      <h2 id="join-title">Build the next generation of interactive intelligence with us</h2>
+      <p>
+        SimpleLove is looking for people who share a long-term view of on-device intelligence,
+        AI-native interactive content, and character intelligence. I welcome conversations with investors,
+        founders, researchers, engineers, and creators about funding, collaboration, or joining the team.
+      </p>
+      <div class="link-row">
+        <a class="startup-link" href="https://simplelove.fun/" target="_blank" rel="noopener">simplelove.fun ↗</a>
+        <a href="mailto:cialtion737410@sjtu.edu.cn?subject=SimpleLove%20Collaboration">Get in touch</a>
+      </div>
+    </section>
+
+    <footer>
+      <span>© 2026 Xiaoxin Shi</span>
+      <a href="https://github.com/HaxxorCialtion/HaxxorCialtion.github.io" target="_blank" rel="noopener">Source</a>
+    </footer>
+  </main>
+</body>
+</html>
