@@ -179,6 +179,19 @@ figcaption { margin-top: 9px; color: var(--muted); font-size: 12px; line-height:
 .timeline strong { font-weight: 650; }
 .timeline span { color: var(--soft); font-size: 14px; }
 
+.skills-section h2 { margin-bottom: 22px; }
+.skill-grid { display: grid; }
+.skill-grid p {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 24px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.skill-grid p:last-child { border-bottom: 0; }
+.skill-grid strong { font-weight: 650; }
+.skill-grid span { color: var(--soft); font-size: 14px; }
+
 .join {
   margin: 18px 0 0;
   padding: 44px 46px;
@@ -218,6 +231,7 @@ footer a { color: var(--muted); }
   .project h3 { font-size: 27px; }
   .project figure { max-width: 560px; }
   .timeline > div { grid-template-columns: 1fr; gap: 3px; }
+  .skill-grid p { grid-template-columns: 1fr; gap: 4px; }
   .join { padding: 32px 24px; }
   .join h2 { font-size: 26px; }
 }

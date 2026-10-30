@@ -4,9 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Xiaoxin Shi / 石枭昕</title>
-  <meta name="description" content="Xiaoxin Shi is a Ph.D. student working on real-time intelligence, parallel decoding, embodied agents, and on-device interactive AI." />
+  <meta name="description" content="Xiaoxin Shi is a Ph.D. student working on LLM post-training, inference systems, embodied agents, and on-device multimodal models." />
   <meta property="og:title" content="Xiaoxin Shi / 石枭昕" />
-  <meta property="og:description" content="Real-time intelligence, embodied agents, and on-device interactive AI." />
+  <meta property="og:description" content="LLM post-training, inference infrastructure, embodied agents, and on-device AI." />
   <meta property="og:type" content="profile" />
   <meta property="og:url" content="https://haxxorcialtion.github.io/en/" />
   <link rel="canonical" href="https://haxxorcialtion.github.io/en/" />
@@ -24,29 +24,29 @@
         <a class="language-link" href="../" lang="zh-CN">中文</a>
       </nav>
 
-      <p class="eyebrow">Real-time intelligence · Embodied agents · Interactive AI</p>
+      <p class="eyebrow">LLM post-training · Inference infra · Embodied agents · On-device AI</p>
       <h1>Xiaoxin Shi <span>石枭昕</span></h1>
       <p class="lead">
-        Research interests: post-training and inference infrastructure; on-device embodied real-time agents,
-        with faster structured decisions, scalable embodied agents, and on-device AI-native applications.
+        Research interests: LLM architecture and post-training, real-time function calling, inference systems optimization,
+        embodied agents, and on-device multimodal models.
       </p>
       <p class="current">
-        Ph.D. student at Shanghai Innovation Institute / Shanghai Jiao Tong University, advised by Prof. Zengfeng Huang.
+        Ph.D. student at Shanghai Innovation Institute / Shanghai Jiao Tong University, working on LLMs with Prof. Zengfeng Huang.
       </p>
       <div class="link-row" aria-label="Profile links">
         <a href="mailto:cialtion737410@sjtu.edu.cn">Email</a>
         <a href="https://github.com/HaxxorCialtion" target="_blank" rel="me noopener">GitHub</a>
-        <a href="../assets/resume_en.pdf">CV</a>
-        <a class="startup-link" href="https://simplelove.fun/" target="_blank" rel="noopener">SimpleLove ↗</a>
+        <a href="../assets/technical_academic_resume.pdf">Academic CV</a>
+        <a class="startup-link" href="https://simplelove.fun/" target="_blank" rel="noopener">SimpleFun ↗</a>
       </div>
     </header>
 
     <section class="intro" aria-labelledby="research-title">
-      <h2 id="research-title">Research</h2>
+      <h2 id="research-title">Research thread</h2>
       <p>
-        My work spans LLM post-training, inference systems, and on-device products. The recurring question is:
-        when an intelligent model must perceive state, decide, and affect an interface or physical system within
-        tens of milliseconds, how should the model, action space, and execution stack be designed together?
+        I work on putting the model, action space, and execution system into one real-time loop: faster structured decisions,
+        scalable embodied action interfaces, and models that actually run on personal devices. From real-time function calling,
+        to robot control loops, to on-device AI games, the common question is how an agent can keep up with the physical world.
       </p>
     </section>
 
@@ -62,9 +62,10 @@
           <h3>SimpleTool / RealtimeTool</h3>
           <p class="project-subtitle">Parallel Decoding for Real-Time LLM Function Calling</p>
           <p>
-            After one shared prefill, function names and arguments are generated concurrently across parallel heads,
-            removing the serial structured-decision bottleneck in real-time agents. It delivers 3–6× typical
-            end-to-end speedup and up to 9.6×, with RT-Qwen3-4B reaching 61.2 ms P50 on an RTX 4090.
+            A structured-output compression and multi-head decoding method for real-time function calling. Shared Prefix / KV Cache
+            allows function names and arguments to be generated concurrently, reducing serial autoregressive overhead. Across Qwen
+            models from 0.5B to 14B, it achieves 3–6× typical end-to-end speedup and up to 9.6×; a 4B model reaches 61.2 ms P50,
+            or about 16 Hz, on an RTX 4090.
           </p>
           <div class="project-links">
             <a href="https://icml.cc/virtual/2026/poster/62617" target="_blank" rel="noopener">ICML page</a>
@@ -75,72 +76,96 @@
         </div>
         <figure>
           <img src="../assets/project-simpletool.png" alt="SimpleTool multi-head parallel function-calling architecture" />
-          <figcaption>Shared prefix / KV with parallel decoding of function and arguments.</figcaption>
+          <figcaption>Shared prefix / KV with parallel decoding of function names and arguments.</figcaption>
         </figure>
       </article>
 
       <article class="project project-vla">
         <div class="project-copy">
-          <p class="project-type">Ongoing research · Embodied Agent-as-Policy</p>
+          <p class="project-type">Ongoing · LLM / VLM as Policy</p>
           <h3>SimpleToolVLA</h3>
-          <p class="project-subtitle">Typed tool calls as a scalable embodied action space</p>
+          <p class="project-subtitle">Structured action interfaces for embodied intelligence</p>
           <p>
-            SimpleToolVLA treats tool calling as the high-level interface between an LLM / VLM and controllers,
-            VLA skills, or world-action models. Dynamic schemas define typed, composable, and verifiable semantic actions.
-            The current work tests two falsifiable hypotheses: whether simulation and synthetic tool trajectories scale
-            transferable policies, and whether the resulting edge loop can reliably meet physical deadlines.
+            SimpleToolVLA models embodied operation as language-defined tool calling, using typed tools with continuous parameters
+            to express robot actions and skills. The work studies how high-level LLM / VLM policies integrate with low-level motion
+            controllers, and evaluates action parameters, real-time latency, and task generalization in the perception–decision–execution loop.
+            MuJoCo-based tabletop experiments support data synthesis and distillation.
           </p>
           <div class="research-flow" aria-label="SimpleToolVLA research path">
-            <span>Multimodal context</span><b>→</b><span>tool(args)</span><b>→</b><span>Embodiment adapter</span><b>→</b><span>Physical loop</span>
+            <span>Perception</span><b>→</b><span>tool(args)</span><b>→</b><span>Controller</span><b>→</b><span>Physical loop</span>
           </div>
         </div>
       </article>
 
       <article class="project project-with-figure simplelove-project">
         <div class="project-copy">
-          <p class="project-type">Startup · AI-OC-native interactive content</p>
-          <h3>SimpleLove</h3>
-          <p class="project-subtitle">Personal OC for the Interactive Internet</p>
+          <p class="project-type">Startup · On-device AI game engine</p>
+          <h3>SimpleFun</h3>
+          <p class="project-subtitle">One model · One phone · Infinite small worlds</p>
           <p>
-            SimpleLove explores persistent AI-OC identity, cross-experience memory, and prompt-to-interactive-content.
-            One side is a content experience shaped by an OC, memory, and preference; the other is a creation platform
-            where agents help modify, test, and remix runnable experiences. The long-term goal is for the same OC to
-            grow from a character inside content into a personal agent on the user's devices.
-            <br />
-            <strong>In short: a “TikTok” for OC mini-apps, driven by coding agents and AIGC.</strong>
+            SimpleFun connects AI play, AI creation, and AI remix through one mini-app protocol. A small model on the phone outputs
+            dialogue, expression, inner state, and action together; the AI-UGC engine turns images, audio, and text into playable games;
+            the Remix engine modifies existing games with a real-engine playtest gate. The current system has 100+ runnable mini-apps,
+            with a 0.8B model bundled and 2B / 4B models downloaded on demand. The public product entry remains simplelove.fun.
           </p>
           <div class="project-links">
-            <a href="https://simplelove.fun/" target="_blank" rel="noopener">Visit website</a>
+            <a href="https://simplelove.fun/" target="_blank" rel="noopener">Product entry ↗</a>
             <a href="https://github.com/SimpleLoveAI/SimpleLove" target="_blank" rel="noopener">GitHub</a>
           </div>
         </div>
         <figure>
-          <img src="../assets/project-simplelove.png" alt="SimpleLove AI Coding Studio product interface" />
-          <figcaption>Prompt-to-content, AI remix, and runnable interactive experiences.</figcaption>
+          <img src="../assets/project-simplefun.png" alt="SimpleFun on-device AI game product interface" />
+          <figcaption>AI play, AI creation, and AI remix for on-device interactive content.</figcaption>
         </figure>
       </article>
     </section>
 
     <section class="timeline-section" aria-labelledby="background-title">
-      <h2 id="background-title">Experience &amp; education</h2>
+      <h2 id="background-title">Research &amp; engineering</h2>
       <div class="timeline">
-        <div><time>Jun. 2026 – Present</time><p><strong>miHoYo</strong><span>Intern</span></p></div>
-        <div><time>Sept. 2025 – Present</time><p><strong>Shanghai Innovation Institute / Shanghai Jiao Tong University</strong><span>Ph.D. student · post-training and infra · Advisor: Prof. Zengfeng Huang</span></p></div>
-        <div><time>2021 – 2025</time><p><strong>Shanghai Jiao Tong University</strong><span>B.S. in Chemistry · Computational chemistry</span></p></div>
+        <div>
+          <time>Jun. 2026 – Oct. 2026</time>
+          <p><strong>miHoYo × Unitree collaboration</strong><span>Core R&amp;D · G1 Edu real-robot interaction system; AI NPC post-training with SFT, OPD, and RL</span></p>
+        </div>
+        <div>
+          <time>2026 – Present</time>
+          <p><strong>SimpleToolVLA</strong><span>LLM / VLM as Policy · Real-time robot decision-making and structured action interfaces</span></p>
+        </div>
+        <div>
+          <time>Oct. 2025 – Present</time>
+          <p><strong>SimpleTool / SimpleLove</strong><span>On-device model training and inference infra · SFT, distillation, multi-head inference, and cross-platform deployment</span></p>
+        </div>
+        <div>
+          <time>Sept. 2025 – Present</time>
+          <p><strong>Shanghai Innovation Institute / Shanghai Jiao Tong University</strong><span>Ph.D. student in LLMs · Advisor: Prof. Zengfeng Huang</span></p>
+        </div>
+        <div>
+          <time>Sept. 2021 – Jun. 2025</time>
+          <p><strong>Shanghai Jiao Tong University</strong><span>B.S. in Chemistry · Computational chemistry</span></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="skills-section" aria-labelledby="skills-title">
+      <h2 id="skills-title">Technical focus</h2>
+      <div class="skill-grid">
+        <p><strong>Models &amp; algorithms</strong><span>Transformers, LLM post-training, SFT / RL, LoRA, distillation, structured / parallel decoding, VLM agents, LLM as Policy</span></p>
+        <p><strong>Training &amp; inference</strong><span>PyTorch, Transformers, vLLM, SGLang, llama.cpp, MLX, quantization, KV Cache, inference profiling</span></p>
+        <p><strong>Engineering</strong><span>Synthetic data, automated evaluation, robot bring-up, Apple Silicon, iPhone deployment, and cross-platform integration</span></p>
       </div>
     </section>
 
     <section class="join" aria-labelledby="join-title">
       <p class="project-type">Open invitation</p>
-      <h2 id="join-title">Build the next generation of interactive intelligence with us</h2>
+      <h2 id="join-title">Build on-device AI mini-apps with us</h2>
       <p>
-        SimpleLove is looking for people who share a long-term view of on-device intelligence,
-        AI-native interactive content, and character intelligence. I welcome conversations with investors,
-        founders, researchers, engineers, and creators about funding, collaboration, or joining the team.
+        SimpleFun is looking for early-stage VC partners, co-founders, and collaborators across on-device inference, game design,
+        IP, B2B, and studios. If you care about putting inference on the phone and turning content into code, get in touch to build
+        real-time inference and AI-native play together.
       </p>
       <div class="link-row">
         <a class="startup-link" href="https://simplelove.fun/" target="_blank" rel="noopener">simplelove.fun ↗</a>
-        <a href="mailto:cialtion737410@sjtu.edu.cn?subject=SimpleLove%20Collaboration">Get in touch</a>
+        <a href="mailto:cialtion737410@sjtu.edu.cn?subject=SimpleFun%20Collaboration">Get in touch</a>
       </div>
     </section>
 
