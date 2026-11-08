@@ -93,6 +93,29 @@ p, h1, h2, h3, figure { margin: 0; }
   margin-top: 20px;
   font-size: 14px;
 }
+.hero-links {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 28px;
+  margin-top: 20px;
+}
+.hero-links .link-row { margin-top: 0; }
+.featured-links {
+  display: flex;
+  align-items: baseline;
+  flex-shrink: 0;
+  gap: 20px;
+}
+.featured-links a {
+  color: var(--soft);
+  font-size: 17px;
+  font-weight: 650;
+  text-decoration-thickness: 1px;
+  text-decoration-color: #aebbd0;
+  white-space: nowrap;
+}
+.featured-links a:hover { color: var(--teal); }
 .startup-link { color: var(--rose); font-weight: 700; }
 
 section {
@@ -219,6 +242,8 @@ footer a { color: var(--muted); }
   .institution-marks { gap: 12px; }
   .institution-marks img { height: 24px; }
   .hero { padding-bottom: 42px; }
+  .hero-links { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .featured-links { gap: 16px; }
   .hero h1 { font-size: 39px; }
   .hero h1 span { display: block; margin: 8px 0 0; font-size: 18px; }
   .lead { font-size: 20px; line-height: 1.62; }
